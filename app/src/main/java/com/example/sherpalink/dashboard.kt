@@ -1,5 +1,9 @@
 package com.example.sherpalink
 
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -20,6 +24,15 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import kotlinx.coroutines.delay
 
+class DashboardActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent{
+            DashboardScreen()
+        }
+    }
+}
 
 @Composable
 fun DashboardScreen() {
@@ -266,12 +279,12 @@ fun BottomMenuBar() {
         NavigationBarItem(
             selected = false,
             onClick = {},
-            icon = { Icon(Icons.Default.Person, contentDescription = null) }
+            icon = { Icon(Icons.Default.LocationOn, contentDescription = null) }
         )
         NavigationBarItem(
             selected = false,
             onClick = {},
-            icon = { Icon(Icons.Default.LocationOn, contentDescription = null) }
+            icon = { Icon(Icons.Default.Person, contentDescription = null) }
         )
     }
 }
