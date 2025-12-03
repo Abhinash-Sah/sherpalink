@@ -4,31 +4,59 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.*
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.font.FontWeight
 import kotlinx.coroutines.delay
 
 class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent{
+        setContent {
             DashboardScreen()
         }
     }
@@ -42,17 +70,14 @@ fun DashboardScreen() {
             .fillMaxSize()
             .background(Color.White)
     ) {
-
         TopHeader()
-
         DashboardBody()
-
         BottomMenuBar()
     }
 }
 
 // --------------------------------------------------
-// TOP HEADER
+// TOP HEADER (UPDATED WITH SHERPALINK)
 // --------------------------------------------------
 @Composable
 fun TopHeader() {
@@ -60,30 +85,23 @@ fun TopHeader() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Notification + small red dot
-        Box {
-            Icon(
-                Icons.Default.Notifications,
-                contentDescription = "Notification",
-                modifier = Modifier.size(28.dp)
-            )
-
-            Box(
-                modifier = Modifier
-                    .size(12.dp)
-                    .align(Alignment.TopEnd)
-                    .clip(CircleShape)
-                    .background(Color.Red)
-            )
-        }
-
-        // Menu button
+        Icon(
+            Icons.Default.Notifications,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp)
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Text(
+            text = "SherpaLink",
+            fontSize = 30.sp,
+            fontWeight = FontWeight.ExtraBold
+        )
+        Spacer(modifier = Modifier.weight(1f))
         Icon(
             Icons.Default.Menu,
-            contentDescription = "Menu",
+            contentDescription = null,
             modifier = Modifier.size(32.dp)
         )
     }
@@ -104,23 +122,18 @@ fun DashboardBody() {
         OutlinedTextField(
             value = "",
             onValueChange = {},
-            placeholder = { Text("Search ") },
+            placeholder = { Text("Search...", fontSize = 14.sp) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(1.dp))
         )
 
         Spacer(modifier = Modifier.height(15.dp))
-
         ImageSlider()
-
         Spacer(modifier = Modifier.height(20.dp))
-
         CategoryRow()
-
         Spacer(modifier = Modifier.height(22.dp))
-
         TrendingTrips()
     }
 }
@@ -140,11 +153,12 @@ fun ImageSlider() {
 
     val totalSlides = sliderImages.size
 
-// Auto slide every 2 seconds
+    // Auto slide every 2 seconds
     LaunchedEffect(key1 = index) {
-        delay(2000)  // 2 sec
+        delay(2000)
         index = (index + 1) % totalSlides
     }
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
         Image(
@@ -185,7 +199,6 @@ fun CategoryRow() {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-
         CategoryItem(R.drawable.tour_package, "Tour\nPackage")
         CategoryItem(R.drawable.registration, "Registration\nForm")
         CategoryItem(R.drawable.guide, "Guide\nBooking")
@@ -200,7 +213,7 @@ fun CategoryItem(image: Int, title: String) {
             painter = painterResource(id = image),
             contentDescription = title,
             modifier = Modifier
-                .size(85.dp)
+                .size(100.dp)
                 .clip(RoundedCornerShape(18.dp)),
             contentScale = ContentScale.Crop
         )
@@ -223,8 +236,7 @@ fun TrendingTrips() {
     ) {
         Text("Trending Trips", fontSize = 20.sp, fontWeight = FontWeight.Bold)
 
-//        Icon(Icons.Default.ChevronRight, contentDescription = null)
-
+        Icon(Icons.Default.KeyboardArrowRight, contentDescription = null)
     }
 
     Spacer(modifier = Modifier.height(10.dp))
@@ -232,12 +244,9 @@ fun TrendingTrips() {
     Row(
         modifier = Modifier.horizontalScroll(rememberScrollState())
     ) {
-
-//        TrendingItem(R.drawable.trip1, "Trekking", "Everest Summit")
-        TrendingItem(R.drawable.trip2, "Trekking", "Everest Summit")
+        TrendingItem(R.drawable.trip1, "Trekking", "Everest Summit")
         TrendingItem(R.drawable.trip2, "Hunting", "Dhorpatan Hunting")
-        TrendingItem(R.drawable.trip2, "Hunting", "Dhorpatan Hunting")
-//        TrendingItem(R.drawable.trip3, "Camping", "Jungle Camping")
+        TrendingItem(R.drawable.trip3, "Camping", "Jungle Camping")
     }
 }
 
@@ -252,7 +261,7 @@ fun TrendingItem(image: Int, category: String, title: String) {
             painter = painterResource(id = image),
             contentDescription = title,
             modifier = Modifier
-                .size(200.dp)
+                .size(180.dp)
                 .clip(RoundedCornerShape(18.dp)),
             contentScale = ContentScale.Crop
         )
