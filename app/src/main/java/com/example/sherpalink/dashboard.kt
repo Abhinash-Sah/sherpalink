@@ -1,5 +1,9 @@
 package com.example.sherpalink
 
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -17,7 +21,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import com.example.sherpalink.ui.theme.SherpalinkTheme
 
+class DashboardActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+           DashboardScreen()
+        }
+    }
+}
 @Composable
 fun DashboardScreen() {
 
@@ -115,7 +129,7 @@ fun DashboardBody() {
 // --------------------------------------------------
 @Composable
 fun ImageSlider() {
-    var index by remember { mutableStateOf(0) }
+    var index by remember { mutableIntStateOf(0) }
 
     val sliderImages = listOf(
         R.drawable.slider1,
