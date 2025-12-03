@@ -91,7 +91,7 @@ fun DashboardBody() {
         OutlinedTextField(
             value = "",
             onValueChange = {},
-            placeholder = { Text("Search") },
+            placeholder = { Text("Search ") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             modifier = Modifier
                 .fillMaxWidth()
