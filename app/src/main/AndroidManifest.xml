@@ -12,18 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sherpalink">
         <activity
-            android:name=".ui.theme.Activity"
-            android:exported="true"
-            android:label="@string/title_activity_"
-            android:theme="@style/Theme.Sherpalink">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".DashboardActivity"
+            android:name=".dashboard"
             android:exported="true"
             android:label="@string/title_activity_dashboard"
             android:theme="@style/Theme.Sherpalink">
