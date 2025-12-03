@@ -12,11 +12,14 @@ import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import kotlinx.coroutines.delay
+
 
 @Composable
 fun DashboardScreen() {
@@ -78,7 +81,6 @@ fun TopHeader() {
 // --------------------------------------------------
 @Composable
 fun DashboardBody() {
-
     Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
@@ -123,6 +125,13 @@ fun ImageSlider() {
         R.drawable.slider3
     )
 
+    val totalSlides = sliderImages.size
+
+// Auto slide every 2 seconds
+    LaunchedEffect(key1 = index) {
+        delay(2000)  // 2 sec
+        index = (index + 1) % totalSlides
+    }
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
         Image(
@@ -202,6 +211,7 @@ fun TrendingTrips() {
         Text("Trending Trips", fontSize = 20.sp, fontWeight = FontWeight.Bold)
 
 //        Icon(Icons.Default.ChevronRight, contentDescription = null)
+
     }
 
     Spacer(modifier = Modifier.height(10.dp))
@@ -253,11 +263,15 @@ fun BottomMenuBar() {
             onClick = {},
             icon = { Icon(Icons.Default.Home, contentDescription = null) }
         )
-
         NavigationBarItem(
             selected = false,
             onClick = {},
             icon = { Icon(Icons.Default.Person, contentDescription = null) }
+        )
+        NavigationBarItem(
+            selected = false,
+            onClick = {},
+            icon = { Icon(Icons.Default.LocationOn, contentDescription = null) }
         )
     }
 }
