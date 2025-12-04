@@ -1,5 +1,6 @@
 package com.example.sherpalink
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -90,7 +92,7 @@ fun TopHeader() {
             fontStyle = FontStyle.Italic,
             fontWeight = FontWeight.ExtraBold
         )
-
+//yaseen!!!!!!!!!!!!!!
         Icon(
             Icons.Default.Menu,
             contentDescription = "Menu",
@@ -262,27 +264,38 @@ fun TrendingItem(image: Int, category: String, title: String) {
 // ----------------------------
 @Composable
 fun BottomMenuBar() {
+    val context = LocalContext.current
     NavigationBar(containerColor = Color.White) {
+
         NavigationBarItem(
             selected = true,
             onClick = {},
             icon = { Icon(Icons.Default.Home, contentDescription = null) }
         )
+
         NavigationBarItem(
             selected = false,
             onClick = {},
             icon = { Icon(Icons.Default.LocationOn, contentDescription = null) }
         )
+
         NavigationBarItem(
             selected = false,
             onClick = {},
             icon = { Icon(Icons.Default.AddCircle, contentDescription = null) }
         )
+
+        // ✔ FIXED LIST BUTTON
         NavigationBarItem(
             selected = false,
-            onClick = {},
+            onClick = {
+                val intent = Intent(context, ActivityScreen::class.java)
+                context.startActivity(intent)
+            },
             icon = { Icon(Icons.Default.List, contentDescription = null) }
         )
+
+
         NavigationBarItem(
             selected = false,
             onClick = {},
@@ -291,9 +304,10 @@ fun BottomMenuBar() {
     }
 }
 
-// ----------------------------
+
+
 // PREVIEW
-// ----------------------------
+
 @Preview(showBackground = true)
 @Composable
 fun DashboardPreview() {
