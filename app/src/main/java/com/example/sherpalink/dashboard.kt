@@ -23,6 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import kotlinx.coroutines.delay
 
 class DashboardActivity : ComponentActivity() {
@@ -73,28 +74,59 @@ fun BottomMenuBar(selectedIndex: Int, onTabSelected: (Int) -> Unit) {
 
 @Composable
 fun DashboardScreen() {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        item { TopHeader() }
-        item { DashboardBodyContent() }
+
+    var menuOpen by remember { mutableStateOf(false) }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        // Your existing dashboard content stays untouched
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item { TopHeader(onMenuClick = { menuOpen = !menuOpen }) }
+            item { DashboardBodyContent() }
+        }
+
+        // Overlay menu
+        if (menuOpen) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0x66000000))   // Dim background
+                    .clickable { menuOpen = false }   // Close when clicking outside
+            )
+
+            Box(
+                modifier = Modifier
+                    .zIndex(10f)                       // Bring menu to front
+                    .align(Alignment.TopEnd)
+                    .padding(top = 70.dp, end = 16.dp)
+            ) {
+                MenuDropdown { menuOpen = false }
+            }
+        }
     }
 }
 
-@Composable
-fun TopHeader() {
-    var menuOpen by remember { mutableStateOf(false) }
 
+
+@Composable
+fun TopHeader(onMenuClick: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(top = 25.dp, start = 8.dp, end = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 25.dp, start = 8.dp, end = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box {
             Icon(Icons.Default.Notifications, contentDescription = "Notification", modifier = Modifier.size(28.dp))
             Box(
-                modifier = Modifier.size(12.dp)
+                modifier = Modifier
+                    .size(12.dp)
                     .align(Alignment.TopEnd)
                     .clip(CircleShape)
                     .background(Color.Red)
@@ -103,19 +135,16 @@ fun TopHeader() {
 
         Text("SherpaLink", fontSize = 30.sp)
 
-        Box {
-            Icon(
-                Icons.Default.Menu,
-                contentDescription = "Menu",
-                modifier = Modifier.size(32.dp).clickable { menuOpen = !menuOpen }
-            )
-
-            if (menuOpen) {
-                MenuDropdown { menuOpen = false }
-            }
-        }
+        Icon(
+            Icons.Default.Menu,
+            contentDescription = "Menu",
+            modifier = Modifier
+                .size(32.dp)
+                .clickable { onMenuClick() }
+        )
     }
 }
+
 
 @Composable
 fun MenuDropdown(onClose: () -> Unit) {
