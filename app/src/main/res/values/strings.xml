@@ -2,4 +2,5 @@
     <string name="app_name">sherpalink</string>
     <string name="title_activity_dashboard">dashboard</string>
     <string name="title_activity_">Activity</string>
+    <string name="title_activity_menu">menu</string>
 </resources>
