@@ -20,7 +20,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -38,8 +41,13 @@ class DashboardActivity : ComponentActivity() {
 fun SherpaLinkApp() {
     var selectedTab by remember { mutableStateOf(0) }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier.weight(1f)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+    ) {
+
+    Box(modifier = Modifier.weight(1f)) {
             when (selectedTab) {
                 0 -> DashboardScreen()
                 1 -> Text("Location Screen")
@@ -83,6 +91,7 @@ fun DashboardScreen() {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .systemBarsPadding()
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -133,7 +142,10 @@ fun TopHeader(onMenuClick: () -> Unit) {
             )
         }
 
-        Text("SherpaLink", fontSize = 30.sp)
+        Text("SherpaLink", fontSize = 30.sp,
+            fontStyle = FontStyle.Italic,
+            fontWeight = FontWeight.Bold
+        )
 
         Icon(
             Icons.Default.Menu,
@@ -157,16 +169,17 @@ fun MenuDropdown(onClose: () -> Unit) {
             .shadow(6.dp)
     ) {
 
-        MenuItem("Dashboard")
-        MenuItem("Admin")
-        MenuItem("Rating & Review")
-        MenuItem("Profile")
+        MenuItem("Dashboard", onClose)
+        MenuItem("Admin", onClose)
+        MenuItem("Rating & Review", onClose)
+        MenuItem("Profile", onClose)
+
 
         // LOGOUT (BLACK BACKGROUND)
         Box(
             modifier = Modifier.fillMaxWidth()
                 .background(Color.Black)
-                .clickable { }
+                .clickable { onClose() }
                 .padding(14.dp)
         ) {
             Text("Logout", color = Color.White, fontSize = 16.sp)
@@ -175,35 +188,41 @@ fun MenuDropdown(onClose: () -> Unit) {
 }
 
 @Composable
-fun MenuItem(text: String) {
+fun MenuItem(text: String, onClose: () -> Unit = {}) {
     Box(
-        modifier = Modifier.fillMaxWidth()
-            .clickable { }
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClose() }
             .padding(14.dp)
     ) {
         Text(text, fontSize = 16.sp, color = Color.Black)
     }
 }
 
+
 @Composable
 fun DashboardBodyContent() {
+
+    var search by remember { mutableStateOf("") }
+
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
 
         OutlinedTextField(
-            value = "",
-            onValueChange = {},
+            value = search,
+            onValueChange = { search = it },
             placeholder = { Text("Search...") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(5.dp))
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(5.dp))
         )
 
         ImageSlider()
-
         CategoryRow()
-
         TrendingTrips()
     }
 }
+
 
 @Composable
 fun ImageSlider() {
@@ -293,3 +312,11 @@ fun TrendingItem(image: Int, category: String, title: String) {
         Text(title, fontSize = 16.sp)
     }
 }
+
+
+@Preview(showBackground = true)
+@Composable
+fun DashboardPreview() {
+    SherpaLinkApp()
+}
+
