@@ -1,4 +1,5 @@
 package com.example.sherpalink
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,10 +8,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -21,11 +22,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.delay
 
 
@@ -37,13 +36,11 @@ class DashboardActivity : ComponentActivity() {
     }
 }
 
-
 @Composable
 fun SherpaLinkApp() {
     var selectedTab by remember { mutableStateOf(0) }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // Screen content
         Box(modifier = Modifier.weight(1f)) {
             when (selectedTab) {
                 0 -> DashboardScreen()
@@ -54,7 +51,6 @@ fun SherpaLinkApp() {
             }
         }
 
-        // Bottom Navigation
         BottomMenuBar(selectedTab) { selectedTab = it }
     }
 }
@@ -73,23 +69,25 @@ fun BottomMenuBar(selectedIndex: Int, onTabSelected: (Int) -> Unit) {
             NavigationBarItem(
                 selected = selectedIndex == index,
                 onClick = { onTabSelected(index) },
-                icon = {
-                    Icon(icon, contentDescription = null)
-                }
+                icon = { Icon(icon, contentDescription = null) }
             )
         }
     }
 }
+
 @Composable
 fun DashboardScreen() {
-    LazyColumn(
+
+    //  SCROLL 
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .verticalScroll(rememberScrollState())   // <-- scroll enabled
+            .padding(16.dp)
     ) {
-        item { TopHeader() }
-        item { DashboardBodyContent() }
+        TopHeader()
+        Spacer(modifier = Modifier.height(12.dp))
+        DashboardBodyContent()
     }
 }
 
@@ -103,7 +101,11 @@ fun TopHeader() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box {
-            Icon(Icons.Default.Notifications, contentDescription = "Notification", modifier = Modifier.size(28.dp))
+            Icon(
+                Icons.Default.Notifications,
+                contentDescription = "Notification",
+                modifier = Modifier.size(28.dp)
+            )
             Box(
                 modifier = Modifier
                     .size(12.dp)
@@ -119,7 +121,6 @@ fun TopHeader() {
     }
 }
 
-
 @Composable
 fun DashboardBodyContent() {
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -129,7 +130,9 @@ fun DashboardBodyContent() {
             onValueChange = {},
             placeholder = { Text("Search...") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(5.dp))
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(5.dp))
         )
 
         ImageSlider()
@@ -143,7 +146,11 @@ fun DashboardBodyContent() {
 @Composable
 fun ImageSlider() {
     var index by remember { mutableStateOf(0) }
-    val sliderImages = listOf(R.drawable.slider1, R.drawable.slider2, R.drawable.slider3)
+    val sliderImages = listOf(
+        R.drawable.slider1,
+        R.drawable.slider2,
+        R.drawable.slider3
+    )
 
     LaunchedEffect(index) {
         delay(2000)
@@ -154,10 +161,15 @@ fun ImageSlider() {
         Image(
             painter = painterResource(sliderImages[index]),
             contentDescription = "Slider",
-            modifier = Modifier.fillMaxWidth().height(180.dp).clip(RoundedCornerShape(16.dp)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp)
+                .clip(RoundedCornerShape(16.dp)),
             contentScale = ContentScale.Crop
         )
+
         Spacer(modifier = Modifier.height(8.dp))
+
         Row {
             sliderImages.forEachIndexed { i, _ ->
                 Box(
@@ -174,7 +186,10 @@ fun ImageSlider() {
 
 @Composable
 fun CategoryRow() {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
         CategoryItem(R.drawable.tour_package, "Tour\nPackage")
         CategoryItem(R.drawable.registration, "Registration\nForm")
         CategoryItem(R.drawable.guide, "Guide\nBooking")
@@ -187,7 +202,9 @@ fun CategoryItem(image: Int, title: String) {
         Image(
             painter = painterResource(image),
             contentDescription = title,
-            modifier = Modifier.size(100.dp).clip(RoundedCornerShape(18.dp)),
+            modifier = Modifier
+                .size(100.dp)
+                .clip(RoundedCornerShape(18.dp)),
             contentScale = ContentScale.Crop
         )
         Spacer(modifier = Modifier.height(6.dp))
@@ -198,11 +215,16 @@ fun CategoryItem(image: Int, title: String) {
 @Composable
 fun TrendingTrips() {
     Column {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Text("Trending Trips", fontSize = 20.sp)
             Icon(Icons.Default.KeyboardArrowRight, contentDescription = null)
         }
+
         Spacer(modifier = Modifier.height(10.dp))
+
         Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
             TrendingItem(R.drawable.trip1, "Trekking", "Everest Summit")
             TrendingItem(R.drawable.trip2, "Hunting", "Dhorpatan Hunting")
@@ -217,16 +239,21 @@ fun TrendingItem(image: Int, category: String, title: String) {
         Image(
             painter = painterResource(image),
             contentDescription = title,
-            modifier = Modifier.size(180.dp).clip(RoundedCornerShape(18.dp)),
+            modifier = Modifier
+                .size(180.dp)
+                .clip(RoundedCornerShape(18.dp)),
             contentScale = ContentScale.Crop
         )
+
         Spacer(modifier = Modifier.height(6.dp))
+
         Text(category, fontSize = 12.sp, color = Color.Gray)
         Text(title, fontSize = 16.sp)
     }
 }
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun FullDashboardPreview() {
-    SherpaLinkApp() // This includes bottom bar + dashboard
+    SherpaLinkApp()
 }
