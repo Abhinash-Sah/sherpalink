@@ -17,10 +17,41 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import kotlinx.coroutines.delay
+
+@Composable
+fun AppHeader() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 25.dp, start = 8.dp, end = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box {
+            Icon(Icons.Default.Notifications, contentDescription = null, modifier = Modifier.size(28.dp))
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .align(Alignment.TopEnd)
+                    .clip(CircleShape)
+                    .background(Color.Red)
+            )
+        }
+
+        Text("SherpaLink", fontSize = 24.sp)
+
+        Icon(
+            Icons.Default.Menu,
+            contentDescription = null,
+            modifier = Modifier.size(30.dp)
+        )
+    }
+}
 
 @Composable
 fun HomeScreen() {
@@ -34,7 +65,6 @@ fun HomeScreen() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item { TopHeader(onMenuClick = { menuOpen = !menuOpen }) }
             item { DashboardBodyContent() }
         }
 
@@ -255,4 +285,9 @@ fun TrendingItem(image: Int, category: String, title: String) {
         Text(category, fontSize = 12.sp, color = Color.Gray)
         Text(title, fontSize = 16.sp)
     }
+}
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun homeScreenPreview() {
+    HomeScreen()
 }

@@ -32,6 +32,11 @@ fun DashboardRoot() {
     var selectedTab by remember { mutableStateOf(0) }
 
     Column(modifier = Modifier.fillMaxSize()) {
+
+        // ✅ HEADER ON ALL SCREENS
+        AppHeader()
+
+        // ✅ Screen change area
         Box(modifier = Modifier.weight(1f)) {
             when (selectedTab) {
                 0 -> HomeScreen()
@@ -40,12 +45,12 @@ fun DashboardRoot() {
                 3 -> ListScreen()
                 4 -> ProfileScreen()
             }
-
         }
 
         BottomMenuBar(selectedTab) { selectedTab = it }
     }
 }
+
 
 @Composable
 fun BottomMenuBar(selectedIndex: Int, onTabSelected: (Int) -> Unit) {
