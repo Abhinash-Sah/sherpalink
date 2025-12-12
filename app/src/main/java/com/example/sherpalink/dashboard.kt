@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -293,9 +292,4 @@ fun TrendingItem(image: Int, category: String, title: String) {
         Text(category, fontSize = 12.sp, color = Color.Gray)
         Text(title, fontSize = 16.sp)
     }
-}
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun FullDashboardPreview() {
-    SherpaLinkApp() // This includes bottom bar + dashboard
 }
