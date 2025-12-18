@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "442790765272",
+    "firebase_url": "https://shrepalink-default-rtdb.firebaseio.com",
+    "project_id": "shrepalink",
+    "storage_bucket": "shrepalink.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:442790765272:android:f209b2f4810acaddac2dad",
+        "android_client_info": {
+          "package_name": "com.example.sherpalink"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5R49H1tMh_RIg6Y-SIwPw34-tm4A2XBo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
