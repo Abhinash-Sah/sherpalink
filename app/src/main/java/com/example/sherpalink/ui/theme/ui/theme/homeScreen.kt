@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import kotlinx.coroutines.delay
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun AppHeader() {
@@ -43,29 +45,23 @@ fun AppHeader() {
             )
         }
 
-        Text("SherpaLink", fontSize = 24.sp)
+        Text("SherpaLink", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
-        Icon(
-            Icons.Default.Menu,
-            contentDescription = null,
-            modifier = Modifier.size(30.dp)
-        )
+        Icon(Icons.Default.Menu, contentDescription = null, modifier = Modifier.size(30.dp))
     }
 }
-
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController) {
     var menuOpen by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item { DashboardBodyContent() }
+            item { DashboardBodyContent(navController) }
         }
 
         if (menuOpen) {
@@ -88,82 +84,9 @@ fun HomeScreen() {
     }
 }
 
-/* -------- Rest of Home UI components -------- */
-
+/* ---------------- Dashboard Content ---------------- */
 @Composable
-fun TopHeader(onMenuClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 25.dp, start = 8.dp, end = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box {
-            Icon(Icons.Default.Notifications, contentDescription = null, modifier = Modifier.size(28.dp))
-            Box(
-                modifier = Modifier
-                    .size(12.dp)
-                    .align(Alignment.TopEnd)
-                    .clip(CircleShape)
-                    .background(Color.Red)
-            )
-        }
-
-        Text("SherpaLink", fontSize = 30.sp, fontWeight = FontWeight.Bold)
-
-        Icon(
-            Icons.Default.Menu,
-            contentDescription = null,
-            modifier = Modifier
-                .size(32.dp)
-                .clickable { onMenuClick() }
-        )
-    }
-}
-
-@Composable
-fun MenuDropdown(onClose: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .width(200.dp)
-            .padding(top = 8.dp)
-            .background(Color.White, RoundedCornerShape(8.dp))
-            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
-            .shadow(6.dp)
-    ) {
-        MenuItem("Dashboard", onClose)
-        MenuItem("Admin", onClose)
-        MenuItem("Rating & Review", onClose)
-        MenuItem("Profile", onClose)
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Black)
-                .clickable { onClose() }
-                .padding(14.dp)
-        ) {
-            Text("Logout", color = Color.White, fontSize = 16.sp)
-        }
-    }
-}
-
-@Composable
-fun MenuItem(text: String, onClose: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClose() }
-            .padding(14.dp)
-    ) {
-        Text(text, fontSize = 16.sp)
-    }
-}
-
-@Composable
-fun DashboardBodyContent() {
-
+fun DashboardBodyContent(navController: NavController) {
     var search by remember { mutableStateOf("") }
 
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -177,11 +100,52 @@ fun DashboardBodyContent() {
         )
 
         ImageSlider()
-        CategoryRow()
+        CategoryRow(navController)
         TrendingTrips()
     }
 }
 
+/* ---------------- Category Row ---------------- */
+@Composable
+fun CategoryRow(navController: NavController) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        CategoryItem(R.drawable.tour_package, "Tour\nPackage") {
+            navController.navigate("tour_package")
+        }
+        CategoryItem(R.drawable.registration, "Registration\nForm") {
+            navController.navigate("registration_form")
+        }
+        CategoryItem(R.drawable.guide, "Guide\nBooking") {
+            navController.navigate("guide_booking")
+        }
+
+    }
+    }
+
+
+@Composable
+fun CategoryItem(image: Int, title: String, onClick: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        Image(
+            painter = painterResource(image),
+            contentDescription = null,
+            modifier = Modifier
+                .size(100.dp)
+                .clip(RoundedCornerShape(18.dp)),
+            contentScale = ContentScale.Crop
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(title, fontSize = 14.sp)
+    }
+}
+
+/* ---------------- Image Slider ---------------- */
 @Composable
 fun ImageSlider() {
     var index by remember { mutableStateOf(0) }
@@ -221,34 +185,7 @@ fun ImageSlider() {
     }
 }
 
-@Composable
-fun CategoryRow() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        CategoryItem(R.drawable.tour_package, "Tour\nPackage")
-        CategoryItem(R.drawable.registration, "Registration\nForm")
-        CategoryItem(R.drawable.guide, "Guide\nBooking")
-    }
-}
-
-@Composable
-fun CategoryItem(image: Int, title: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Image(
-            painter = painterResource(image),
-            contentDescription = null,
-            modifier = Modifier
-                .size(100.dp)
-                .clip(RoundedCornerShape(18.dp)),
-            contentScale = ContentScale.Crop
-        )
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(title, fontSize = 14.sp)
-    }
-}
-
+/* ---------------- Trending Trips ---------------- */
 @Composable
 fun TrendingTrips() {
     Column {
@@ -286,8 +223,50 @@ fun TrendingItem(image: Int, category: String, title: String) {
         Text(title, fontSize = 16.sp)
     }
 }
+
+/* ---------------- Menu ---------------- */
+@Composable
+fun MenuDropdown(onClose: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .width(200.dp)
+            .padding(top = 8.dp)
+            .background(Color.White, RoundedCornerShape(8.dp))
+            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
+            .shadow(6.dp)
+    ) {
+        MenuItem("Dashboard", onClose)
+        MenuItem("Admin", onClose)
+        MenuItem("Rating & Review", onClose)
+        MenuItem("Profile", onClose)
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.Black)
+                .clickable { onClose() }
+                .padding(14.dp)
+        ) {
+            Text("Logout", color = Color.White, fontSize = 16.sp)
+        }
+    }
+}
+
+@Composable
+fun MenuItem(text: String, onClose: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClose() }
+            .padding(14.dp)
+    ) {
+        Text(text, fontSize = 16.sp)
+    }
+}
+
+/* ---------------- Preview ---------------- */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun homeScreenPreview() {
-    HomeScreen()
+fun HomeScreenPreview() {
+    HomeScreen(navController = rememberNavController())
 }

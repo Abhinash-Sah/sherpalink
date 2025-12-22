@@ -1,22 +1,15 @@
-package com.example.sherpalink
+package com.example.sherpalink.screens
 
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,20 +19,13 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.*
 
 @Composable
 fun LocationScreen() {
 
     val context = LocalContext.current
-    val fusedLocationClient = remember {
-        LocationServices.getFusedLocationProviderClient(context)
-    }
+    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
     var hasLocationPermission by remember {
         mutableStateOf(
@@ -62,14 +48,13 @@ fun LocationScreen() {
         }
     }
 
-    var userLocation by remember {
-        mutableStateOf(LatLng(27.7172, 85.3240)) // Kathmandu
-    }
+    var userLocation by remember { mutableStateOf(LatLng(27.7172, 85.3240)) } // Default Kathmandu
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(userLocation, 14f)
     }
 
+    // Get user location when permission is granted
     LaunchedEffect(hasLocationPermission) {
         if (hasLocationPermission) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
@@ -87,9 +72,7 @@ fun LocationScreen() {
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            properties = MapProperties(
-                isMyLocationEnabled = hasLocationPermission
-            ),
+            properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
             uiSettings = MapUiSettings(
                 myLocationButtonEnabled = false,
                 zoomControlsEnabled = false
@@ -114,7 +97,7 @@ fun LocationScreen() {
             ) {
                 Icon(
                     imageVector = Icons.Default.LocationOn,
-                    contentDescription = null,
+                    contentDescription = "Recenter",
                     tint = Color.White
                 )
             }

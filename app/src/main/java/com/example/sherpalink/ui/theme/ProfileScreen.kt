@@ -1,4 +1,4 @@
-package com.example.sherpalink
+package com.example.sherpalink.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -17,6 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.sherpalink.R
+import com.example.sherpalink.screens.ProfileScreen
+
 
 @Composable
 fun ProfileScreen() {
@@ -75,7 +78,6 @@ fun ProfileScreen() {
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        // DETAILS BUTTON
         Button(
             onClick = { showEditDialog = true },
             colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
@@ -90,7 +92,7 @@ fun ProfileScreen() {
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(
-            onClick = { },
+            onClick = { /* Delete account logic */ },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD9362B)),
             shape = RoundedCornerShape(14.dp),
             modifier = Modifier
@@ -101,7 +103,6 @@ fun ProfileScreen() {
         }
     }
 
-    // POPUP DIALOG
     if (showEditDialog) {
         EditProfileDialog { showEditDialog = false }
     }
@@ -118,12 +119,7 @@ fun EditProfileDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
-        title = {
-            Text(
-                text = "Edit Profile",
-                fontWeight = FontWeight.Bold
-            )
-        },
+        title = { Text("Edit Profile", fontWeight = FontWeight.Bold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
 
@@ -156,12 +152,7 @@ fun EditProfileDialog(onDismiss: () -> Unit) {
             }
         },
         confirmButton = {
-            TextButton(
-                onClick = {
-                    // save later (Firebase / API)
-                    onDismiss()
-                }
-            ) {
+            TextButton(onClick = { onDismiss() }) {
                 Text("Save")
             }
         },
