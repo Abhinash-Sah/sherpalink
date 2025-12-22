@@ -26,7 +26,10 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun AppHeader() {
+fun AppHeader(
+    onNotificationClick: () -> Unit = {},
+    onHomeClick: () -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -34,8 +37,14 @@ fun AppHeader() {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box {
-            Icon(Icons.Default.Notifications, contentDescription = null, modifier = Modifier.size(28.dp))
+        // Notification bell
+        Box(modifier = Modifier.clickable { onNotificationClick() }) {
+            Icon(
+                Icons.Default.Notifications,
+                contentDescription = "Notifications",
+                modifier = Modifier.size(28.dp)
+            )
+            // Red dot for unread notifications
             Box(
                 modifier = Modifier
                     .size(10.dp)
@@ -45,11 +54,22 @@ fun AppHeader() {
             )
         }
 
-        Text("SherpaLink", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        // App title clickable to go home
+        Text(
+            "SherpaLink",
+            fontSize = 24.sp,
+            modifier = Modifier.clickable { onHomeClick() }
+        )
 
-        Icon(Icons.Default.Menu, contentDescription = null, modifier = Modifier.size(30.dp))
+        // Menu icon (optional)
+        Icon(
+            Icons.Default.Menu,
+            contentDescription = "Menu",
+            modifier = Modifier.size(30.dp)
+        )
     }
 }
+
 @Composable
 fun HomeScreen(navController: NavController) {
     var menuOpen by remember { mutableStateOf(false) }

@@ -34,8 +34,16 @@ fun DashboardRoot() {
 
     Column(modifier = Modifier.fillMaxSize()) {
 
-        // Header always visible
-        AppHeader()
+        // Header with click callbacks
+        AppHeader(
+
+            onNotificationClick = {
+                navController.navigate("notifications") { launchSingleTop = true }
+            },
+            onHomeClick = {
+                navController.navigate("home") { launchSingleTop = true }
+            }
+        )
 
         // Screen area controlled by NavHost
         Box(modifier = Modifier.weight(1f)) {
@@ -48,6 +56,8 @@ fun DashboardRoot() {
                 composable("add") { AddScreen() }
                 composable("list") { ListScreen() }
                 composable("profile") { ProfileScreen() }
+                composable("notifications") { NotificationScreen() }
+                composable("notifications") { NotificationScreen()}
             }
         }
 
@@ -64,6 +74,7 @@ fun DashboardRoot() {
         }
     }
 }
+
 
 @Composable
 fun BottomMenuBar(selectedIndex: Int, onTabSelected: (Int) -> Unit) {
