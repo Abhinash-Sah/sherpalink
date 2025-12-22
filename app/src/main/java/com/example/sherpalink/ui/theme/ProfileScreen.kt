@@ -42,7 +42,7 @@ fun ProfileScreen() {
             painter = painterResource(id = R.drawable.guide),
             contentDescription = "Profile Image",
             modifier = Modifier
-                .size(140.dp)
+                .size(150.dp)
                 .clip(CircleShape)
         )
 
