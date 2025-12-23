@@ -16,6 +16,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,8 +58,11 @@ fun AppHeader(
 
         // App title clickable to go home
         Text(
-            "SherpaLink",
+            text = "SherpaLink",
             fontSize = 24.sp,
+            fontStyle = FontStyle.Italic,
+            fontWeight = FontWeight.ExtraBold,
+            fontFamily = FontFamily.Cursive,
             modifier = Modifier.clickable { onHomeClick() }
         )
 
