@@ -54,7 +54,7 @@ fun DashboardRoot() {
                 composable("guide_booking") { GuideBookingScreen() }
                 composable("location") { LocationScreen() }
                 composable("add") { AddScreen() }
-                composable("list") { ListScreen() }
+                composable("list") { MessageScreen() }
                 composable("profile") { ProfileScreen() }
                 composable("notifications") { NotificationScreen() }
                 composable("notifications") { NotificationScreen()}
@@ -83,7 +83,7 @@ fun BottomMenuBar(selectedIndex: Int, onTabSelected: (Int) -> Unit) {
             Icons.Default.Home,
             Icons.Default.LocationOn,
             Icons.Default.AddCircle,
-            Icons.Default.List,
+            Icons.Default.Email,
             Icons.Default.Person
         )
 

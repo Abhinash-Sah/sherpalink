@@ -11,7 +11,7 @@ import com.example.sherpalink.screens.AddScreen
 import com.example.sherpalink.screens.TourPackageScreen
 import com.example.sherpalink.screens.RegistrationScreen
 import com.example.sherpalink.screens.GuideBookingScreen
-import com.example.sherpalink.screens.ListScreen
+import com.example.sherpalink.screens.MessageScreen
 import com.example.sherpalink.screens.LocationScreen
 import com.example.sherpalink.screens.ProfileScreen
 
@@ -35,7 +35,7 @@ fun AppNavHost() {
             composable("guide_booking") { GuideBookingScreen() }
             composable("location") { LocationScreen() }
             composable("add") { AddScreen() }
-            composable("list") { ListScreen() }
+            composable("list") { MessageScreen() }
             composable("profile") { ProfileScreen() }
         }
 
