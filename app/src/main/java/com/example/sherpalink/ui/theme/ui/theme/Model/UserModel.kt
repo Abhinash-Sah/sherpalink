@@ -1,4 +1,4 @@
-package com.example.ai37a.model
+package com.example.sherpalink
 
     data class UserModel(
         val userId: String = "",

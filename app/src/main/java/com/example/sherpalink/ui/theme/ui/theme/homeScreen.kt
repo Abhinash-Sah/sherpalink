@@ -1,8 +1,13 @@
-package com.example.sherpalink
+package com.example.sherpalink.screens
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -16,68 +21,20 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import kotlinx.coroutines.delay
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.sherpalink.viewmodel.ImageViewModel
+import com.example.sherpalink.R
+import kotlinx.coroutines.delay
 
+/* ---------------- Home Screen ---------------- */
 @Composable
-fun AppHeader(
-    onNotificationClick: () -> Unit = {},
-    onHomeClick: () -> Unit = {}
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 25.dp, start = 8.dp, end = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Notification bell
-        Box(modifier = Modifier.clickable { onNotificationClick() }) {
-            Icon(
-                Icons.Default.Notifications,
-                contentDescription = "Notifications",
-                modifier = Modifier.size(28.dp)
-            )
-            // Red dot for unread notifications
-            Box(
-                modifier = Modifier
-                    .size(10.dp)
-                    .align(Alignment.TopEnd)
-                    .clip(CircleShape)
-                    .background(Color.Red)
-            )
-        }
-
-        // App title clickable to go home
-        Text(
-            text = "SherpaLink",
-            fontSize = 24.sp,
-            fontStyle = FontStyle.Italic,
-            fontWeight = FontWeight.ExtraBold,
-            fontFamily = FontFamily.Cursive,
-            modifier = Modifier.clickable { onHomeClick() }
-        )
-
-        // Menu icon (optional)
-        Icon(
-            Icons.Default.Menu,
-            contentDescription = "Menu",
-            modifier = Modifier.size(30.dp)
-        )
-    }
-}
-//changing
-
-@Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController, imageViewModel: ImageViewModel) {
     var menuOpen by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -87,9 +44,10 @@ fun HomeScreen(navController: NavController) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item { DashboardBodyContent(navController) }
+            item { DashboardBodyContent(navController, imageViewModel) }
         }
 
+        // Menu overlay
         if (menuOpen) {
             Box(
                 modifier = Modifier
@@ -112,11 +70,12 @@ fun HomeScreen(navController: NavController) {
 
 /* ---------------- Dashboard Content ---------------- */
 @Composable
-fun DashboardBodyContent(navController: NavController) {
+fun DashboardBodyContent(navController: NavController, imageViewModel: ImageViewModel) {
     var search by remember { mutableStateOf("") }
 
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
 
+        // Search bar
         OutlinedTextField(
             value = search,
             onValueChange = { search = it },
@@ -125,9 +84,74 @@ fun DashboardBodyContent(navController: NavController) {
             modifier = Modifier.fillMaxWidth()
         )
 
-        ImageSlider()
+        // Image slider
+        val images = listOf(
+            R.drawable.image1,
+            R.drawable.image2,
+            R.drawable.image3
+        )
+
+        ImageSlider(
+            navController = navController,
+            viewModel = imageViewModel,
+            images = images
+        )
+
+        // Category row
         CategoryRow(navController)
+
+        // Trending trips
         TrendingTrips()
+    }
+}
+
+/* ---------------- Image Slider ---------------- */
+@Composable
+fun ImageSlider(
+    navController: NavController,
+    viewModel: ImageViewModel,
+    images: List<Int>
+) {
+    var index by remember { mutableStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(2000)
+            index = (index + 1) % images.size
+        }
+    }
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        if (images.isNotEmpty()) {
+            Image(
+                painter = painterResource(images[index]),
+                contentDescription = "Slider Image",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable {
+                        viewModel.setImage(images[index])
+                        navController.navigate("image_upload")
+                    },
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Indicator dots
+        Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            images.forEachIndexed { i, _ ->
+                Box(
+                    modifier = Modifier
+                        .padding(3.dp)
+                        .size(if (i == index) 10.dp else 8.dp)
+                        .clip(CircleShape)
+                        .background(if (i == index) Color.Black else Color.LightGray)
+                )
+            }
+        }
     }
 }
 
@@ -147,10 +171,8 @@ fun CategoryRow(navController: NavController) {
         CategoryItem(R.drawable.guide, "Guide\nBooking") {
             navController.navigate("guide_booking")
         }
-
     }
-    }
-
+}
 
 @Composable
 fun CategoryItem(image: Int, title: String, onClick: () -> Unit) {
@@ -168,46 +190,6 @@ fun CategoryItem(image: Int, title: String, onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(title, fontSize = 14.sp)
-    }
-}
-
-/* ---------------- Image Slider ---------------- */
-@Composable
-fun ImageSlider() {
-    var index by remember { mutableStateOf(0) }
-    val sliderImages = listOf(
-        R.drawable.slider1,
-        R.drawable.slider2,
-        R.drawable.slider3
-    )
-
-    LaunchedEffect(index) {
-        delay(2000)
-        index = (index + 1) % sliderImages.size
-    }
-
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Image(
-            painter = painterResource(sliderImages[index]),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp)
-                .clip(RoundedCornerShape(16.dp)),
-            contentScale = ContentScale.Crop
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Row {
-            sliderImages.forEachIndexed { i, _ ->
-                Box(
-                    modifier = Modifier
-                        .padding(3.dp)
-                        .size(if (i == index) 10.dp else 8.dp)
-                        .clip(CircleShape)
-                        .background(if (i == index) Color.Black else Color.LightGray)
-                )
-            }
-        }
     }
 }
 
@@ -294,5 +276,7 @@ fun MenuItem(text: String, onClose: () -> Unit) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen(navController = rememberNavController())
+    val navController = rememberNavController()
+    val imageViewModel: ImageViewModel = viewModel()
+    HomeScreen(navController = navController, imageViewModel = imageViewModel)
 }
