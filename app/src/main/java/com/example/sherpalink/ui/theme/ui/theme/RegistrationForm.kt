@@ -108,7 +108,7 @@ fun RegistrationScreen() {
 
         Button(
             onClick = {
-                // Submit logic later
+                // Submit logic later -
             },
             modifier = Modifier
                 .fillMaxWidth()
