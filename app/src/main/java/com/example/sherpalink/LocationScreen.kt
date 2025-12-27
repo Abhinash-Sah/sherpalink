@@ -212,7 +212,7 @@ fun LocationScreen() {
                     }
             }
 
-            // Recenter FAB -chnages
+            // Recenter FAB -chnages the cam
             if (hasLocationPermission) {
                 FloatingActionButton(
                     onClick = {
