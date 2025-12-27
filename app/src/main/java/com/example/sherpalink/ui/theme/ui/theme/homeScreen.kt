@@ -2,17 +2,17 @@ package com.example.sherpalink.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,81 +25,48 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.sherpalink.R
 import kotlinx.coroutines.delay
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 
-/* ---------------- Home Screen ---------------- */
 @Composable
 fun HomeScreen(navController: NavController) {
-
-    var menuOpen by remember { mutableStateOf(false) }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item { DashboardBodyContent(navController) }
-        }
-
-        // Menu overlay
-        if (menuOpen) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0x66000000))
-                    .clickable { menuOpen = false }
-            )
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 70.dp, end = 16.dp)
-            ) {
-                MenuDropdown { menuOpen = false }
-            }
-        }
-    }
-}
-
-/* ---------------- Dashboard Content ---------------- */
-@Composable
-fun DashboardBodyContent(navController: NavController) {
     var search by remember { mutableStateOf("") }
-
     val images = listOf(R.drawable.image1, R.drawable.image2, R.drawable.image3)
 
-    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        // Search bar
-        OutlinedTextField(
-            value = search,
-            onValueChange = { search = it },
-            placeholder = { Text("Search...") },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-            modifier = Modifier.fillMaxWidth()
-        )
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item {
+            OutlinedTextField(
+                value = search,
+                onValueChange = { search = it },
+                placeholder = { Text("Search...") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        // Image slider
-        ImageSlider(navController, images)
+            Spacer(modifier = Modifier.height(12.dp))
 
-        // Category row
-        CategoryRow(navController)
+            AutoImageSlider(navController, images)
 
-        // Trending trips
-        TrendingTrips()
+            Spacer(modifier = Modifier.height(16.dp))
+
+            CategoryRow(navController)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TrendingTrips()
+        }
     }
 }
 
-/* ---------------- Image Slider ---------------- */
 @Composable
-fun ImageSlider(navController: NavController, images: List<Int>) {
+fun AutoImageSlider(navController: NavController, images: List<Int>) {
     var currentIndex by remember { mutableStateOf(0) }
-    val scrollState = rememberScrollState()
 
-    // Auto-rotate images every 3 seconds
     LaunchedEffect(Unit) {
         while (true) {
             delay(3000)
@@ -107,81 +74,45 @@ fun ImageSlider(navController: NavController, images: List<Int>) {
         }
     }
 
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp),
-        horizontalArrangement = Arrangement.Center
+            .height(180.dp)
     ) {
         Image(
             painter = painterResource(images[currentIndex]),
             contentDescription = null,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
+                .fillMaxSize()
                 .clip(RoundedCornerShape(16.dp))
                 .clickable {
                     navController.navigate("full_image/$currentIndex")
-                },
-            contentScale = ContentScale.Crop
+                }
+
         )
     }
 }
-
-
-/* ---------------- Fullscreen Image Slider ---------------- */
 @Composable
-fun FullScreenImageSlider(
-    startIndex: Int,
-    images: List<Int>,
-    navController: NavController
-) {
-    var currentIndex by remember { mutableStateOf(startIndex) }
-
+fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures { change, dragAmount ->
-                    change.consume()
-                    if (dragAmount > 0) {
-                        currentIndex = (currentIndex - 1 + images.size) % images.size
-                    } else {
-                        currentIndex = (currentIndex + 1) % images.size
-                    }
-                }
-            }
-            .clickable { navController.popBackStack() }
+            .clickable { onBack() },
+    contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(images[currentIndex]),
+            painter = painterResource(id = imageRes),
             contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.fillMaxSize()
         )
-
-        // Optional indicator dots
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(16.dp)
-        ) {
-            images.forEachIndexed { i, _ ->
-                Box(
-                    modifier = Modifier
-                        .padding(3.dp)
-                        .size(if (i == currentIndex) 10.dp else 8.dp)
-                        .clip(CircleShape)
-                        .background(if (i == currentIndex) Color.White else Color.Gray)
-                )
-            }
-        }
     }
 }
 
-/* ---------------- Category Row ---------------- */
+
+// CategoryRow and CategoryItem functions remain unchanged
 @Composable
 fun CategoryRow(navController: NavController) {
     Row(
@@ -219,7 +150,7 @@ fun CategoryItem(image: Int, title: String, onClick: () -> Unit) {
     }
 }
 
-/* ---------------- Trending Trips ---------------- */
+// Trending trips functions remain unchanged
 @Composable
 fun TrendingTrips() {
     Column {
@@ -228,7 +159,6 @@ fun TrendingTrips() {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text("Trending Trips", fontSize = 20.sp)
-            Icon(Icons.Default.KeyboardArrowRight, contentDescription = null)
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -258,37 +188,8 @@ fun TrendingItem(image: Int, category: String, title: String) {
     }
 }
 
-/* ---------------- Menu ---------------- */
-@Composable
-fun MenuDropdown(onClose: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .width(200.dp)
-            .padding(top = 8.dp)
-            .background(Color.White, RoundedCornerShape(8.dp))
-            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
-    ) {
-        listOf("Dashboard","Admin","Rating & Review","Profile").forEach { text ->
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onClose() }
-                    .padding(14.dp)
-            ) { Text(text, fontSize = 16.sp) }
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Black)
-                .clickable { onClose() }
-                .padding(14.dp)
-        ) { Text("Logout", color = Color.White, fontSize = 16.sp) }
-    }
-}
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    val navController = rememberNavController()
-    HomeScreen(navController = navController)
+    HomeScreen(navController = rememberNavController())
 }
