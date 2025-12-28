@@ -4,8 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,32 +15,73 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.sherpalink.R
-import com.example.sherpalink.screens.ProfileScreen
+import com.example.sherpalink.UserModel
+import com.example.sherpalink.repository.UserRepoImplementation
+import com.example.sherpalink.viewmodel.UserViewModel
 
-
+// ------------------------------ Main ProfileScreen using ViewModel ------------------------------
 @Composable
-fun ProfileScreen() {
-
+fun ProfileScreen(viewModel: UserViewModel = viewModel(
+    factory = UserViewModel.UserViewModelFactory(UserRepoImplementation())
+)) {
+    val user = viewModel.user
+    val loading = viewModel.loading
     var showEditDialog by remember { mutableStateOf(false) }
 
+    // Fetch user ONCE when screen opens
+    LaunchedEffect(Unit) {
+        if (user == null) {
+            viewModel.getCurrentUser()?.uid?.let { viewModel.getUserById(it) }
+        }
+    }
+
+    if (loading) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    if (user == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("User data not found")
+        }
+        return
+    }
+
+    ProfileScreenContent(
+        user = user,
+        onEditClick = { showEditDialog = true },
+        onDeleteClick = { viewModel.deleteAccount(user.userId) { _, _ -> } },
+        showEditDialog = showEditDialog,
+        onDismissEdit = { showEditDialog = false },
+        onSaveEdit = { updatedUser -> viewModel.updateProfile(updatedUser.userId, updatedUser) { _, _ -> } }
+    )
+}
+
+// ------------------------------ Core UI Content ------------------------------
+@Composable
+fun ProfileScreenContent(
+    user: UserModel,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    showEditDialog: Boolean,
+    onDismissEdit: () -> Unit,
+    onSaveEdit: (UserModel) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        Text(
-            text = "Guide",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Medium
-        )
-
+        Text(user.role.uppercase(), fontSize = 18.sp, fontWeight = FontWeight.Medium)
         Spacer(modifier = Modifier.height(24.dp))
 
         Image(
-            painter = painterResource(id = R.drawable.guide),
+            painter = painterResource(id = R.drawable.ic_launcher_foreground),
             contentDescription = "Profile Image",
             modifier = Modifier
                 .size(150.dp)
@@ -51,121 +90,91 @@ fun ProfileScreen() {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(
-            text = "ANMOL KC",
-            fontSize = 26.sp,
-            fontWeight = FontWeight.ExtraBold
-        )
-
+        Text("${user.firstName} ${user.lastName}", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
         Spacer(modifier = Modifier.height(12.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            repeat(5) {
-                Icon(
-                    imageVector = Icons.Outlined.Star,
-                    contentDescription = null,
-                    tint = Color.Black
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Easy paths never reach high peaks.",
-            fontSize = 16.sp
-        )
-
+        Text(user.email)
         Spacer(modifier = Modifier.height(28.dp))
 
         Button(
-            onClick = { showEditDialog = true },
+            onClick = onEditClick,
             colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
             shape = RoundedCornerShape(14.dp),
-            modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .height(52.dp)
-        ) {
-            Text(text = "Details", color = Color.White)
-        }
+            modifier = Modifier.fillMaxWidth(0.85f).height(52.dp)
+        ) { Text("Details", color = Color.White) }
 
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(
-            onClick = { /* Delete account logic */ },
+            onClick = onDeleteClick,
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD9362B)),
             shape = RoundedCornerShape(14.dp),
-            modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .height(52.dp)
-        ) {
-            Text(text = "Delete Account", color = Color.White)
-        }
+            modifier = Modifier.fillMaxWidth(0.85f).height(52.dp)
+        ) { Text("Delete Account", color = Color.White) }
     }
 
     if (showEditDialog) {
-        EditProfileDialog { showEditDialog = false }
+        EditProfileDialog(
+            user = user,
+            onDismiss = onDismissEdit,
+            onSave = onSaveEdit
+        )
     }
 }
 
+// ------------------------------ Edit Dialog ------------------------------
 @Composable
-fun EditProfileDialog(onDismiss: () -> Unit) {
-
-    var name by remember { mutableStateOf("ANMOL KC") }
-    var bio by remember { mutableStateOf("Easy paths never reach high peaks.") }
-    var email by remember { mutableStateOf("example@email.com") }
-    var phone by remember { mutableStateOf("+977 98XXXXXXXX") }
+fun EditProfileDialog(
+    user: UserModel,
+    onDismiss: () -> Unit,
+    onSave: (UserModel) -> Unit
+) {
+    var firstName by remember { mutableStateOf(user.firstName) }
+    var lastName by remember { mutableStateOf(user.lastName) }
+    var email by remember { mutableStateOf(user.email) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
-        title = { Text("Edit Profile", fontWeight = FontWeight.Bold) },
+        title = { Text("Edit Profile") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Name") },
-                    singleLine = true
-                )
-
-                OutlinedTextField(
-                    value = bio,
-                    onValueChange = { bio = it },
-                    label = { Text("Bio") }
-                )
-
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = { Text("Email") },
-                    singleLine = true
-                )
-
-                OutlinedTextField(
-                    value = phone,
-                    onValueChange = { phone = it },
-                    label = { Text("Phone") },
-                    singleLine = true
-                )
+            Column {
+                OutlinedTextField(value = firstName, onValueChange = { firstName = it }, label = { Text("First Name") })
+                OutlinedTextField(value = lastName, onValueChange = { lastName = it }, label = { Text("Last Name") })
+                OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
             }
         },
         confirmButton = {
-            TextButton(onClick = { onDismiss() }) {
-                Text("Save")
-            }
+            TextButton(onClick = {
+                onSave(user.copy(firstName = firstName, lastName = lastName, email = email))
+                onDismiss()
+            }) { Text("Save") }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
+            TextButton(onClick = onDismiss) { Text("Cancel") }
         }
     )
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+// ------------------------------ Static Preview ------------------------------
+@Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
-    ProfileScreen()
+    val mockUser = UserModel(
+        userId = "1",
+        firstName = "Saksham",
+        lastName = "Ban",
+        email = "saksham@example.com",
+        dob = "2000-01-01",
+        gender = "Male",
+        role = "user"
+    )
+
+    // Pass mock data to the same UI
+    ProfileScreenContent(
+        user = mockUser,
+        onEditClick = {},
+        onDeleteClick = {},
+        showEditDialog = false,
+        onDismissEdit = {},
+        onSaveEdit = {}
+    )
 }
