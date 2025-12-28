@@ -28,7 +28,7 @@ fun SignInScreen(onSignInClick: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize()) {
 
         Image(
-            painter = painterResource(id = R.drawable.baseline_login_24),
+            painter = painterResource(id = R.drawable.loginimage),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
