@@ -148,3 +148,49 @@ fun SignUpScreen(
         }
     }
 }
+@Composable
+private fun AuthField(
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    onValueChange: (String) -> Unit
+) {
+    var value by remember { mutableStateOf("") }
+
+    OutlinedTextField(
+        value = value,
+        onValueChange = {
+            value = it
+            onValueChange(it)
+        },
+        placeholder = { Text(placeholder) },
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedContainerColor = Color.White,
+            focusedContainerColor = Color.White
+        )
+    )
+}
+@Composable
+private fun AuthPasswordField(
+    placeholder: String,
+    onValueChange: (String) -> Unit
+) {
+    var value by remember { mutableStateOf("") }
+
+    OutlinedTextField(
+        value = value,
+        onValueChange = {
+            value = it
+            onValueChange(it)
+        },
+        placeholder = { Text(placeholder) },
+        visualTransformation = PasswordVisualTransformation(),
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedContainerColor = Color.White,
+            focusedContainerColor = Color.White
+        )
+    )
+}
