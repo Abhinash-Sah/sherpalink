@@ -1,14 +1,13 @@
 package com.example.sherpalink.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -20,8 +19,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.sherpalink.R
 import kotlinx.coroutines.delay
@@ -30,38 +33,172 @@ import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun HomeScreen(navController: NavController) {
-    var search by remember { mutableStateOf("") }
-    val images = listOf(R.drawable.image1, R.drawable.image2, R.drawable.image3)
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
+    var search by remember { mutableStateOf("") }
+    var menuOpen by remember { mutableStateOf(false) }
+
+    val images = listOf(
+        R.drawable.image1,
+        R.drawable.image2,
+        R.drawable.image3
+    )
+
+    Box(modifier = Modifier.fillMaxSize()) {
+
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(
+                top = 60.dp,
+                bottom = 16.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+
+
         item {
             OutlinedTextField(
                 value = search,
                 onValueChange = { search = it },
                 placeholder = { Text("Search...") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                leadingIcon = {
+                    Icon(Icons.Default.Search, contentDescription = null)
+                },
                 modifier = Modifier.fillMaxWidth()
+                    .padding(top = 8.dp)
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            AutoImageSlider(navController, images)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            CategoryRow(navController)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TrendingTrips()
         }
+
+            item { AutoImageSlider(navController, images) }
+            item { CategoryRow(navController) }
+            item { TrendingTrips() }
+        }
+
+        // ================= APP HEADER =================
+        @Composable
+        fun AppHeader(
+            modifier: Modifier = Modifier,
+            onNotificationClick: () -> Unit = {},
+            onHomeClick: () -> Unit = {},
+            menuItems: List<String> = listOf(
+                "Dashboard",
+                "Admin",
+                "Rating & Review",
+                "Profile"
+            ),
+            menuOpen: Boolean,
+            onMenuToggle: () -> Unit
+        ) {
+
+            Box(modifier = modifier.fillMaxWidth()) {
+
+                // 🔹 Header Row
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                )
+                {
+
+                    Icon(
+                        Icons.Default.Notifications,
+                        contentDescription = "Notifications",
+                        modifier = Modifier
+                            .size(38.dp)
+                            .padding(6.dp)
+                            .clickable { onNotificationClick() }
+                    )
+
+                    Text(
+                        text = "SherpaLink",
+                        fontSize = 28.sp,
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontFamily = FontFamily.Cursive,
+                        modifier = Modifier.clickable { onHomeClick() }
+                    )
+
+                    Icon(
+                        Icons.Default.Menu,
+                        contentDescription = "Menu",
+                        modifier = Modifier
+                            .size(38.dp)
+                            .padding(6.dp) // ✅ FIX
+                            .clickable { onMenuToggle() }
+                    )
+                }
+
+                // 🔹 Dim background (NOT covering header)
+                if (menuOpen) {
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 90.dp) // ✅ FIX: header remains clickable
+                            .background(Color.Black.copy(alpha = 0.3f))
+                            .clickable { onMenuToggle() }
+                    )
+
+                    // 🔹 Side Menu
+                    Column(
+                        modifier = Modifier
+                            .width(200.dp)
+                            .height(300.dp)
+                            .background(
+                                Color.White,
+                                RoundedCornerShape(topEnd = 12.dp, bottomEnd = 12.dp)
+                            )
+                            .padding(16.dp)
+                            .align(Alignment.TopStart)
+                            .zIndex(2f) // ✅ FIX
+                    ) {
+                        menuItems.forEach { item ->
+                            Text(
+                                text = item,
+                                fontSize = 16.sp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp)
+                                    .clickable { onMenuToggle() }
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Text(
+                            text = "Logout",
+                            fontSize = 16.sp,
+                            color = Color.Red,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 12.dp)
+                                .clickable { onMenuToggle() }
+                        )
+                    }
+                }
+            }
+        }
+
+        // 2️⃣ Fixed Header Overlay
+        AppHeader(
+            modifier = Modifier.zIndex(3f), // ✅ FIX: always clickable
+            onNotificationClick = {
+                navController.navigate("notifications")
+            },
+            onHomeClick = {
+                navController.navigate("home")
+            },
+            menuOpen = menuOpen,
+            onMenuToggle = { menuOpen = !menuOpen }
+        )
     }
 }
+
 
 @Composable
 fun AutoImageSlider(navController: NavController, images: List<Int>) {
@@ -89,30 +226,10 @@ fun AutoImageSlider(navController: NavController, images: List<Int>) {
                 .clickable {
                     navController.navigate("full_image/$currentIndex")
                 }
-
-        )
-    }
-}
-@Composable
-fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .clickable { onBack() },
-    contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = painterResource(id = imageRes),
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxSize()
         )
     }
 }
 
-
-// CategoryRow and CategoryItem functions remain unchanged
 @Composable
 fun CategoryRow(navController: NavController) {
     Row(
@@ -150,17 +267,10 @@ fun CategoryItem(image: Int, title: String, onClick: () -> Unit) {
     }
 }
 
-// Trending trips functions remain unchanged
 @Composable
 fun TrendingTrips() {
     Column {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Trending Trips", fontSize = 20.sp)
-        }
-
+        Text("Trending Trips", fontSize = 20.sp)
         Spacer(modifier = Modifier.height(10.dp))
 
         Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {

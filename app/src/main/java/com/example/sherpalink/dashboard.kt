@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -14,13 +13,11 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.*
-import com.example.sherpalink.components.AppHeader
-import com.example.sherpalink.screens.*
 import androidx.compose.material3.*
+import com.example.sherpalink.screens.*
 
 class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,54 +33,9 @@ class DashboardActivity : ComponentActivity() {
 fun DashboardRoot() {
     val navController = rememberNavController()
     var selectedTab by remember { mutableStateOf(0) }
-    var menuOpen by remember { mutableStateOf(false) } // lifted menu state
 
-    // Outer Box detects clicks outside to close menu
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                detectTapGestures {
-                    menuOpen = false
-                }
-            }
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-
-            // Header
-            AppHeader(
-                onNotificationClick = { navController.navigate("notifications") },
-                onHomeClick = { navController.navigate("home") },
-                menuOpen = menuOpen,
-                onMenuToggle = { menuOpen = !menuOpen }
-            )
-
-            // Screen area
-            Box(modifier = Modifier.weight(1f)) {
-                NavHost(navController = navController, startDestination = "home") {
-
-                    composable("home") { HomeScreen(navController) }
-                    composable("tour_package") { TourPackageScreen() }
-                    composable("registration_form") { RegistrationScreen() }
-                    composable("guide_booking") { GuideBookingScreen() }
-                    composable("location") { LocationScreen() }
-                    composable("add") { AddScreen() }
-                    composable("list") { MessageScreen() }
-                    composable("profile") { ProfileScreen() }
-                    composable("notifications") { NotificationScreen() }
-                    composable("full_image/{index}") { backStackEntry ->
-                        val index = backStackEntry.arguments?.getInt("index") ?: 0
-                        val images = listOf(R.drawable.image1, R.drawable.image2, R.drawable.image3)
-                        FullScreenImage(
-                            imageRes = images[index],
-                            onBack = { navController.popBackStack() }
-                        )
-                    }
-
-                }
-            }
-
-            // Bottom navigation
+    Scaffold(
+        bottomBar = {
             BottomMenuBar(selectedTab) { index ->
                 selectedTab = index
                 when (index) {
@@ -95,12 +47,57 @@ fun DashboardRoot() {
                 }
             }
         }
+    ) { paddingValues ->
+
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+
+            NavHost(
+                navController = navController,
+                startDestination = "home"
+            ) {
+                composable("home") { HomeScreen(navController) }
+                composable("tour_package") { TourPackageScreen() }
+                composable("registration_form") { RegistrationScreen() }
+                composable("guide_booking") { GuideBookingScreen() }
+                composable("location") { LocationScreen() }
+                composable("add") { AddScreen() }
+                composable("list") { MessageScreen() }
+                composable("profile") { ProfileScreen() }
+                composable("notifications") { NotificationScreen() }
+                composable("full_image/{index}") { backStackEntry ->
+                    val indexArg = backStackEntry.arguments?.getString("index")
+                    val index = indexArg?.toIntOrNull() ?: 0
+                    val images = listOf(R.drawable.image1, R.drawable.image2, R.drawable.image3)
+                    val safeIndex = if (images.isNotEmpty()) index.coerceIn(images.indices) else -1
+                    if (safeIndex != -1) {
+                        //FullScreenImage(imageRes = images[safeIndex], onBack = { navController.popBackStack() })
+                    } else {
+                        Text(
+                            text = "No image available",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .wrapContentSize()
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
 @Composable
-fun BottomMenuBar(selectedIndex: Int, onTabSelected: (Int) -> Unit) {
-    NavigationBar(containerColor = Color.White) {
+fun BottomMenuBar(
+    selectedIndex: Int,
+    onTabSelected: (Int) -> Unit
+) {
+    NavigationBar(
+        containerColor = Color.White
+    ) {
         val icons = listOf(
             Icons.Default.Home,
             Icons.Default.LocationOn,
@@ -113,7 +110,12 @@ fun BottomMenuBar(selectedIndex: Int, onTabSelected: (Int) -> Unit) {
             NavigationBarItem(
                 selected = selectedIndex == index,
                 onClick = { onTabSelected(index) },
-                icon = { Icon(icon, contentDescription = null) }
+                icon = {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null
+                    )
+                }
             )
         }
     }
