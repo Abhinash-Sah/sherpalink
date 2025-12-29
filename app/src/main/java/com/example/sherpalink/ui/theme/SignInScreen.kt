@@ -20,7 +20,10 @@ import androidx.compose.ui.unit.sp
 import com.example.sherpalink.R
 
 @Composable
-fun SignInScreen(onSignInClick: () -> Unit) {
+fun SignInScreen(
+    onSignInClick: () -> Unit,
+    onSignUpClick: () -> Unit
+) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -39,7 +42,7 @@ fun SignInScreen(onSignInClick: () -> Unit) {
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(
+                        listOf(
                             Color.Black.copy(alpha = 0.4f),
                             Color.Black.copy(alpha = 0.8f)
                         )
@@ -128,7 +131,7 @@ fun SignInScreen(onSignInClick: () -> Unit) {
             Spacer(modifier = Modifier.height(14.dp))
 
             OutlinedButton(
-                onClick = { },
+                onClick = onSignUpClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
