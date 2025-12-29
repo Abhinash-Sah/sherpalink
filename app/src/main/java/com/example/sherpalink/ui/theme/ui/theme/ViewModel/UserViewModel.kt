@@ -1,21 +1,24 @@
 package com.example.sherpalink.viewmodel
 
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.example.sherpalink.UserModel
 import com.example.sherpalink.repository.UserRepo
 import com.google.firebase.auth.FirebaseUser
 
 class UserViewModel(private val repo: UserRepo) : ViewModel() {
 
-    private val _user = MutableLiveData<UserModel?>()
-    val user: MutableLiveData<UserModel?> get() = _user
+    var user by mutableStateOf<UserModel?>(null)
+        private set
 
-    private val _allUsers = MutableLiveData<List<UserModel>?>()
-    val allUsers: MutableLiveData<List<UserModel>?> get() = _allUsers
+    var allUsers by mutableStateOf<List<UserModel>>(emptyList())
+        private set
 
-    private val _loading = MutableLiveData<Boolean>()
-    val loading: MutableLiveData<Boolean> get() = _loading
+    var loading by mutableStateOf(false)
+        private set
 
     fun login(email: String, password: String, callback: (Boolean, String) -> Unit) {
         repo.login(email, password, callback)
@@ -38,24 +41,38 @@ class UserViewModel(private val repo: UserRepo) : ViewModel() {
     }
 
     fun getUserById(userId: String) {
-        _loading.postValue(true)
+        loading = true
         repo.getUserById(userId) { success, _, data ->
-            _loading.postValue(false)
-            _user.postValue(if (success) data else null)
+            loading = false
+            user = if (success) data else null
         }
     }
 
     fun getAllUser() {
-        _loading.postValue(true)
+        loading = true
         repo.getAllUser { success, _, data ->
-            _loading.postValue(false)
-            _allUsers.postValue(if (success) data else emptyList())
+            loading = false
+            allUsers = if (success && data != null) data else emptyList()
         }
     }
+
 
     fun getCurrentUser(): FirebaseUser? = repo.getCurrentUser()
 
     fun logOut(callback: (Boolean, String) -> Unit) = repo.logOut(callback)
 
     fun forgetPassword(email: String, callback: (Boolean, String) -> Unit) = repo.forgetPassword(email, callback)
+
+    class UserViewModelFactory(
+        private val repo: UserRepo
+    ) : ViewModelProvider.Factory {
+
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return UserViewModel(repo) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
+        }
+    }
 }
