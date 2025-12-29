@@ -54,6 +54,60 @@ fun SignUpScreen(
                 )
         )
 
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            Text(
+                text = "SherpaLink",
+                fontSize = 36.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Create an account",
+                color = Color.White,
+                fontSize = 18.sp
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                AuthField("First Name", Modifier.weight(1f)) { firstName = it }
+                AuthField("Last Name", Modifier.weight(1f)) { lastName = it }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                AuthField("Email", Modifier.weight(1f)) { email = it }
+                AuthField("Phone", Modifier.weight(1f)) { phone = it }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            AuthPasswordField("Password") { password = it }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            AuthPasswordField("Confirm Password") { confirmPassword = it }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
 
         }
     }
