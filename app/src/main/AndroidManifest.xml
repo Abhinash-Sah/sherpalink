@@ -4,14 +4,11 @@
 
     <meta-data
         android:name="com.google.android.geo.API_KEY"
-        android:value="YOUR_API_KEY" />
-
-<!--    <uses-permission-sdk-23 android:name="android.permission.ACCESS_FINE_LOCATION" />-->
-<!--    <uses-permission-sdk-23 android:name="android.permission.ACCESS_COARSE_LOCATION" />-->
-
+        android:value="YOUR_API_KEY" /> <!-- <uses-permission-sdk-23 android:name="android.permission.ACCESS_FINE_LOCATION" /> -->
+    <!-- <uses-permission-sdk-23 android:name="android.permission.ACCESS_COARSE_LOCATION" /> -->
     <!-- Location Permissions -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -20,6 +17,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Sherpalink">
+        <activity
+            android:name=".SignUpScreen"
+            android:exported="true"
+            android:label="@string/title_activity_sign_up_screen"
+            android:theme="@style/Theme.Sherpalink">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".SignInActivity"
             android:exported="true"
@@ -30,13 +38,10 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <!-- GOOGLE MAPS API KEY (MUST be inside application) -->
+        </activity> <!-- GOOGLE MAPS API KEY (MUST be inside application) -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDb0Z8lGtIrp4pPGTPH1-iPF--6ss2-Ej0"/>
-
-        <!-- Launcher activity -->
+            android:value="AIzaSyDb0Z8lGtIrp4pPGTPH1-iPF--6ss2-Ej0" /> <!-- Launcher activity -->
         <activity
             android:name=".DashboardActivity"
             android:exported="true">
@@ -46,7 +51,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>
