@@ -108,7 +108,43 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            Button(
+                onClick = onSignUpClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0D1B2A)
+                )
+            ) {
+                Text("Sign Up")
+            }
 
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text("or", color = Color.White.copy(alpha = 0.8f))
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedButton(
+                onClick = onSignInClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Sign In", color = Color.White)
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = "By clicking continue, you agree to our Terms of Service and Privacy Policy",
+                color = Color.White.copy(alpha = 0.7f),
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
