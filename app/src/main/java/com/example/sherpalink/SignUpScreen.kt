@@ -18,3 +18,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sherpalink.R
+
+@Composable
+fun SignUpScreen(
+    onSignUpClick: () -> Unit,
+    onSignInClick: () -> Unit
+) {
+
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+
+    Box(modifier = Modifier.fillMaxSize())
+    }
+}
