@@ -6,23 +6,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.zIndex
 import androidx.navigation.compose.*
-import androidx.compose.material3.*
-import androidx.compose.ui.Alignment
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
 import com.example.sherpalink.screens.*
-import com.example.sherpalink.ui.auth.SignInScreen
-import com.example.sherpalink.ui.auth.SignUpScreen
+import com.google.firebase.auth.FirebaseAuth
 
 class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,141 +29,84 @@ class DashboardActivity : ComponentActivity() {
 @Composable
 fun DashboardRoot() {
     val navController = rememberNavController()
-
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
 
-    val showBottomBar = currentRoute !in listOf("signup", "signin")
-
-    val routeToIndex = mapOf(
-        "home" to 0,
-        "location" to 1,
-        "add" to 2,
-        "list" to 3,
-        "profile" to 4
-    )
-
-    val selectedTab = routeToIndex[currentRoute] ?: 0
+    val showBottomBar = currentRoute !in listOf("full_image")
+    var menuOpen by remember { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                BottomMenuBar(selectedTab) { index ->
-                    when (index) {
-                        0 -> navController.navigate("home") { launchSingleTop = true }
-                        1 -> navController.navigate("location") { launchSingleTop = true }
-                        2 -> navController.navigate("add") { launchSingleTop = true }
-                        3 -> navController.navigate("list") { launchSingleTop = true }
-                        4 -> navController.navigate("profile") { launchSingleTop = true }
+                BottomMenuBar(currentRoute) { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        popUpTo(navController.graph.startDestinationId)
                     }
                 }
             }
         }
     ) { paddingValues ->
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
 
-            NavHost(navController = navController, startDestination = "home") {
-
-                composable("signup") {
-                    SignUpScreen(
-                        onSignUpClick = { email, password, userModel ->
-                        },
-                        onSignInClick = {
-                            navController.navigate("signin") {
-                                popUpTo("signup") { inclusive = true }
-                            }
-                        }
-                    )
-                }
-
-                composable("signin") {
-                    SignInScreen(
-                        onSignInClick = { email, password ->
-                            navController.navigate("home") {
-                                popUpTo("signin") { inclusive = true }
-                            }
-                        },
-                        onSignUpClick = {
-                            navController.navigate("signup") {
-                                popUpTo("signin") { inclusive = true }
-                            }
-                        }
-                    )
-                }
-
+            NavHost(
+                navController = navController,
+                startDestination = "home"
+            ) {
                 composable("home") { HomeScreen(navController) }
                 composable("location") { LocationScreen() }
                 composable("add") { AddScreen() }
                 composable("list") { MessageScreen() }
                 composable("profile") { ProfileScreen() }
 
-                composable(
-                    route = "full_image/{index}",
-                    arguments = listOf(
-                        navArgument("index") { type = NavType.IntType }
-                    )
-                ) { backStackEntry ->
+                composable("notifications") { NotificationScreen(navController) }
+                composable("tour_package") { TourPackageScreen(navController) }
+                composable("registration_form") { RegistrationScreen(navController) }
+                composable("guide_booking") { GuideBookingScreen(navController) }
+            }
 
-                    val index = backStackEntry.arguments?.getInt("index") ?: 0
-
-                    val images = listOf(
-                        R.drawable.image1,
-                        R.drawable.image2,
-                        R.drawable.image3
-                    )
-
-                    val safeIndex =
-                        if (images.isNotEmpty()) index.coerceIn(images.indices) else -1
-
-                    if (safeIndex != -1) {
-                        FullScreenImage(
-                            imageRes = images[safeIndex],
-                            onBack = { navController.popBackStack() }
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No image available")
-                        }
+            AppHeader(
+                modifier = Modifier.zIndex(3f),
+                onNotificationClick = { navController.navigate("notifications") },
+                onHomeClick = { navController.navigate("home") },
+                menuOpen = menuOpen,
+                onMenuToggle = { menuOpen = !menuOpen },
+                onLogout = {
+                    FirebaseAuth.getInstance().signOut()
+                    navController.navigate("sign_in") {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
                     }
                 }
-            }
+            )
         }
     }
 }
 
 @Composable
 fun BottomMenuBar(
-    selectedIndex: Int,
-    onTabSelected: (Int) -> Unit
+    currentRoute: String?,
+    onTabSelected: (String) -> Unit
 ) {
-    val icons = listOf(
-        Icons.Default.Home,
-        Icons.Default.LocationOn,
-        Icons.Default.AddCircle,
-        Icons.Default.Email,
-        Icons.Default.Person
+    val items = listOf(
+        Icons.Default.Home to "home",
+        Icons.Default.LocationOn to "location",
+        Icons.Default.AddCircle to "add",
+        Icons.Default.Email to "list",
+        Icons.Default.Person to "profile"
     )
 
     NavigationBar(containerColor = Color.White) {
-        icons.forEachIndexed { index, icon ->
+        items.forEach { (icon, route) ->
             NavigationBarItem(
-                selected = selectedIndex == index,
-                onClick = { onTabSelected(index) },
-                icon = { Icon(imageVector = icon, contentDescription = null) }
+                selected = currentRoute == route,
+                onClick = { onTabSelected(route) },
+                icon = { Icon(icon, contentDescription = null) }
             )
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DashboardPreview() {
-    DashboardRoot()
 }

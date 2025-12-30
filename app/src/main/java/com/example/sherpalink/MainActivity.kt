@@ -10,6 +10,10 @@ import androidx.navigation.compose.rememberNavController
 import com.example.sherpalink.screens.*
 import com.example.sherpalink.ui.auth.SignInScreen
 import com.example.sherpalink.ui.auth.SignUpScreen
+import com.google.firebase.auth.FirebaseAuth
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
+import com.example.sherpalink.screens.FullScreenImage
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,17 +28,21 @@ class MainActivity : ComponentActivity() {
 fun AppNavHost() {
     val navController = rememberNavController()
 
+    // Check Firebase login state
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val startDestination = if (currentUser != null) "dashboard" else "sign_in"
+
     NavHost(
         navController = navController,
-        startDestination = "sign_in"
+        startDestination = startDestination
     ) {
 
         // ---------------- SIGN IN ----------------
         composable("sign_in") {
             SignInScreen(
                 onSignInClick = { email, password ->
-                    // TODO: Firebase login
-                    navController.navigate("home") {
+                    // TODO: Firebase login logic
+                    navController.navigate("dashboard") {
                         popUpTo("sign_in") { inclusive = true }
                     }
                 },
@@ -48,8 +56,8 @@ fun AppNavHost() {
         composable("signup") {
             SignUpScreen(
                 onSignUpClick = { email, password, userModel ->
-                    // TODO: Firebase signup
-                    navController.navigate("home") {
+                    // TODO: Firebase signup logic
+                    navController.navigate("dashboard") {
                         popUpTo("signup") { inclusive = true }
                     }
                 },
@@ -59,22 +67,25 @@ fun AppNavHost() {
             )
         }
 
-        // ---------------- MAIN SCREENS ----------------
-        composable("home") { HomeScreen(navController) }
-        composable("notifications") { NotificationScreen(navController) }
-        composable("tour_package") { TourPackageScreen(navController) }
-        composable("registration_form") { RegistrationScreen(navController) }
-        composable("guide_booking") { GuideBookingScreen(navController) }
+        // ---------------- DASHBOARD ----------------
+        composable("dashboard") {
+            DashboardRoot()
+        }
 
-        // ---------------- FULL IMAGE ----------------
-        composable("full_image/{imageRes}") { backStackEntry ->
+        // ---------------- FULL SCREEN IMAGE ----------------
+        composable(
+            route = "full_image/{imageRes}",
+            arguments = listOf(
+                navArgument("imageRes") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
             val imageRes =
-                backStackEntry.arguments?.getString("imageRes")?.toIntOrNull()
-                    ?: R.drawable.image1
+                backStackEntry.arguments?.getInt("imageRes") ?: R.drawable.image1
 
-            FullScreenImage(imageRes = imageRes) {
-                navController.popBackStack()
-            }
+            FullScreenImage(
+                imageRes = imageRes,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

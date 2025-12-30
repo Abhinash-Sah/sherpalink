@@ -79,128 +79,134 @@ fun HomeScreen(navController: NavController) {
             item { TrendingTrips() }
         }
 
-        // ================= APP HEADER =================
-        @Composable
-        fun AppHeader(
-            modifier: Modifier = Modifier,
-            onNotificationClick: () -> Unit = {},
-            onHomeClick: () -> Unit = {},
-            menuItems: List<String> = listOf(
-                "Dashboard",
-                "Admin",
-                "Rating & Review",
-                "Profile"
-            ),
-            menuOpen: Boolean,
-            onMenuToggle: () -> Unit
-        ) {
-
-            Box(modifier = modifier.fillMaxWidth()) {
-
-                // 🔹 Header Row
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 20.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    Icon(
-                        Icons.Default.Notifications,
-                        contentDescription = "Notifications",
-                        modifier = Modifier
-                            .size(38.dp)
-                            .padding(6.dp)
-                            .clickable { onNotificationClick() }
-                    )
-
-                    Text(
-                        text = "SherpaLink",
-                        fontSize = 28.sp,
-                        fontStyle = FontStyle.Italic,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontFamily = FontFamily.Cursive,
-                        modifier = Modifier.clickable { onHomeClick() }
-                    )
-
-                    Icon(
-                        Icons.Default.Menu,
-                        contentDescription = "Menu",
-                        modifier = Modifier
-                            .size(38.dp)
-                            .padding(6.dp)
-                            .clickable { onMenuToggle() }
-                    )
-                }
-
-                // 🔹 Dim background (NOT covering header)
-                if (menuOpen) {
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(top = 90.dp)
-                            .background(Color.Black.copy(alpha = 0.3f))
-                            .clickable { onMenuToggle() }
-                    )
-
-                    // 🔹 Side Menu
-                    Column(
-                        modifier = Modifier
-                            .width(200.dp)
-                            .height(300.dp)
-                            .background(
-                                Color.White,
-                                RoundedCornerShape(topEnd = 12.dp, bottomEnd = 12.dp)
-                            )
-                            .padding(16.dp)
-                            .align(Alignment.TopStart)
-                            .zIndex(2f)
-                    ) {
-                        menuItems.forEach { item ->
-                            Text(
-                                text = item,
-                                fontSize = 16.sp,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 12.dp)
-                                    .clickable { onMenuToggle() }
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        Text(
-                            text = "Logout",
-                            fontSize = 16.sp,
-                            color = Color.Red,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 12.dp)
-                                .clickable {
-                                    FirebaseAuth.getInstance().signOut()
-                                    navController.navigate("sign_in") {
-                                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                                    }
-                                    onMenuToggle()
-                                }
-                        )
-                    }
-                }
-            }
-        }
-
-        // 2️⃣ Fixed Header Overlay
+        // ✅ FIXED: AppHeader is now top-level
         AppHeader(
             modifier = Modifier.zIndex(3f),
             onNotificationClick = { navController.navigate("notifications") },
             onHomeClick = { navController.navigate("home") },
             menuOpen = menuOpen,
-            onMenuToggle = { menuOpen = !menuOpen }
+            onMenuToggle = { menuOpen = !menuOpen },
+            onLogout = {
+                FirebaseAuth.getInstance().signOut()
+                navController.navigate("sign_in") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                }
+            }
         )
     }
 }
+
+/* ================== FIXED APP HEADER ================== */
+
+@Composable
+fun AppHeader(
+    modifier: Modifier = Modifier,
+    onNotificationClick: () -> Unit = {},
+    onHomeClick: () -> Unit = {},
+    menuItems: List<String> = listOf(
+        "Dashboard",
+        "Admin",
+        "Rating & Review",
+        "Profile"
+    ),
+    menuOpen: Boolean,
+    onMenuToggle: () -> Unit,
+    onLogout: () -> Unit
+) {
+
+    Box(modifier = modifier.fillMaxWidth()) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Icon(
+                Icons.Default.Notifications,
+                contentDescription = "Notifications",
+                modifier = Modifier
+                    .size(38.dp)
+                    .padding(6.dp)
+                    .clickable { onNotificationClick() }
+            )
+
+            Text(
+                text = "SherpaLink",
+                fontSize = 28.sp,
+                fontStyle = FontStyle.Italic,
+                fontWeight = FontWeight.ExtraBold,
+                fontFamily = FontFamily.Cursive,
+                modifier = Modifier.clickable { onHomeClick() }
+            )
+
+            Icon(
+                Icons.Default.Menu,
+                contentDescription = "Menu",
+                modifier = Modifier
+                    .size(38.dp)
+                    .padding(6.dp)
+                    .clickable { onMenuToggle() }
+            )
+        }
+
+        if (menuOpen) {
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 90.dp)
+                    .background(Color.Black.copy(alpha = 0.3f))
+                    .clickable { onMenuToggle() }
+            )
+
+            Column(
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(300.dp)
+                    .background(
+                        Color.White,
+                        RoundedCornerShape(topEnd = 12.dp, bottomEnd = 12.dp)
+                    )
+                    .padding(16.dp)
+                    .align(Alignment.TopStart)
+                    .zIndex(2f)
+            ) {
+                menuItems.forEach { item ->
+                    Text(
+                        text = item,
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp)
+                            .clickable { onMenuToggle() }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "Logout",
+                    fontSize = 16.sp,
+                    color = Color.Red,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp)
+                        .clickable {
+                            onLogout()
+                            onMenuToggle()
+                        }
+                )
+            }
+        }
+    }
+}
+
+/* ================== REST UNCHANGED ================== */
 
 @Composable
 fun AutoImageSlider(navController: NavController, images: List<Int>) {
@@ -233,7 +239,10 @@ fun AutoImageSlider(navController: NavController, images: List<Int>) {
 }
 
 @Composable
-fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
+fun FullScreenImage(
+    imageRes: Int,
+    onBack: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -249,7 +258,6 @@ fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
         )
     }
 }
-
 @Composable
 fun CategoryRow(navController: NavController) {
     Row(
