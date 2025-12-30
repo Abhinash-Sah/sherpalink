@@ -22,12 +22,13 @@ import com.example.sherpalink.R
 
 @Composable
 fun SignInScreen(
-    onSignInClick: () -> Unit,
+    onSignInClick: (String, String) -> Unit,
     onSignUpClick: () -> Unit
 ) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var showErrorDialog by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -113,7 +114,13 @@ fun SignInScreen(
             Spacer(modifier = Modifier.height(22.dp))
 
             Button(
-                onClick = onSignInClick,
+                onClick = {
+                    if (email.isBlank() || password.isBlank()) {
+                        showErrorDialog = true
+                    } else {
+                        onSignInClick(email, password)
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
@@ -151,7 +158,21 @@ fun SignInScreen(
             )
         }
     }
+
+    if (showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showErrorDialog = false }) {
+                    Text("OK")
+                }
+            },
+            title = { Text("Error") },
+            text = { Text("Please enter the credentials") }
+        )
+    }
 }
+
 @Preview(
     showBackground = true,
     showSystemUi = true
@@ -159,6 +180,7 @@ fun SignInScreen(
 @Composable
 fun SignInScreenPreview() {
     SignInScreen(
-        onSignInClick = {}
+        onSignInClick = { _, _ -> },
+        onSignUpClick = {}
     )
 }

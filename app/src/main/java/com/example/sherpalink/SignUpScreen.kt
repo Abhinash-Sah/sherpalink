@@ -15,13 +15,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sherpalink.R
+import com.example.sherpalink.UserModel
 
 @Composable
 fun SignUpScreen(
-    onSignUpClick: () -> Unit,
+    onSignUpClick: (String, String, UserModel) -> Unit,
     onSignInClick: () -> Unit
 ) {
 
@@ -32,8 +34,12 @@ fun SignUpScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
     Box(modifier = Modifier.fillMaxSize()) {
 
+        // Background Image
         Image(
             painter = painterResource(id = R.drawable.loginimage),
             contentDescription = null,
@@ -41,6 +47,7 @@ fun SignUpScreen(
             contentScale = ContentScale.Crop
         )
 
+        // Gradient overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -80,6 +87,7 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // First & Last Name
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -90,6 +98,7 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Email & Phone
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -100,16 +109,42 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Password & Confirm Password
             AuthPasswordField("Password") { password = it }
-
             Spacer(modifier = Modifier.height(12.dp))
-
             AuthPasswordField("Confirm Password") { confirmPassword = it }
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // Sign Up Button
             Button(
-                onClick = onSignUpClick,
+                onClick = {
+                    if (
+                        firstName.isBlank() ||
+                        lastName.isBlank() ||
+                        email.isBlank() ||
+                        phone.isBlank() ||
+                        password.isBlank() ||
+                        confirmPassword.isBlank()
+                    ) {
+                        errorMessage = "Please input all credentials"
+                        showErrorDialog = true
+                    } else if (password != confirmPassword) {
+                        errorMessage = "Passwords do not match"
+                        showErrorDialog = true
+                    } else {
+                        onSignUpClick(
+                            email,
+                            password,
+                            UserModel(
+                                firstName = firstName,
+                                lastName = lastName,
+                                email = email,
+                                role = "user"
+                            )
+                        )
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -124,7 +159,6 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text("or", color = Color.White.copy(alpha = 0.8f))
-
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedButton(
@@ -147,7 +181,23 @@ fun SignUpScreen(
             )
         }
     }
+
+    // Error Dialog
+    if (showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showErrorDialog = false }) {
+                    Text("OK")
+                }
+            },
+            title = { Text("Error") },
+            text = { Text(errorMessage) }
+        )
+    }
 }
+
+// Text Field Composable
 @Composable
 private fun AuthField(
     placeholder: String,
@@ -171,6 +221,8 @@ private fun AuthField(
         )
     )
 }
+
+// Password Field Composable
 @Composable
 private fun AuthPasswordField(
     placeholder: String,
@@ -192,5 +244,14 @@ private fun AuthPasswordField(
             unfocusedContainerColor = Color.White,
             focusedContainerColor = Color.White
         )
+    )
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun SignUpScreenPreview() {
+    SignUpScreen(
+        onSignUpClick = { _, _, _ -> },
+        onSignInClick = {}
     )
 }
