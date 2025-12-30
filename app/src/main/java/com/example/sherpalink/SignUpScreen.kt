@@ -166,7 +166,7 @@ fun SignUpScreen(
                                 firstName = firstName,
                                 lastName = lastName,
                                 email = email,
-                                role = "user"
+                                role = selectedRole
                             )
                         )
                     }
