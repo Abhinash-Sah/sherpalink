@@ -115,6 +115,32 @@ fun SignUpScreen(
             AuthPasswordField("Confirm Password") { confirmPassword = it }
 
             Spacer(modifier = Modifier.height(20.dp))
+            var selectedRole by remember { mutableStateOf("user") } // default tourist
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = { selectedRole = "user" },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (selectedRole == "user") Color(0xFF0D1B2A) else Color.Gray
+                    ),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Tourist", color = Color.White)
+                }
+
+                Button(
+                    onClick = { selectedRole = "guide" },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (selectedRole == "guide") Color(0xFF0D1B2A) else Color.Gray
+                    ),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Guide", color = Color.White)
+                }
+            }
 
             // Sign Up Button
             Button(
@@ -250,8 +276,11 @@ private fun AuthPasswordField(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SignUpScreenPreview() {
-    SignUpScreen(
-        onSignUpClick = { _, _, _ -> },
-        onSignInClick = {}
-    )
+    MaterialTheme {
+        SignUpScreen(
+            onSignUpClick = { _, _, _ -> },
+            onSignInClick = {}
+        )
+    }
 }
+

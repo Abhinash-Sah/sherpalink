@@ -229,6 +229,23 @@ fun AutoImageSlider(navController: NavController, images: List<Int>) {
         )
     }
 }
+@Composable
+fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .clickable { onBack() },
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(id = imageRes),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Fit
+        )
+    }
+}
 
 @Composable
 fun CategoryRow(navController: NavController) {

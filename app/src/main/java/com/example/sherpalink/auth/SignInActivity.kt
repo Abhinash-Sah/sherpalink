@@ -1,4 +1,4 @@
-package com.example.sherpalink
+package com.example.sherpalink.auth
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,8 +6,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.example.sherpalink.DashboardActivity
 import com.example.sherpalink.ui.auth.SignInScreen
-import com.example.sherpalink.ui.theme.ui.theme.SignUpActivity
 import com.example.sherpalink.ui.theme.ui.theme.loginUser
 
 class SignInActivity : ComponentActivity() {
@@ -31,4 +31,5 @@ class SignInActivity : ComponentActivity() {
                 },
                 onSignUpClick = {
                     startActivity(Intent(this, SignUpActivity::class.java))
-                })}}}
+                })
+        }}}

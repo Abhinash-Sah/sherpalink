@@ -1,4 +1,4 @@
-package com.example.sherpalink.ui.theme.ui.theme
+package com.example.sherpalink.auth
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,10 +7,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import com.example.sherpalink.repository.UserRepoImplementation
 import com.example.sherpalink.ui.auth.SignUpScreen
 import com.example.sherpalink.ui.theme.ui.theme.ui.theme.SherpalinkTheme
-import com.example.sherpalink.SignInActivity
-import com.example.sherpalink.repository.UserRepoImplementation
 import com.example.sherpalink.viewmodel.UserViewModel
 
 class SignUpActivity : ComponentActivity() {
@@ -30,7 +29,8 @@ class SignUpActivity : ComponentActivity() {
                         userViewModel.register(email, password) { success, msg, userId ->
 
                             if (success) {
-                                val userWithId = userModel.copy(userId = userId, password = password)
+                                val userWithId =
+                                    userModel.copy(userId = userId, password = password)
 
                                 userViewModel.addUserToDatabase(
                                     userId,
@@ -67,8 +67,10 @@ class SignUpActivity : ComponentActivity() {
                             }
                         }
                     },
-                    onSignInClick = { finish() } // just finish to go back to SignInActivity
+                    onSignInClick = { finish()
+                        startActivity(Intent(this, SignInActivity::class.java))
+                        finish()
+                    } // just finish to go back to SignInActivity
                 )
             }
         }}}
-
