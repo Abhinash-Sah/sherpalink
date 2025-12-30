@@ -3,11 +3,7 @@ package com.example.sherpalink.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,9 +12,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun RegistrationScreen() {
+fun RegistrationScreen(navController: NavController) {
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -94,7 +92,7 @@ fun RegistrationScreen() {
         Spacer(modifier = Modifier.height(10.dp))
 
         Button(
-            onClick = { },
+            onClick = { /* Add image logic */ },
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .height(48.dp)
@@ -108,14 +106,15 @@ fun RegistrationScreen() {
 
         Button(
             onClick = {
-                // Submit logic later
+                // Submit logic, can navigate using navController
+                // Example: navController.navigate("home")
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD8342A))
         ) {
-            Text("submit", color = Color.White)
+            Text("Submit", color = Color.White)
         }
     }
 }
@@ -144,5 +143,5 @@ fun InputField(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun RegistrationPreview() {
-    RegistrationScreen()
+    RegistrationScreen(navController = rememberNavController())
 }

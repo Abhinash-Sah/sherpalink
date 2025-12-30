@@ -7,7 +7,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.room.util.copy
 import com.example.sherpalink.DashboardActivity
+import com.example.sherpalink.UserModel
 import com.example.sherpalink.repository.UserRepoImplementation
 import com.example.sherpalink.ui.auth.SignUpScreen
 import com.example.sherpalink.ui.theme.ui.theme.ui.theme.SherpalinkTheme
@@ -28,59 +30,40 @@ class SignUpActivity : ComponentActivity() {
                 SignUpScreen(
                     onSignUpClick = { email, password, userModel ->
 
+                        // Null check for userModel
+                        if (userModel == null) {
+                            Toast.makeText(this, "User data missing", Toast.LENGTH_SHORT).show()
+                            return@SignUpScreen
+                        }
+
+                        // Safe copy usage
+                        val safeUserModel = userModel
+
+                        // Register the user
                         userViewModel.register(email, password) { success, msg, userId ->
-
                             if (success) {
-                                val userWithId =
-                                    userModel.copy(userId = userId, password = password)
+                                val userWithId = safeUserModel.copy(
+                                    userId = userId,
+                                    password = password
+                                )
 
-                                userViewModel.addUserToDatabase(
-                                    userId,
-                                    userWithId
-                                ) { dbSuccess, dbMsg ->
-
+                                // Add user to database
+                                userViewModel.addUserToDatabase(userId, userWithId) { dbSuccess, dbMsg ->
                                     if (dbSuccess) {
-                                        runOnUiThread {
-                                            Toast.makeText(
-                                                this@SignUpActivity,
-                                                "Registration Successful!",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-
-                                            startActivity(
-                                                Intent(
-                                                    this@SignUpActivity,
-                                                    DashboardActivity::class.java
-                                                )
-                                            )
-                                            finish()
-                                        }
+                                        Toast.makeText(this, "Registration Successful!", Toast.LENGTH_SHORT).show()
+                                        startActivity(Intent(this, DashboardActivity::class.java))
+                                        finish()
                                     } else {
-                                        runOnUiThread {
-                                            Toast.makeText(
-                                                this@SignUpActivity,
-                                                "Database Error: $dbMsg",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
+                                        Toast.makeText(this, "Database Error: $dbMsg", Toast.LENGTH_SHORT).show()
                                     }
                                 }
-
                             } else {
-                                runOnUiThread {
-                                    Toast.makeText(
-                                        this@SignUpActivity,
-                                        "Registration Error: $msg",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+                                Toast.makeText(this, "Registration Error: $msg", Toast.LENGTH_SHORT).show()
                             }
                         }
                     },
                     onSignInClick = {
-                        startActivity(
-                            Intent(this@SignUpActivity, SignInActivity::class.java)
-                        )
+                        startActivity(Intent(this, SignInActivity::class.java))
                         finish()
                     }
                 )

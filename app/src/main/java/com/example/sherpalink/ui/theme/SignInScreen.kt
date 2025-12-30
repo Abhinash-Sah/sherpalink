@@ -25,7 +25,6 @@ fun SignInScreen(
     onSignInClick: (String, String) -> Unit,
     onSignUpClick: () -> Unit
 ) {
-
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
@@ -70,13 +69,13 @@ fun SignInScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Create an account",
+                text = "Welcome back",
                 color = Color.White,
                 fontSize = 18.sp
             )
 
             Text(
-                text = "Enter your email to signup for this app",
+                text = "Sign in to continue",
                 color = Color.White.copy(alpha = 0.8f),
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
@@ -134,10 +133,6 @@ fun SignInScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            Text("or", color = Color.White.copy(alpha = 0.8f))
-
-            Spacer(modifier = Modifier.height(14.dp))
-
             OutlinedButton(
                 onClick = onSignUpClick,
                 modifier = Modifier
@@ -147,15 +142,6 @@ fun SignInScreen(
             ) {
                 Text("Sign Up", fontSize = 16.sp)
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                text = "By clicking continue, you agree to our Terms of Service and Privacy Policy",
-                color = Color.White.copy(alpha = 0.7f),
-                fontSize = 12.sp,
-                textAlign = TextAlign.Center
-            )
         }
     }
 
@@ -168,19 +154,7 @@ fun SignInScreen(
                 }
             },
             title = { Text("Error") },
-            text = { Text("Please enter the credentials") }
+            text = { Text("Please enter email and password") }
         )
     }
-}
-
-@Preview(
-    showBackground = true,
-    showSystemUi = true
-)
-@Composable
-fun SignInScreenPreview() {
-    SignInScreen(
-        onSignInClick = { _, _ -> },
-        onSignUpClick = {}
-    )
 }

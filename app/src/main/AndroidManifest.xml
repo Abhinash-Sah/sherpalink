@@ -14,14 +14,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sherpalink">
 
-        <!-- Google Maps API Key -->
+        <!-- GOOGLE MAPS API KEY -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDb0Z8lGtIrp4pPGTPH1-iPF--6ss2-Ej0" />
 
-        <!-- LAUNCHER ACTIVITY -->
+        <!-- ONLY LAUNCHER ACTIVITY -->
         <activity
-            android:name=".auth.SignUpActivity"
+            android:name=".auth.AuthCheckActivity"
             android:exported="true"
             android:theme="@style/Theme.Sherpalink">
 
@@ -32,11 +32,16 @@
 
         </activity>
 
-        <!-- OTHER ACTIVITIES -->
+        <!-- AUTH SCREENS -->
+        <activity
+            android:name=".auth.SignUpActivity"
+            android:exported="true" />
+
         <activity
             android:name=".auth.SignInActivity"
-            android:exported="false" />
+            android:exported="true" />
 
+        <!-- MAIN APP -->
         <activity
             android:name=".DashboardActivity"
             android:exported="false" />

@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.sherpalink.R
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
@@ -43,8 +45,9 @@ fun HomeScreen(navController: NavController) {
         R.drawable.image3
     )
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    val context = LocalContext.current
 
+    Box(modifier = Modifier.fillMaxSize()) {
 
         LazyColumn(
             modifier = Modifier
@@ -57,20 +60,19 @@ fun HomeScreen(navController: NavController) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-
-        item {
-            OutlinedTextField(
-                value = search,
-                onValueChange = { search = it },
-                placeholder = { Text("Search...") },
-                leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = null)
-                },
-                modifier = Modifier.fillMaxWidth()
-                    .padding(top = 8.dp)
-            )
-
-        }
+            item {
+                OutlinedTextField(
+                    value = search,
+                    onValueChange = { search = it },
+                    placeholder = { Text("Search...") },
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, contentDescription = null)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                )
+            }
 
             item { AutoImageSlider(navController, images) }
             item { CategoryRow(navController) }
@@ -102,8 +104,7 @@ fun HomeScreen(navController: NavController) {
                         .padding(horizontal = 16.dp, vertical = 20.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
-                )
-                {
+                ) {
 
                     Icon(
                         Icons.Default.Notifications,
@@ -128,7 +129,7 @@ fun HomeScreen(navController: NavController) {
                         contentDescription = "Menu",
                         modifier = Modifier
                             .size(38.dp)
-                            .padding(6.dp) // ✅ FIX
+                            .padding(6.dp)
                             .clickable { onMenuToggle() }
                     )
                 }
@@ -139,7 +140,7 @@ fun HomeScreen(navController: NavController) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(top = 90.dp) // ✅ FIX: header remains clickable
+                            .padding(top = 90.dp)
                             .background(Color.Black.copy(alpha = 0.3f))
                             .clickable { onMenuToggle() }
                     )
@@ -155,7 +156,7 @@ fun HomeScreen(navController: NavController) {
                             )
                             .padding(16.dp)
                             .align(Alignment.TopStart)
-                            .zIndex(2f) // ✅ FIX
+                            .zIndex(2f)
                     ) {
                         menuItems.forEach { item ->
                             Text(
@@ -177,7 +178,13 @@ fun HomeScreen(navController: NavController) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 12.dp)
-                                .clickable { onMenuToggle() }
+                                .clickable {
+                                    FirebaseAuth.getInstance().signOut()
+                                    navController.navigate("sign_in") {
+                                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                    }
+                                    onMenuToggle()
+                                }
                         )
                     }
                 }
@@ -186,19 +193,14 @@ fun HomeScreen(navController: NavController) {
 
         // 2️⃣ Fixed Header Overlay
         AppHeader(
-            modifier = Modifier.zIndex(3f), // ✅ FIX: always clickable
-            onNotificationClick = {
-                navController.navigate("notifications")
-            },
-            onHomeClick = {
-                navController.navigate("home")
-            },
+            modifier = Modifier.zIndex(3f),
+            onNotificationClick = { navController.navigate("notifications") },
+            onHomeClick = { navController.navigate("home") },
             menuOpen = menuOpen,
             onMenuToggle = { menuOpen = !menuOpen }
         )
     }
 }
-
 
 @Composable
 fun AutoImageSlider(navController: NavController, images: List<Int>) {
@@ -224,11 +226,12 @@ fun AutoImageSlider(navController: NavController, images: List<Int>) {
                 .fillMaxSize()
                 .clip(RoundedCornerShape(16.dp))
                 .clickable {
-                    navController.navigate("full_image/$currentIndex")
+                    navController.navigate("full_image/${images[currentIndex]}")
                 }
         )
     }
 }
+
 @Composable
 fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
     Box(

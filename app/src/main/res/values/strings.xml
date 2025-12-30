@@ -6,4 +6,5 @@
     <string name="title_activity_sign_in_activity.kt">SignInActivity.kt</string>
     <string name="title_activity_sign_up_screen">SignUpScreen</string>
     <string name="title_activity_sign_up">SignUpActivity</string>
+    <string name="title_activity_auth_check">AuthCheckActivity</string>
 </resources>

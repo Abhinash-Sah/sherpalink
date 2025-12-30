@@ -60,6 +60,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
+    implementation(libs.androidx.room.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
