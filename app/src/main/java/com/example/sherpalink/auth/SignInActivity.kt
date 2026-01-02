@@ -7,46 +7,41 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import com.example.sherpalink.DashboardActivity
+import com.example.sherpalink.repository.UserRepoImplementation
 import com.example.sherpalink.ui.auth.SignInScreen
 import com.example.sherpalink.ui.theme.ui.theme.loginUser
+import com.example.sherpalink.viewmodel.UserViewModel
 
 class SignInActivity : ComponentActivity() {
+
+    private val userViewModel: UserViewModel by viewModels {
+        UserViewModel.UserViewModelFactory(UserRepoImplementation())
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         setContent {
-
             SignInScreen(
                 onSignInClick = { email, password ->
-                    loginUser(email, password) { success, message, user ->
+                    userViewModel.login(email, password) { success, message ->
                         if (success) {
-
-                            // ✅ Go to Dashboard
-                            startActivity(
-                                Intent(this, DashboardActivity::class.java)
-                            )
-
-                            // ✅ Prevent going back to login
-                            finish()
-
+                            // Go to Dashboard after login
+                            startActivity(Intent(this, DashboardActivity::class.java))
+                            finish() // Prevent going back
                         } else {
-                            Toast.makeText(
-                                this,
-                                message ?: "Login failed",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
                         }
                     }
                 },
                 onSignUpClick = {
-                    startActivity(
-                        Intent(this, SignUpActivity::class.java)
-                    )
+                    startActivity(Intent(this, SignUpActivity::class.java))
                 }
             )
         }
     }
 }
+

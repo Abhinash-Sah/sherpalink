@@ -79,6 +79,9 @@ fun HomeScreen(navController: NavController) {
             onHomeClick = { navController.navigate("home") },
             menuOpen = menuOpen,
             onMenuToggle = { menuOpen = !menuOpen },
+            onProfileClick = { navController.navigate("profile") },
+            onAboutClick = { navController.navigate("about") },
+            onRatingsClick = { navController.navigate("ratings") },
             onLogout = {
                 FirebaseAuth.getInstance().signOut()
                 context.startActivity(Intent(context, SignInActivity::class.java))
@@ -95,6 +98,9 @@ fun AppHeader(
     onHomeClick: () -> Unit,
     menuOpen: Boolean,
     onMenuToggle: () -> Unit,
+    onProfileClick: () -> Unit = {},
+    onAboutClick: () -> Unit = {},
+    onRatingsClick: () -> Unit = {},
     onLogout: () -> Unit
 ) {
     Box(modifier.fillMaxWidth()) {
@@ -135,12 +141,46 @@ fun AppHeader(
                     .padding(16.dp)
             ) {
                 Text(
-                    "Logout",
+                    text = "Profile",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onMenuToggle()
+                            onProfileClick()
+                        }
+                        .padding(vertical = 8.dp)
+                )
+                Text(
+                    text = "About",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onMenuToggle()
+                            onAboutClick()
+                        }
+                        .padding(vertical = 8.dp)
+                )
+                Text(
+                    text = "Ratings",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onMenuToggle()
+                            onRatingsClick()
+                        }
+                        .padding(vertical = 8.dp)
+                )
+                Divider(color = Color.Gray, thickness = 1.dp)
+                Text(
+                    text = "Logout",
                     color = Color.Red,
-                    modifier = Modifier.clickable {
-                        onMenuToggle()
-                        onLogout()
-                    }
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onMenuToggle()
+                            onLogout()
+                        }
+                        .padding(vertical = 8.dp)
                 )
             }
         }
