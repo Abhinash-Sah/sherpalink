@@ -5,12 +5,15 @@ import android.content.Intent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
@@ -66,7 +69,7 @@ fun HomeScreen(navController: NavController) {
 
             item { AutoImageSlider(navController, images) }
             item { CategoryRow(navController) }
-            item { TrendingTrips() }
+            item { TrendingTrips(navController) }
         }
 
         AppHeader(
@@ -265,18 +268,51 @@ fun CategoryItem(image: Int, title: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun TrendingTrips() {
-    Column {
-        Text("Trending Trips", fontSize = 20.sp)
+fun TrendingTrips(navController: NavController) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        // Header row
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Trending Trips",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowRight,
+                contentDescription = "Trips",
+                modifier = Modifier
+                    .size(32.dp)
+                    .clickable {
+                        navController.navigate("trending_trips_screen")
+                    }
+            )
+        }
+
         Spacer(modifier = Modifier.height(10.dp))
 
-        Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
-            TrendingItem(R.drawable.trip1, "Trekking", "Everest Summit")
-            TrendingItem(R.drawable.trip2, "Hunting", "Dhorpatan Hunting")
-            TrendingItem(R.drawable.trip3, "Camping", "Jungle Camping")
+
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            item { TrendingItem(R.drawable.trip1, "Trekking", "Everest Summit") }
+            item { TrendingItem(R.drawable.trip2, "Hunting", "Dhorpatan Hunting") }
+            item { TrendingItem(R.drawable.trip3, "Camping", "Jungle Camping") }
+            item { TrendingItem(R.drawable.trip4, "Rafting", "Trishuli River") }
         }
     }
 }
+
+
 
 @Composable
 fun TrendingItem(image: Int, category: String, title: String) {
