@@ -1,36 +1,33 @@
 package com.example.sherpalink.screens
 
+import android.app.Activity
+import android.content.Intent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.*
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.sherpalink.R
+import com.example.sherpalink.auth.SignInActivity
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 
 @Composable
@@ -47,16 +44,13 @@ fun HomeScreen(navController: NavController) {
 
     val context = LocalContext.current
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize()) {
 
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(
-                top = 60.dp,
-                bottom = 16.dp
-            ),
+            contentPadding = PaddingValues(top = 60.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
@@ -79,7 +73,6 @@ fun HomeScreen(navController: NavController) {
             item { TrendingTrips() }
         }
 
-        // ✅ FIXED: AppHeader is now top-level
         AppHeader(
             modifier = Modifier.zIndex(3f),
             onNotificationClick = { navController.navigate("notifications") },
@@ -88,125 +81,71 @@ fun HomeScreen(navController: NavController) {
             onMenuToggle = { menuOpen = !menuOpen },
             onLogout = {
                 FirebaseAuth.getInstance().signOut()
-                navController.navigate("sign_in") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
-                }
+                context.startActivity(Intent(context, SignInActivity::class.java))
+                (context as Activity).finish()
             }
         )
     }
 }
 
-/* ================== FIXED APP HEADER ================== */
-
 @Composable
 fun AppHeader(
     modifier: Modifier = Modifier,
-    onNotificationClick: () -> Unit = {},
-    onHomeClick: () -> Unit = {},
-    menuItems: List<String> = listOf(
-        "Dashboard",
-        "Admin",
-        "Rating & Review",
-        "Profile"
-    ),
+    onNotificationClick: () -> Unit,
+    onHomeClick: () -> Unit,
     menuOpen: Boolean,
     onMenuToggle: () -> Unit,
     onLogout: () -> Unit
 ) {
-
-    Box(modifier = modifier.fillMaxWidth()) {
+    Box(modifier.fillMaxWidth()) {
 
         Row(
-            modifier = Modifier
+            Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 20.dp),
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Icon(
                 Icons.Default.Notifications,
-                contentDescription = "Notifications",
-                modifier = Modifier
-                    .size(38.dp)
-                    .padding(6.dp)
-                    .clickable { onNotificationClick() }
+                null,
+                modifier = Modifier.size(32.dp).clickable { onNotificationClick() }
             )
 
             Text(
-                text = "SherpaLink",
-                fontSize = 28.sp,
-                fontStyle = FontStyle.Italic,
-                fontWeight = FontWeight.ExtraBold,
-                fontFamily = FontFamily.Cursive,
+                "SherpaLink",
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier.clickable { onHomeClick() }
             )
 
             Icon(
                 Icons.Default.Menu,
-                contentDescription = "Menu",
-                modifier = Modifier
-                    .size(38.dp)
-                    .padding(6.dp)
-                    .clickable { onMenuToggle() }
+                null,
+                modifier = Modifier.size(32.dp).clickable { onMenuToggle() }
             )
         }
 
         if (menuOpen) {
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 90.dp)
-                    .background(Color.Black.copy(alpha = 0.3f))
-                    .clickable { onMenuToggle() }
-            )
-
             Column(
-                modifier = Modifier
+                Modifier
+                    .padding(top = 60.dp)
+                    .background(Color.White)
                     .width(200.dp)
-                    .height(300.dp)
-                    .background(
-                        Color.White,
-                        RoundedCornerShape(topEnd = 12.dp, bottomEnd = 12.dp)
-                    )
                     .padding(16.dp)
-                    .align(Alignment.TopStart)
-                    .zIndex(2f)
             ) {
-                menuItems.forEach { item ->
-                    Text(
-                        text = item,
-                        fontSize = 16.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 12.dp)
-                            .clickable { onMenuToggle() }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
                 Text(
-                    text = "Logout",
-                    fontSize = 16.sp,
+                    "Logout",
                     color = Color.Red,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp)
-                        .clickable {
-                            onLogout()
-                            onMenuToggle()
-                        }
+                    modifier = Modifier.clickable {
+                        onMenuToggle()
+                        onLogout()
+                    }
                 )
             }
         }
     }
 }
-
-/* ================== REST UNCHANGED ================== */
 
 @Composable
 fun AutoImageSlider(navController: NavController, images: List<Int>) {
@@ -219,30 +158,23 @@ fun AutoImageSlider(navController: NavController, images: List<Int>) {
         }
     }
 
-    Box(
+    Image(
+        painter = painterResource(images[currentIndex]),
+        contentDescription = null,
         modifier = Modifier
             .fillMaxWidth()
             .height(180.dp)
-    ) {
-        Image(
-            painter = painterResource(images[currentIndex]),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(16.dp))
-                .clickable {
-                    navController.navigate("full_image/${images[currentIndex]}")
-                }
-        )
-    }
+            .clip(RoundedCornerShape(16.dp))
+            .clickable {
+                navController.navigate("full_image/$currentIndex") // ✅ FIXED
+            },
+        contentScale = ContentScale.Crop
+    )
 }
 
+
 @Composable
-fun FullScreenImage(
-    imageRes: Int,
-    onBack: () -> Unit
-) {
+fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -258,6 +190,7 @@ fun FullScreenImage(
         )
     }
 }
+
 @Composable
 fun CategoryRow(navController: NavController) {
     Row(

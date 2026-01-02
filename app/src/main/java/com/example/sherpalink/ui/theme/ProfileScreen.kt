@@ -30,10 +30,10 @@ fun ProfileScreen(viewModel: UserViewModel = viewModel(
     val loading = viewModel.loading
     var showEditDialog by remember { mutableStateOf(false) }
 
-    // Fetch user ONCE when screen opens
-    LaunchedEffect(Unit) {
-        if (user == null) {
-            viewModel.getCurrentUser()?.uid?.let { viewModel.getUserById(it) }
+    LaunchedEffect(viewModel.getCurrentUser()) {
+        val uid = viewModel.getCurrentUser()?.uid
+        if (uid != null && user == null) {
+            viewModel.getUserById(uid)
         }
     }
 
@@ -61,7 +61,6 @@ fun ProfileScreen(viewModel: UserViewModel = viewModel(
     )
 }
 
-// ------------------------------ Core UI Content ------------------------------
 @Composable
 fun ProfileScreenContent(
     user: UserModel,
