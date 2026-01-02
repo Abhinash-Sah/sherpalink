@@ -29,9 +29,8 @@ class SignInActivity : ComponentActivity() {
                 onSignInClick = { email, password ->
                     userViewModel.login(email, password) { success, message ->
                         if (success) {
-                            // Go to Dashboard after login
                             startActivity(Intent(this, DashboardActivity::class.java))
-                            finish() // Prevent going back
+                            finish()
                         } else {
                             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
                         }
