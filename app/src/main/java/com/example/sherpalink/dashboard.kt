@@ -21,6 +21,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.sherpalink.screens.*
+import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
+import com.example.sherpalink.ui.theme.ui.theme.RatingsScreen
 
 class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,7 +75,8 @@ fun DashboardRoot() {
                 composable("add") { AddScreen() }
                 composable("list") { MessageScreen() }
                 composable("profile") { ProfileScreen() }
-
+                composable("about") { AboutScreen() }       // Add AboutScreen route
+                composable("ratings") { RatingsScreen() }
                 // ✅ ADDED – fixes crashes
                 composable("tour_package") { TourPackageScreen(navController) }
                 composable("registration_form") { RegistrationScreen(navController) }

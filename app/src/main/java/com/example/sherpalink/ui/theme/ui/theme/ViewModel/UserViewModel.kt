@@ -21,8 +21,27 @@ class UserViewModel(private val repo: UserRepo) : ViewModel() {
         private set
 
     fun login(email: String, password: String, callback: (Boolean, String) -> Unit) {
-        repo.login(email, password, callback)
+        loading = true
+        repo.login(email, password) { success, message ->
+            if (success) {
+                val uid = repo.getCurrentUser()?.uid
+                if (uid != null) {
+                    repo.getUserById(uid) { successUser, _, data ->
+                        loading = false
+                        user = if (successUser) data else null
+                        callback(successUser, if (successUser) "Login successful" else "User data not found")
+                    }
+                } else {
+                    loading = false
+                    callback(false, "Failed to get current user")
+                }
+            } else {
+                loading = false
+                callback(false, message)
+            }
+        }
     }
+
 
     fun register(email: String, password: String, callback: (Boolean, String, String) -> Unit) {
         repo.register(email, password, callback)

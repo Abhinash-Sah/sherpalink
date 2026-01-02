@@ -21,7 +21,6 @@ import com.example.sherpalink.UserModel
 import com.example.sherpalink.repository.UserRepoImplementation
 import com.example.sherpalink.viewmodel.UserViewModel
 
-// ------------------------------ Main ProfileScreen using ViewModel ------------------------------
 @Composable
 fun ProfileScreen(viewModel: UserViewModel = viewModel(
     factory = UserViewModel.UserViewModelFactory(UserRepoImplementation())
@@ -30,12 +29,14 @@ fun ProfileScreen(viewModel: UserViewModel = viewModel(
     val loading = viewModel.loading
     var showEditDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(viewModel.getCurrentUser()) {
+    LaunchedEffect(viewModel.user) {
         val uid = viewModel.getCurrentUser()?.uid
-        if (uid != null && user == null) {
+        if (uid != null && viewModel.user == null) {
             viewModel.getUserById(uid)
         }
     }
+
+
 
     if (loading) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -153,7 +154,6 @@ fun EditProfileDialog(
     )
 }
 
-// ------------------------------ Static Preview ------------------------------
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
