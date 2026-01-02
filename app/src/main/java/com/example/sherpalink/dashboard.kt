@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,7 +21,7 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.sherpalink.screens.*
 import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
-import com.example.sherpalink.ui.theme.ui.theme.RatingsScreen
+import RatingsScreen
 
 class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,12 +34,9 @@ class DashboardActivity : ComponentActivity() {
 @Composable
 fun DashboardRoot() {
     val navController = rememberNavController()
-
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
-
     val showBottomBar = currentRoute !in listOf("signin", "signup")
-
     val routeToIndex = mapOf(
         "home" to 0,
         "location" to 1,
@@ -75,16 +71,13 @@ fun DashboardRoot() {
                 composable("add") { AddScreen() }
                 composable("list") { MessageScreen() }
                 composable("profile") { ProfileScreen() }
-                composable("about") { AboutScreen() }       // Add AboutScreen route
+                composable("about") { AboutScreen() }
                 composable("ratings") { RatingsScreen() }
-                // ✅ ADDED – fixes crashes
                 composable("tour_package") { TourPackageScreen(navController) }
                 composable("registration_form") { RegistrationScreen(navController) }
                 composable("guide_booking") { GuideBookingScreen(navController) }
                 composable("notifications") { NotificationScreen(navController) }
                 composable("notifications") { NotificationScreen(navController) }
-
-                // ✅ FIXED image fullscreen
                 composable(
                     "full_image/{index}",
                     arguments = listOf(navArgument("index") { type = NavType.IntType })
