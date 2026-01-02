@@ -77,7 +77,6 @@ fun DashboardRoot() {
                 composable("registration_form") { RegistrationScreen(navController) }
                 composable("guide_booking") { GuideBookingScreen(navController) }
                 composable("notifications") { NotificationScreen(navController) }
-                composable("notifications") { NotificationScreen(navController) }
                 composable(
                     "full_image/{index}",
                     arguments = listOf(navArgument("index") { type = NavType.IntType })
