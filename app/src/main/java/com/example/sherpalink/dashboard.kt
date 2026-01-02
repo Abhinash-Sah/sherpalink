@@ -74,7 +74,8 @@ fun DashboardRoot() {
                 composable("add") { AddScreen() }
                 composable("list") { MessageScreen() }
                 composable("profile") { ProfileScreen() }
-
+                composable("about") { AboutScreen() }
+                composable("ratings") { RatingsScreen() }
                 // ✅ ADDED – fixes crashes
                 composable("tour_package") { TourPackageScreen(navController) }
                 composable("registration_form") { RegistrationScreen(navController) }
