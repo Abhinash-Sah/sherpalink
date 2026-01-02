@@ -11,26 +11,22 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.*
-import androidx.compose.material3.*
-import androidx.compose.ui.Alignment
 import androidx.navigation.NavType
+import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.sherpalink.screens.*
-import com.example.sherpalink.ui.auth.SignInScreen
-import com.example.sherpalink.ui.auth.SignUpScreen
 
 class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            DashboardRoot()
-        }
+        setContent { DashboardRoot() }
     }
 }
 
@@ -41,7 +37,7 @@ fun DashboardRoot() {
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
 
-    val showBottomBar = currentRoute !in listOf("signup", "signin")
+    val showBottomBar = currentRoute !in listOf("signin", "signup")
 
     val routeToIndex = mapOf(
         "home" to 0,
@@ -67,41 +63,10 @@ fun DashboardRoot() {
                 }
             }
         }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
+    ) { padding ->
+        Box(Modifier.fillMaxSize().padding(padding)) {
 
-            NavHost(navController = navController, startDestination = "home") {
-
-                composable("signup") {
-                    SignUpScreen(
-                        onSignUpClick = { email, password, userModel ->
-                        },
-                        onSignInClick = {
-                            navController.navigate("signin") {
-                                popUpTo("signup") { inclusive = true }
-                            }
-                        }
-                    )
-                }
-
-                composable("signin") {
-                    SignInScreen(
-                        onSignInClick = { email, password ->
-                            navController.navigate("home") {
-                                popUpTo("signin") { inclusive = true }
-                            }
-                        },
-                        onSignUpClick = {
-                            navController.navigate("signup") {
-                                popUpTo("signin") { inclusive = true }
-                            }
-                        }
-                    )
-                }
+            NavHost(navController, startDestination = "home") {
 
                 composable("home") { HomeScreen(navController) }
                 composable("location") { LocationScreen() }
@@ -109,37 +74,30 @@ fun DashboardRoot() {
                 composable("list") { MessageScreen() }
                 composable("profile") { ProfileScreen() }
 
+                // ✅ ADDED – fixes crashes
+                composable("tour_package") { TourPackageScreen(navController) }
+                composable("registration_form") { RegistrationScreen(navController) }
+                composable("guide_booking") { GuideBookingScreen(navController) }
+                composable("notifications") { NotificationScreen(navController) }
+                composable("notifications") { NotificationScreen(navController) }
+
+                // ✅ FIXED image fullscreen
                 composable(
-                    route = "full_image/{index}",
-                    arguments = listOf(
-                        navArgument("index") { type = NavType.IntType }
-                    )
+                    "full_image/{index}",
+                    arguments = listOf(navArgument("index") { type = NavType.IntType })
                 ) { backStackEntry ->
-
                     val index = backStackEntry.arguments?.getInt("index") ?: 0
-
                     val images = listOf(
                         R.drawable.image1,
                         R.drawable.image2,
                         R.drawable.image3
                     )
+                    val safeIndex = index.coerceIn(images.indices)
 
-                    val safeIndex =
-                        if (images.isNotEmpty()) index.coerceIn(images.indices) else -1
-
-                    if (safeIndex != -1) {
-                        FullScreenImage(
-                            imageRes = images[safeIndex],
-                            onBack = { navController.popBackStack() }
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No image available")
-                        }
-                    }
+                    FullScreenImage(
+                        imageRes = images[safeIndex],
+                        onBack = { navController.popBackStack() }
+                    )
                 }
             }
         }
@@ -147,10 +105,7 @@ fun DashboardRoot() {
 }
 
 @Composable
-fun BottomMenuBar(
-    selectedIndex: Int,
-    onTabSelected: (Int) -> Unit
-) {
+fun BottomMenuBar(selectedIndex: Int, onTabSelected: (Int) -> Unit) {
     val icons = listOf(
         Icons.Default.Home,
         Icons.Default.LocationOn,
@@ -164,7 +119,7 @@ fun BottomMenuBar(
             NavigationBarItem(
                 selected = selectedIndex == index,
                 onClick = { onTabSelected(index) },
-                icon = { Icon(imageVector = icon, contentDescription = null) }
+                icon = { Icon(icon, null) }
             )
         }
     }
