@@ -70,7 +70,7 @@ fun DashboardRoot() {
                 composable("location") { LocationScreen() }
                 composable("add") { AddScreen() }
                 composable("list") { MessageScreen() }
-                composable("profile") { ProfileScreen() }
+                composable("profile") { ProfileScreen(navController) }
                 composable("about") { AboutScreen() }
                 composable("ratings") { RatingsScreen() }
                 composable("tour_package") { TourPackageScreen(navController) }
