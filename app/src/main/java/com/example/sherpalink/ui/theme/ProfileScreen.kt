@@ -1,5 +1,6 @@
 package com.example.sherpalink.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -10,24 +11,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.sherpalink.R
 import com.example.sherpalink.UserModel
 import com.example.sherpalink.repository.UserRepoImplementation
 import com.example.sherpalink.viewmodel.UserViewModel
 
 @Composable
-fun ProfileScreen(viewModel: UserViewModel = viewModel(
-    factory = UserViewModel.UserViewModelFactory(UserRepoImplementation())
-)) {
+fun ProfileScreen(
+    navController: NavController,
+    viewModel: UserViewModel = viewModel(
+        factory = UserViewModel.UserViewModelFactory(UserRepoImplementation())
+    )
+) {
     val user = viewModel.user
     val loading = viewModel.loading
     var showEditDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     LaunchedEffect(viewModel.user) {
         val uid = viewModel.getCurrentUser()?.uid
@@ -35,8 +43,6 @@ fun ProfileScreen(viewModel: UserViewModel = viewModel(
             viewModel.getUserById(uid)
         }
     }
-
-
 
     if (loading) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -55,11 +61,42 @@ fun ProfileScreen(viewModel: UserViewModel = viewModel(
     ProfileScreenContent(
         user = user,
         onEditClick = { showEditDialog = true },
-        onDeleteClick = { viewModel.deleteAccount(user.userId) { _, _ -> } },
+        onDeleteClick = { showDeleteConfirm = true },
         showEditDialog = showEditDialog,
         onDismissEdit = { showEditDialog = false },
-        onSaveEdit = { updatedUser -> viewModel.updateProfile(updatedUser.userId, updatedUser) { _, _ -> } }
+        onSaveEdit = { updatedUser ->
+            viewModel.updateProfile(updatedUser.userId, updatedUser) { _, _ -> }
+        }
     )
+
+    // ------------------ Delete Confirmation Dialog ------------------
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Delete Account") },
+            text = { Text("Are you sure you want to delete your account? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteAccount(user.userId) { success, message ->
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        if (success) {
+                            navController.navigate("login_screen") {
+                                popUpTo("home") { inclusive = true }
+                            }
+                        }
+                    }
+                    showDeleteConfirm = false
+                }) {
+                    Text("Delete", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -137,9 +174,21 @@ fun EditProfileDialog(
         title = { Text("Edit Profile") },
         text = {
             Column {
-                OutlinedTextField(value = firstName, onValueChange = { firstName = it }, label = { Text("First Name") })
-                OutlinedTextField(value = lastName, onValueChange = { lastName = it }, label = { Text("Last Name") })
-                OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
+                OutlinedTextField(
+                    value = firstName,
+                    onValueChange = { firstName = it },
+                    label = { Text("First Name") }
+                )
+                OutlinedTextField(
+                    value = lastName,
+                    onValueChange = { lastName = it },
+                    label = { Text("Last Name") }
+                )
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") }
+                )
             }
         },
         confirmButton = {
@@ -167,7 +216,6 @@ fun ProfileScreenPreview() {
         role = "user"
     )
 
-    // Pass mock data to the same UI
     ProfileScreenContent(
         user = mockUser,
         onEditClick = {},

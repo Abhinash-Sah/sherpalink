@@ -22,7 +22,7 @@ import androidx.navigation.navArgument
 import com.example.sherpalink.screens.*
 import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
 import RatingsScreen
-
+import com.example.sherpalink.ui.theme.ui.theme.TrendingTripsScreen
 class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,12 +34,9 @@ class DashboardActivity : ComponentActivity() {
 @Composable
 fun DashboardRoot() {
     val navController = rememberNavController()
-
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
-
     val showBottomBar = currentRoute !in listOf("signin", "signup")
-
     val routeToIndex = mapOf(
         "home" to 0,
         "location" to 1,
@@ -73,17 +70,14 @@ fun DashboardRoot() {
                 composable("location") { LocationScreen() }
                 composable("add") { AddScreen() }
                 composable("list") { MessageScreen() }
-                composable("profile") { ProfileScreen() }
+                composable("profile") { ProfileScreen(navController) }
                 composable("about") { AboutScreen() }
                 composable("ratings") { RatingsScreen() }
-                // ✅ ADDED – fixes crashes
                 composable("tour_package") { TourPackageScreen(navController) }
                 composable("registration_form") { RegistrationScreen(navController) }
                 composable("guide_booking") { GuideBookingScreen(navController) }
                 composable("notifications") { NotificationScreen(navController) }
-                composable("notifications") { NotificationScreen(navController) }
-
-                // ✅ FIXED image fullscreen
+                composable("trending_trips_screen") { TrendingTripsScreen(navController) }
                 composable(
                     "full_image/{index}",
                     arguments = listOf(navArgument("index") { type = NavType.IntType })

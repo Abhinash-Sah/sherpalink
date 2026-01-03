@@ -55,9 +55,35 @@ class UserViewModel(private val repo: UserRepo) : ViewModel() {
         repo.updateProfile(userId, model, callback)
     }
 
-    fun deleteAccount(userId: String, callback: (Boolean, String) -> Unit) {
-        repo.deleteAccount(userId, callback)
+    fun deleteAccount(userId: String, onComplete: (Boolean, String) -> Unit) {
+        loading = true
+        // First delete user data from Realtime Database
+        repo.deleteAccount(userId) { success, message ->
+            if (success) {
+                // Also delete FirebaseAuth user
+                val currentUser = repo.getCurrentUser()
+                if (currentUser != null) {
+                    currentUser.delete()
+                        .addOnSuccessListener {
+                            loading = false
+                            user = null
+                            onComplete(true, "Account deleted successfully")
+                        }
+                        .addOnFailureListener { e ->
+                            loading = false
+                            onComplete(false, "Data deleted but failed to delete auth: ${e.message}")
+                        }
+                } else {
+                    loading = false
+                    onComplete(true, "Account deleted successfully")
+                }
+            } else {
+                loading = false
+                onComplete(false, "Failed to delete account: $message")
+            }
+        }
     }
+
 
     fun getUserById(userId: String) {
         loading = true
