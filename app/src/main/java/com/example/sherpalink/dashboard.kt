@@ -22,6 +22,8 @@ import androidx.navigation.navArgument
 import com.example.sherpalink.screens.*
 import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
 import RatingsScreen
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Chat
 import com.example.sherpalink.ui.theme.ui.theme.TrendingTripsScreen
 class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,8 +107,8 @@ fun BottomMenuBar(selectedIndex: Int, onTabSelected: (Int) -> Unit) {
     val icons = listOf(
         Icons.Default.Home,
         Icons.Default.LocationOn,
-        Icons.Default.AddCircle,
-        Icons.Default.Email,
+        Icons.Default.CameraAlt,
+        Icons.Default.Chat,
         Icons.Default.Person
     )
 
