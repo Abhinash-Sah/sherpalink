@@ -29,6 +29,14 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+                <uses-permission android:name="android.permission.CAMERA" />
+
+                <application>
+                    <activity
+                        android:name=".MainActivity"
+                        android:exported="true" />
+                </application>
+
             </intent-filter>
         </activity>
         <!-- GOOGLE MAPS API KEY (MUST be inside application) -->
