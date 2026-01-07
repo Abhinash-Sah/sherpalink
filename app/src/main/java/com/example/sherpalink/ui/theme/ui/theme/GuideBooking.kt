@@ -90,7 +90,7 @@ fun GuideGridUI(guides: List<Guide>, onClick: (Guide) -> Unit) {
     }
 }
 
-/* ---------------- GUIDE PREVIEW ---------------- */
+
 @Composable
 fun GuidePreviewUI(guide: Guide, onBack: () -> Unit) {
     Column(
