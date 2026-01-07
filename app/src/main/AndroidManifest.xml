@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.sherpalink">
 
+    <!-- Location Permissions -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -10,40 +14,38 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sherpalink">
 
-        <!-- SplashActivity is launcher -->
+        <!-- GOOGLE MAPS API KEY -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDb0Z8lGtIrp4pPGTPH1-iPF--6ss2-Ej0" />
+
+        <!-- ONLY LAUNCHER ACTIVITY -->
         <activity
-            android:name=".SplashActivity"
+            android:name=".auth.AuthCheckActivity"
             android:exported="true"
-            android:theme="@style/Theme.Sherpalink.Splash">
+            android:theme="@style/Theme.Sherpalink">
+
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
 
-        <!-- MainActivity -->
+        <!-- AUTH SCREENS -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Sherpalink" />
+            android:name=".auth.SignUpActivity"
+            android:exported="true" />
 
-        <!-- SignUpActivity -->
         <activity
-            android:name=".SignUpActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Sherpalink" />
+            android:name=".auth.SignInActivity"
+            android:exported="true" />
 
-        <!-- Add other activities here -->
-        <activity
-            android:name=".SignInActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Sherpalink" />
-
+        <!-- MAIN APP -->
         <activity
             android:name=".DashboardActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Sherpalink" />
-    </application>
+            android:exported="false" />
 
+    </application>
 
 </manifest>

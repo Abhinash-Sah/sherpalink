@@ -7,9 +7,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 
 @Composable
-fun NotificationScreen() {
+fun NotificationScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -17,8 +18,15 @@ fun NotificationScreen() {
         contentAlignment = Alignment.TopCenter
     ) {
         Column {
-            Text("Notifications", fontSize = 28.sp, modifier = Modifier.padding(bottom = 16.dp))
-            Text("Here will be all your notifications.", fontSize = 18.sp)
+            Text(
+                "Notifications",
+                fontSize = 28.sp,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            Text(
+                "Here will be all your notifications.",
+                fontSize = 18.sp
+            )
         }
     }
 }

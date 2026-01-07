@@ -1,64 +1,191 @@
 package com.example.sherpalink.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
+import android.app.Activity
+import android.content.Intent
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.*
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.sherpalink.R
+import com.example.sherpalink.auth.SignInActivity
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun HomeScreen(navController: NavController) {
-    var search by remember { mutableStateOf("") }
-    val images = listOf(R.drawable.image1, R.drawable.image2, R.drawable.image3)
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        item {
-            OutlinedTextField(
-                value = search,
-                onValueChange = { search = it },
-                placeholder = { Text("Search...") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                modifier = Modifier.fillMaxWidth()
+    var search by remember { mutableStateOf("") }
+    var menuOpen by remember { mutableStateOf(false) }
+
+    val images = listOf(
+        R.drawable.image1,
+        R.drawable.image2,
+        R.drawable.image3
+    )
+
+    val context = LocalContext.current
+
+    Box(Modifier.fillMaxSize()) {
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(top = 60.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+
+            item {
+                OutlinedTextField(
+                    value = search,
+                    onValueChange = { search = it },
+                    placeholder = { Text("Search...") },
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, contentDescription = null)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                )
+            }
+
+            item { AutoImageSlider(navController, images) }
+            item { CategoryRow(navController) }
+            item { TrendingTrips(navController) }
+        }
+
+        AppHeader(
+            modifier = Modifier.zIndex(3f),
+            onNotificationClick = { navController.navigate("notifications") },
+            onHomeClick = { navController.navigate("home") },
+            menuOpen = menuOpen,
+            onMenuToggle = { menuOpen = !menuOpen },
+            onProfileClick = { navController.navigate("profile") },
+            onAboutClick = { navController.navigate("about") },
+            onRatingsClick = { navController.navigate("ratings") },
+            onLogout = {
+                FirebaseAuth.getInstance().signOut()
+                context.startActivity(Intent(context, SignInActivity::class.java))
+                (context as Activity).finish()
+            }
+        )
+    }
+}
+
+@Composable
+fun AppHeader(
+    modifier: Modifier = Modifier,
+    onNotificationClick: () -> Unit,
+    onHomeClick: () -> Unit,
+    menuOpen: Boolean,
+    onMenuToggle: () -> Unit,
+    onProfileClick: () -> Unit = {},
+    onAboutClick: () -> Unit = {},
+    onRatingsClick: () -> Unit = {},
+    onLogout: () -> Unit
+) {
+    Box(modifier.fillMaxWidth()) {
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.Notifications,
+                null,
+                modifier = Modifier.size(32.dp).clickable { onNotificationClick() }
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                "SherpaLink",
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable { onHomeClick() }
+            )
 
-            AutoImageSlider(navController, images)
+            Icon(
+                Icons.Default.Menu,
+                null,
+                modifier = Modifier.size(32.dp).clickable { onMenuToggle() }
+            )
+        }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            CategoryRow(navController)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TrendingTrips()
+        if (menuOpen) {
+            Column(
+                Modifier
+                    .padding(top = 60.dp)
+                    .background(Color.White)
+                    .width(200.dp)
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Profile",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onMenuToggle()
+                            onProfileClick()
+                        }
+                        .padding(vertical = 8.dp)
+                )
+                Text(
+                    text = "About",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onMenuToggle()
+                            onAboutClick()
+                        }
+                        .padding(vertical = 8.dp)
+                )
+                Text(
+                    text = "Ratings",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onMenuToggle()
+                            onRatingsClick()
+                        }
+                        .padding(vertical = 8.dp)
+                )
+                Divider(color = Color.Gray, thickness = 1.dp)
+                Text(
+                    text = "Logout",
+                    color = Color.Red,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onMenuToggle()
+                            onLogout()
+                        }
+                        .padding(vertical = 8.dp)
+                )
+            }
         }
     }
 }
@@ -74,25 +201,21 @@ fun AutoImageSlider(navController: NavController, images: List<Int>) {
         }
     }
 
-    Box(
+    Image(
+        painter = painterResource(images[currentIndex]),
+        contentDescription = null,
         modifier = Modifier
             .fillMaxWidth()
             .height(180.dp)
-    ) {
-        Image(
-            painter = painterResource(images[currentIndex]),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(16.dp))
-                .clickable {
-                    navController.navigate("full_image/$currentIndex")
-                }
-
-        )
-    }
+            .clip(RoundedCornerShape(16.dp))
+            .clickable {
+                navController.navigate("full_image/$currentIndex") // ✅ FIXED
+            },
+        contentScale = ContentScale.Crop
+    )
 }
+
+
 @Composable
 fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
     Box(
@@ -100,19 +223,17 @@ fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
             .fillMaxSize()
             .background(Color.Black)
             .clickable { onBack() },
-    contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center
     ) {
         Image(
             painter = painterResource(id = imageRes),
             contentDescription = null,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Fit
         )
     }
 }
 
-
-// CategoryRow and CategoryItem functions remain unchanged
 @Composable
 fun CategoryRow(navController: NavController) {
     Row(
@@ -150,26 +271,52 @@ fun CategoryItem(image: Int, title: String, onClick: () -> Unit) {
     }
 }
 
-// Trending trips functions remain unchanged
 @Composable
-fun TrendingTrips() {
-    Column {
+fun TrendingTrips(navController: NavController) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        // Header row
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Trending Trips", fontSize = 20.sp)
+            Text(
+                text = "Trending Trips",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowRight,
+                contentDescription = "Trips",
+                modifier = Modifier
+                    .size(32.dp)
+                    .clickable {
+                        navController.navigate("trending_trips_screen")
+                    }
+            )
         }
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
-            TrendingItem(R.drawable.trip1, "Trekking", "Everest Summit")
-            TrendingItem(R.drawable.trip2, "Hunting", "Dhorpatan Hunting")
-            TrendingItem(R.drawable.trip3, "Camping", "Jungle Camping")
+
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            item { TrendingItem(R.drawable.trip1, "Trekking", "Everest Summit") }
+            item { TrendingItem(R.drawable.trip2, "Hunting", "Dhorpatan Hunting") }
+            item { TrendingItem(R.drawable.trip3, "Camping", "Jungle Camping") }
+            item { TrendingItem(R.drawable.trip4, "Rafting", "Trishuli River") }
         }
     }
 }
+
+
 
 @Composable
 fun TrendingItem(image: Int, category: String, title: String) {

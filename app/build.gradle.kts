@@ -69,6 +69,7 @@ dependencies {
     // Firebase
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
+    implementation(libs.androidx.room.ktx)
 
     // SplashScreen
     implementation("androidx.core:core-splashscreen:1.0.1")

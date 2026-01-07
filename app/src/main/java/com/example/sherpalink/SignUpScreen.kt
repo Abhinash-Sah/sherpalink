@@ -18,10 +18,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sherpalink.R
+import com.example.sherpalink.UserModel
 
 @Composable
 fun SignUpScreen(
-    onSignUpClick: () -> Unit,
+    onSignUpClick: (email: String, password: String, userModel: UserModel) -> Unit,
     onSignInClick: () -> Unit
 ) {
 
@@ -31,9 +32,14 @@ fun SignUpScreen(
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    var selectedRole by remember { mutableStateOf("user") }
+
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
+        // Background Image
         Image(
             painter = painterResource(id = R.drawable.loginimage),
             contentDescription = null,
@@ -41,6 +47,7 @@ fun SignUpScreen(
             contentScale = ContentScale.Crop
         )
 
+        // Gradient overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -80,6 +87,7 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // First & Last Name
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -90,6 +98,7 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Email & Phone
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -100,23 +109,70 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Password & Confirm Password
             AuthPasswordField("Password") { password = it }
-
             Spacer(modifier = Modifier.height(12.dp))
-
             AuthPasswordField("Confirm Password") { confirmPassword = it }
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // Role selection
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = { selectedRole = "user" },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (selectedRole == "user") Color(0xFF0D1B2A) else Color.Gray
+                    ),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Tourist", color = Color.White)
+                }
+
+                Button(
+                    onClick = { selectedRole = "guide" },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (selectedRole == "guide") Color(0xFF0D1B2A) else Color.Gray
+                    ),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Guide", color = Color.White)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Sign Up Button
             Button(
-                onClick = onSignUpClick,
+                onClick = {
+                    when {
+                        firstName.isBlank() || lastName.isBlank() || email.isBlank() ||
+                                phone.isBlank() || password.isBlank() || confirmPassword.isBlank() -> {
+                            errorMessage = "Please input all credentials"
+                            showErrorDialog = true
+                        }
+                        password != confirmPassword -> {
+                            errorMessage = "Passwords do not match"
+                            showErrorDialog = true
+                        }
+                        else -> {
+                            val user = UserModel(
+                                firstName = firstName,
+                                lastName = lastName,
+                                email = email,
+                                role = selectedRole
+                            )
+                            onSignUpClick(email, password, user)
+                        }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF0D1B2A)
-                )
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D1B2A))
             ) {
                 Text("Sign Up")
             }
@@ -124,7 +180,6 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text("or", color = Color.White.copy(alpha = 0.8f))
-
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedButton(
@@ -147,7 +202,24 @@ fun SignUpScreen(
             )
         }
     }
+
+    // Error Dialog
+    if (showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showErrorDialog = false }) {
+                    Text("OK")
+                }
+            },
+            title = { Text("Error") },
+            text = { Text(errorMessage) }
+        )
+    }
 }
+
+// --- Helper TextField Composables ---
+
 @Composable
 private fun AuthField(
     placeholder: String,
@@ -155,13 +227,9 @@ private fun AuthField(
     onValueChange: (String) -> Unit
 ) {
     var value by remember { mutableStateOf("") }
-
     OutlinedTextField(
         value = value,
-        onValueChange = {
-            value = it
-            onValueChange(it)
-        },
+        onValueChange = { value = it; onValueChange(it) },
         placeholder = { Text(placeholder) },
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
@@ -171,19 +239,16 @@ private fun AuthField(
         )
     )
 }
+
 @Composable
 private fun AuthPasswordField(
     placeholder: String,
     onValueChange: (String) -> Unit
 ) {
     var value by remember { mutableStateOf("") }
-
     OutlinedTextField(
         value = value,
-        onValueChange = {
-            value = it
-            onValueChange(it)
-        },
+        onValueChange = { value = it; onValueChange(it) },
         placeholder = { Text(placeholder) },
         visualTransformation = PasswordVisualTransformation(),
         modifier = Modifier.fillMaxWidth(),

@@ -15,18 +15,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sherpalink.R
 
 @Composable
 fun SignInScreen(
-    onSignInClick: () -> Unit,
+    onSignInClick: (String, String) -> Unit,
     onSignUpClick: () -> Unit
 ) {
-
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var showErrorDialog by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -68,13 +69,13 @@ fun SignInScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Create an account",
+                text = "Welcome back",
                 color = Color.White,
                 fontSize = 18.sp
             )
 
             Text(
-                text = "Enter your email to signup for this app",
+                text = "Sign in to continue",
                 color = Color.White.copy(alpha = 0.8f),
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
@@ -112,7 +113,13 @@ fun SignInScreen(
             Spacer(modifier = Modifier.height(22.dp))
 
             Button(
-                onClick = onSignInClick,
+                onClick = {
+                    if (email.isBlank() || password.isBlank()) {
+                        showErrorDialog = true
+                    } else {
+                        onSignInClick(email, password)
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
@@ -126,10 +133,6 @@ fun SignInScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            Text("or", color = Color.White.copy(alpha = 0.8f))
-
-            Spacer(modifier = Modifier.height(14.dp))
-
             OutlinedButton(
                 onClick = onSignUpClick,
                 modifier = Modifier
@@ -139,15 +142,19 @@ fun SignInScreen(
             ) {
                 Text("Sign Up", fontSize = 16.sp)
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                text = "By clicking continue, you agree to our Terms of Service and Privacy Policy",
-                color = Color.White.copy(alpha = 0.7f),
-                fontSize = 12.sp,
-                textAlign = TextAlign.Center
-            )
         }
+    }
+
+    if (showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showErrorDialog = false }) {
+                    Text("OK")
+                }
+            },
+            title = { Text("Error") },
+            text = { Text("Please enter email and password") }
+        )
     }
 }

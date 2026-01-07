@@ -5,9 +5,10 @@ package com.example.sherpalink
         val firstName: String = "",
         val lastName: String = "",
         val email: String = "",
+        val password: String = "",
         val dob: String = "",
         val gender: String = "",
-        val role: String = ""   // "guide" or "user"
+        val role: String = ""
     ) {
 
         fun toMap(): Map<String, Any?> {
