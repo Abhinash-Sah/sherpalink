@@ -3,34 +3,32 @@ package com.example.sherpalink
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.sherpalink.screens.*
+import androidx.compose.ui.tooling.preview.Preview
 
-class MainActivity : ComponentActivity() {
+class SignUpActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            AppNavHost()
+            SignUpScreen()
         }
     }
 }
 
 @Composable
-fun AppNavHost() {
-    val navController = rememberNavController()
-
-    NavHost(navController = navController, startDestination = "home") {
-        composable("home") { HomeScreen(navController) }
-        composable("tour_package") { TourPackageScreen() }
-        composable("registration_form") { RegistrationScreen() }
-        composable("guide_booking") { GuideBookingScreen() }
-        composable("location") { LocationScreen() }
-        composable("add") { AddScreen() }
-        composable("list") { MessageScreen() }
-        composable("profile") { ProfileScreen() }
-        composable("notifications") { NotificationScreen() }
+fun SignUpScreen() {
+    MaterialTheme {
+        Surface {
+            Text("This is SignUpActivity")
+        }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SignUpScreenPreview() {
+    SignUpScreen()
 }
