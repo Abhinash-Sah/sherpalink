@@ -60,7 +60,6 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
-    implementation(libs.androidx.room.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -74,7 +73,6 @@ dependencies {
     implementation("androidx.camera:camera-camera2:1.3.1")
     implementation("androidx.camera:camera-lifecycle:1.3.1")
     implementation("androidx.camera:camera-view:1.3.1")
-    implementation("io.coil-kt:coil-compose:2.5.0")
 
     // ML Kit (FREE mountain detection)
     implementation("com.google.mlkit:image-labeling:17.0.7")
