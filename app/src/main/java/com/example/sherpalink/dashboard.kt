@@ -22,6 +22,7 @@ import androidx.navigation.navArgument
 import com.example.sherpalink.screens.*
 import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
 import RatingsScreen
+import com.example.sherpalink.ui.guide.GuideBookingSimplePreview
 import com.example.sherpalink.ui.theme.ui.theme.TrendingTripsScreen
 class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,7 +76,7 @@ fun DashboardRoot() {
                 composable("ratings") { RatingsScreen() }
                 composable("tour_package") { TourPackageScreen(navController) }
                 composable("registration_form") { RegistrationScreen(navController) }
-                composable("guide_booking") { GuideBookingScreen(navController) }
+                composable("guide_booking") { GuideBookingSimplePreview() }
                 composable("notifications") { NotificationScreen(navController) }
                 composable("trending_trips_screen") { TrendingTripsScreen(navController) }
                 composable(
