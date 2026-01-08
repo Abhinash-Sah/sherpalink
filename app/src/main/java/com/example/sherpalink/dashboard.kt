@@ -24,7 +24,10 @@ import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
 import RatingsScreen
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Chat
+import com.example.sherpalink.repository.ProductRepoImplementation
 import com.example.sherpalink.ui.theme.ui.theme.TrendingTripsScreen
+import com.example.sherpalink.viewmodel.ProductViewModel
+
 class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +40,7 @@ class DashboardActivity : ComponentActivity() {
 fun DashboardRoot() {
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val productViewModel = remember { ProductViewModel(ProductRepoImplementation()) }
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBottomBar = currentRoute !in listOf("signin", "signup")
     val routeToIndex = mapOf(
@@ -75,7 +79,7 @@ fun DashboardRoot() {
                 composable("profile") { ProfileScreen(navController) }
                 composable("about") { AboutScreen() }
                 composable("ratings") { RatingsScreen() }
-                composable("tour_package") { TourPackageScreen(navController) }
+                composable("tour_package") { TourPackageScreen(navController, productViewModel) }
                 composable("registration_form") { RegistrationScreen(navController) }
                 composable("guide_booking") { GuideBookingScreen(navController) }
                 composable("notifications") { NotificationScreen(navController) }
