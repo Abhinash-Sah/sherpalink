@@ -14,37 +14,46 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sherpalink">
 
-        <!-- GOOGLE MAPS API KEY -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDb0Z8lGtIrp4pPGTPH1-iPF--6ss2-Ej0" />
-
-        <!-- ONLY LAUNCHER ACTIVITY -->
+        <!-- ADMIN LAUNCHER ACTIVITY -->
         <activity
-            android:name=".auth.AuthCheckActivity"
+            android:name=".admin.AdminLauncherActivity"
             android:exported="true"
+            android:label="@string/title_activity_admin_launcher"
             android:theme="@style/Theme.Sherpalink">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
-        <!-- AUTH SCREENS -->
+        <!-- AUTH CHECK / USER LAUNCHER -->
+        <activity
+            android:name=".auth.AuthCheckActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Sherpalink">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- OTHER AUTH SCREENS -->
         <activity
             android:name=".auth.SignUpActivity"
             android:exported="true" />
-
         <activity
             android:name=".auth.SignInActivity"
             android:exported="true" />
 
-        <!-- MAIN APP -->
+        <!-- MAIN APP DASHBOARD -->
         <activity
             android:name=".DashboardActivity"
             android:exported="false" />
+
+        <!-- GOOGLE MAPS API KEY -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDb0Z8lGtIrp4pPGTPH1-iPF--6ss2-Ej0" />
 
     </application>
 

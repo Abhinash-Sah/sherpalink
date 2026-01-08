@@ -67,20 +67,19 @@ fun TourPackageScreen(
         }
     }
 }
-
 @Composable
 fun TourPackageItem(product: ProductModel, navController: NavController) {
-
+    var expanded by remember { mutableStateOf(false) }
     val isPreview = LocalInspectionMode.current
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 12.dp),
+            .padding(bottom = 12.dp)
+            .clickable { expanded = !expanded },
         shape = RoundedCornerShape(12.dp)
     ) {
         Column {
-
             if (isPreview && product.previewImage != null) {
                 Image(
                     painter = painterResource(product.previewImage!!),
@@ -106,14 +105,15 @@ fun TourPackageItem(product: ProductModel, navController: NavController) {
                 Text("Rs. ${product.price.toInt()}")
                 Text(
                     product.description,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
+                    maxLines = if (expanded) Int.MAX_VALUE else 2,
+                    overflow = if (expanded) TextOverflow.Visible else TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.bodySmall
                 )
             }
         }
     }
 }
+
 
 
 
