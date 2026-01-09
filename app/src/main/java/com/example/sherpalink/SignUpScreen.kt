@@ -1,3 +1,4 @@
+
 package com.example.sherpalink.ui.auth
 
 import androidx.compose.foundation.Image
@@ -19,11 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sherpalink.R
 import com.example.sherpalink.UserModel
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.ui.text.input.VisualTransformation
-
 
 @Composable
 fun SignUpScreen(
@@ -251,30 +247,11 @@ private fun AuthPasswordField(
     onValueChange: (String) -> Unit
 ) {
     var value by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
-
     OutlinedTextField(
         value = value,
-        onValueChange = {
-            value = it
-            onValueChange(it)
-        },
+        onValueChange = { value = it; onValueChange(it) },
         placeholder = { Text(placeholder) },
-        visualTransformation = if (passwordVisible)
-            VisualTransformation.None
-        else
-            PasswordVisualTransformation(),
-        trailingIcon = {
-            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                Icon(
-                    imageVector = if (passwordVisible)
-                        Icons.Default.Visibility
-                    else
-                        Icons.Default.VisibilityOff,
-                    contentDescription = null
-                )
-            }
-        },
+        visualTransformation = PasswordVisualTransformation(),
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
@@ -283,4 +260,3 @@ private fun AuthPasswordField(
         )
     )
 }
-

@@ -1,4 +1,3 @@
-
 package com.example.sherpalink.auth
 
 import android.content.Intent
@@ -11,7 +10,6 @@ import androidx.activity.viewModels
 import com.example.sherpalink.DashboardActivity
 import com.example.sherpalink.repository.UserRepoImplementation
 import com.example.sherpalink.ui.auth.SignInScreen
-import com.example.sherpalink.ui.theme.ui.theme.loginUser
 import com.example.sherpalink.viewmodel.UserViewModel
 
 class SignInActivity : ComponentActivity() {
@@ -43,4 +41,3 @@ class SignInActivity : ComponentActivity() {
         }
     }
 }
-
