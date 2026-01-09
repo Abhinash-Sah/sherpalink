@@ -1,5 +1,7 @@
 package com.example.sherpalink.screens
 
+import android.widget.Toast
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,151 +14,100 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.example.sherpalink.ProductModel
-import com.example.sherpalink.viewmodel.ProductViewModel
-import java.text.NumberFormat
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.rememberNavController
 import com.example.sherpalink.R
-import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.painterResource
-
-
+import com.example.sherpalink.viewmodel.ProductViewModel
 
 @Composable
-fun TourPackageScreen(
-    navController: NavController,
-    productViewModel: Any
-) {
-    val products = when (productViewModel) {
-        is ProductViewModel -> productViewModel.allProducts.observeAsState(emptyList()).value
-        is PreviewProductViewModel -> productViewModel.allProducts.value
-        else -> emptyList()
-    }
+fun TourPackageScreen(navController: NavController, productViewModel: ProductViewModel) {
+    val products by productViewModel.allProducts.observeAsState(emptyList())
+    val loading by productViewModel.loading.observeAsState(false)
 
-    val loading = when (productViewModel) {
-        is ProductViewModel -> productViewModel.loading.observeAsState(false).value
-        is PreviewProductViewModel -> productViewModel.loading.value
-        else -> false
-    }
-
-    // Load products if using real ViewModel
-    if (productViewModel is ProductViewModel) {
-        LaunchedEffect(Unit) {
-            productViewModel.getAllProduct()
-        }
-    }
+    LaunchedEffect(Unit) { productViewModel.getAllProduct() }
 
     Box(modifier = Modifier.fillMaxSize()) {
         when {
             loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            products.isEmpty() -> Text(
-                text = "No tour packages available yet",
-                modifier = Modifier.align(Alignment.Center),
-                style = MaterialTheme.typography.bodyMedium
-            )
+            products.isEmpty() -> Text("No tour packages available", modifier = Modifier.align(Alignment.Center))
             else -> LazyColumn(contentPadding = PaddingValues(16.dp)) {
-                items(products) { product ->
+                items(products, key = { it.productId }) { product ->
                     TourPackageItem(product, navController)
                 }
             }
         }
     }
 }
+
 @Composable
 fun TourPackageItem(product: ProductModel, navController: NavController) {
     var expanded by remember { mutableStateOf(false) }
     val isPreview = LocalInspectionMode.current
+    val context = LocalContext.current
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp)
             .clickable { expanded = !expanded },
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column {
-            if (isPreview && product.previewImage != null) {
-                Image(
-                    painter = painterResource(product.previewImage!!),
-                    contentDescription = product.name,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                AsyncImage(
-                    model = product.image,
-                    contentDescription = product.name,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp),
-                    contentScale = ContentScale.Crop
-                )
+        Column(modifier = Modifier.animateContentSize()) {
+            Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+                if (isPreview && product.previewImage != null) {
+                    Image(
+                        painter = painterResource(product.previewImage!!),
+                        contentDescription = product.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    AsyncImage(
+                        model = product.image.takeIf { it.isNotEmpty() },
+                        contentDescription = product.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
 
-            Column(modifier = Modifier.padding(12.dp)) {
-                Text(product.name, style = MaterialTheme.typography.titleMedium)
-                Text("Rs. ${product.price.toInt()}")
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(product.name, style = MaterialTheme.typography.titleLarge)
+                    Text("Rs. ${product.price.toInt()}", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
                 Text(
                     product.description,
                     maxLines = if (expanded) Int.MAX_VALUE else 2,
-                    overflow = if (expanded) TextOverflow.Visible else TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.bodySmall
+                    overflow = if (expanded) TextOverflow.Visible else TextOverflow.Ellipsis
                 )
+
+                if (expanded) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = {
+                            if (product.productId.isNotEmpty()) {
+                                navController.navigate("tour_details/${product.productId}")
+                            } else Toast.makeText(context, "ID not found", Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.align(Alignment.End)
+                    ) { Text("View Details") }
+                }
             }
         }
     }
-}
-
-
-
-
-class PreviewProductViewModel {
-    val allProducts = mutableStateOf(
-        listOf(
-            ProductModel(
-                productId = "1",
-                name = "Everest Base Camp Trek",
-                price = 25000.0,
-                description = "An amazing trek to the base of the world's highest mountain.",
-                categoryId = "Trek",
-                previewImage = R.drawable.everest
-            ),
-            ProductModel(
-                productId = "2",
-                name = "Pokhara Sightseeing",
-                price = 15000.0,
-                description = "Explore the beautiful lakes and culture of Pokhara.",
-                categoryId = "Tour",
-                previewImage = R.drawable.pokhara
-            ),
-            ProductModel(
-                productId = "3",
-                name = "Chitwan Jungle Safari",
-                price = 18000.0,
-                description = "Experience the wildlife adventure in Chitwan National Park.",
-                categoryId = "Tour",
-                previewImage = R.drawable.chitwan
-            )
-        )
-    )
-    val loading = mutableStateOf(false)
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TourPackageScreenPreview() {
-    val navController = rememberNavController()
-    val viewModel = PreviewProductViewModel()
-
-    TourPackageScreen(
-        navController = navController,
-        productViewModel = viewModel
-    )
 }

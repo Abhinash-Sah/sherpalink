@@ -1,30 +1,48 @@
 package com.example.sherpalink
 
+import RatingsScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavType
-import androidx.navigation.compose.*
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.sherpalink.screens.*
-import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
-import RatingsScreen
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Chat
 import com.example.sherpalink.repository.ProductRepoImplementation
+import com.example.sherpalink.screens.AddScreen
+import com.example.sherpalink.screens.FullScreenImage
+import com.example.sherpalink.screens.GuideBookingScreen
+import com.example.sherpalink.screens.HomeScreen
+import com.example.sherpalink.screens.LocationScreen
+import com.example.sherpalink.screens.MessageScreen
+import com.example.sherpalink.screens.NotificationScreen
+import com.example.sherpalink.screens.ProfileScreen
+import com.example.sherpalink.screens.RegistrationScreen
+import com.example.sherpalink.screens.TourDetailsScreen
+import com.example.sherpalink.screens.TourPackageScreen
+import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
 import com.example.sherpalink.ui.theme.ui.theme.TrendingTripsScreen
 import com.example.sherpalink.viewmodel.ProductViewModel
 
@@ -84,6 +102,13 @@ fun DashboardRoot() {
                 composable("guide_booking") { GuideBookingScreen(navController) }
                 composable("notifications") { NotificationScreen(navController) }
                 composable("trending_trips_screen") { TrendingTripsScreen(navController) }
+                composable(
+                    "tour_details/{productId}",
+                    arguments = listOf(navArgument("productId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val productId = backStackEntry.arguments?.getString("productId") ?: ""
+                    TourDetailsScreen(navController, productViewModel, productId)
+                }
                 composable(
                     "full_image/{index}",
                     arguments = listOf(navArgument("index") { type = NavType.IntType })

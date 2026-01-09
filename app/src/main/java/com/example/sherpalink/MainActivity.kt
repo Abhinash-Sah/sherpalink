@@ -16,6 +16,8 @@ import com.example.sherpalink.viewmodel.ProductViewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val config = mapOf("dnenna9ii" to "sherpalink")
+        try { com.cloudinary.android.MediaManager.init(this, config) } catch (e: Exception) {}
         setContent {
             val productViewModel = ProductViewModel(ProductRepoImplementation())
             AppNavHost(productViewModel)
