@@ -2,19 +2,22 @@
 <resources>
 
     <!-- Main app theme -->
-    <style name="Theme.Sherpalink" parent="Theme.Material.Light.NoActionBar" />
+    <style name="Theme.SherpaLink" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- App-level theme customizations -->
+    </style>
 
     <!-- Splash screen theme -->
-    <style name="Theme.Sherpalink.Splash" parent="Theme.SplashScreen">
-        <!-- Background color of splash -->
+    <style name="Theme.SherpaLink.Splash" parent="Theme.SplashScreen">
+
+        <!-- Splash background -->
         <item name="windowSplashScreenBackground">#FFFFFF</item>
 
         <!-- Splash icon -->
-        <!-- Use ic_launcher temporarily to avoid resource linking errors -->
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
 
-        <!-- App theme after splash -->
-        <item name="postSplashScreenTheme">@style/Theme.Sherpalink</item>
+        <!-- Theme after splash -->
+        <item name="postSplashScreenTheme">@style/Theme.SherpaLink</item>
+
     </style>
 
 </resources>
