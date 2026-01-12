@@ -7,12 +7,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.room.util.copy
 import com.example.sherpalink.DashboardActivity
 import com.example.sherpalink.UserModel
 import com.example.sherpalink.repository.UserRepoImplementation
 import com.example.sherpalink.ui.auth.SignUpScreen
-import com.example.sherpalink.ui.theme.ui.theme.ui.theme.SherpalinkTheme
 import com.example.sherpalink.viewmodel.UserViewModel
 
 class SignUpActivity : ComponentActivity() {
@@ -26,48 +24,30 @@ class SignUpActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            SherpalinkTheme {
-                SignUpScreen(
-                    onSignUpClick = { email, password, userModel ->
-
-                        // Null check for userModel
-                        if (userModel == null) {
-                            Toast.makeText(this, "User data missing", Toast.LENGTH_SHORT).show()
-                            return@SignUpScreen
-                        }
-
-                        // Safe copy usage
-                        val safeUserModel = userModel
-
-                        // Register the user
-                        userViewModel.register(email, password) { success, msg, userId ->
-                            if (success) {
-                                val userWithId = safeUserModel.copy(
-                                    userId = userId,
-                                    password = password
-                                )
-
-                                // Add user to database
-                                userViewModel.addUserToDatabase(userId, userWithId) { dbSuccess, dbMsg ->
-                                    if (dbSuccess) {
-                                        Toast.makeText(this, "Registration Successful!", Toast.LENGTH_SHORT).show()
-                                        startActivity(Intent(this, DashboardActivity::class.java))
-                                        finish()
-                                    } else {
-                                        Toast.makeText(this, "Database Error: $dbMsg", Toast.LENGTH_SHORT).show()
-                                    }
+            SignUpScreen(
+                onSignUpClick = { email, password, userModel ->
+                    userViewModel.register(email, password) { success, msg, userId ->
+                        if (success) {
+                            val userWithId = userModel.copy(userId = userId, password = password)
+                            userViewModel.addUserToDatabase(userId, userWithId) { dbSuccess, dbMsg ->
+                                if (dbSuccess) {
+                                    Toast.makeText(this, "Registration Successful!", Toast.LENGTH_SHORT).show()
+                                    startActivity(Intent(this, DashboardActivity::class.java))
+                                    finish()
+                                } else {
+                                    Toast.makeText(this, "Database Error: $dbMsg", Toast.LENGTH_SHORT).show()
                                 }
-                            } else {
-                                Toast.makeText(this, "Registration Error: $msg", Toast.LENGTH_SHORT).show()
                             }
+                        } else {
+                            Toast.makeText(this, "Registration Error: $msg", Toast.LENGTH_SHORT).show()
                         }
-                    },
-                    onSignInClick = {
-                        startActivity(Intent(this, SignInActivity::class.java))
-                        finish()
                     }
-                )
-            }
+                },
+                onSignInClick = {
+                    startActivity(Intent(this, SignInActivity::class.java))
+                    finish()
+                }
+            )
         }
     }
 }

@@ -6,7 +6,8 @@ data class ProductModel(
     var price: Double = 0.0,        // Tour price
     var description: String = "",   // Tour details
     var categoryId: String = "",    // Trek / Tour / Region
-    var image: String = ""          // Image URL
+    var image: String = "",
+    var previewImage: Int? = null
 ) {
 
     fun toMap(): Map<String, Any?> {

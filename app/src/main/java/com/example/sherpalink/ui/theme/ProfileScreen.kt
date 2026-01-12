@@ -33,9 +33,11 @@ fun ProfileScreen(
 ) {
     val user = viewModel.user
     val loading = viewModel.loading
+    val context = LocalContext.current
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
-    val context = LocalContext.current
+    var showResetDialog by remember { mutableStateOf(false) }
+    var resetMessage by remember { mutableStateOf("") }
 
     LaunchedEffect(viewModel.user) {
         val uid = viewModel.getCurrentUser()?.uid
@@ -60,12 +62,19 @@ fun ProfileScreen(
 
     ProfileScreenContent(
         user = user,
+        viewModel = viewModel,
         onEditClick = { showEditDialog = true },
         onDeleteClick = { showDeleteConfirm = true },
         showEditDialog = showEditDialog,
         onDismissEdit = { showEditDialog = false },
         onSaveEdit = { updatedUser ->
             viewModel.updateProfile(updatedUser.userId, updatedUser) { _, _ -> }
+        },
+        onResetPassword = { email ->
+            viewModel.forgetPassword(email) { success, message ->
+                resetMessage = message
+                showResetDialog = true
+            }
         }
     )
 
@@ -97,16 +106,32 @@ fun ProfileScreen(
             }
         )
     }
+
+    // ------------------ Reset Password Dialog ------------------
+    if (showResetDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetDialog = false },
+            title = { Text("Reset Password") },
+            text = { Text(resetMessage) },
+            confirmButton = {
+                TextButton(onClick = { showResetDialog = false }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 }
 
 @Composable
 fun ProfileScreenContent(
     user: UserModel,
+    viewModel: UserViewModel,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     showEditDialog: Boolean,
     onDismissEdit: () -> Unit,
-    onSaveEdit: (UserModel) -> Unit
+    onSaveEdit: (UserModel) -> Unit,
+    onResetPassword: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -147,14 +172,25 @@ fun ProfileScreenContent(
             shape = RoundedCornerShape(14.dp),
             modifier = Modifier.fillMaxWidth(0.85f).height(52.dp)
         ) { Text("Delete Account", color = Color.White) }
-    }
 
-    if (showEditDialog) {
-        EditProfileDialog(
-            user = user,
-            onDismiss = onDismissEdit,
-            onSave = onSaveEdit
-        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // -------- Reset Password Button --------
+        Button(
+            onClick = { onResetPassword(user.email) },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D1B2A)),
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.fillMaxWidth(0.85f).height(52.dp)
+        ) { Text("Reset Password", color = Color.White) }
+
+        // ------------------ Edit Dialog ------------------
+        if (showEditDialog) {
+            EditProfileDialog(
+                user = user,
+                onDismiss = onDismissEdit,
+                onSave = onSaveEdit
+            )
+        }
     }
 }
 
@@ -218,10 +254,12 @@ fun ProfileScreenPreview() {
 
     ProfileScreenContent(
         user = mockUser,
+        viewModel = UserViewModel(UserRepoImplementation()),
         onEditClick = {},
         onDeleteClick = {},
         showEditDialog = false,
         onDismissEdit = {},
-        onSaveEdit = {}
+        onSaveEdit = {},
+        onResetPassword = {}
     )
 }
