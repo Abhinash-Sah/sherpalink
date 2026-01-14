@@ -23,6 +23,7 @@ import com.example.sherpalink.screens.*
 import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
 import RatingsScreen
 import com.example.sherpalink.ui.theme.ui.theme.TrendingTripsScreen
+
 class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
