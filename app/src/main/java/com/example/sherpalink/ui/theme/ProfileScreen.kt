@@ -1,10 +1,13 @@
-package com.example.sherpalink.screens
+package com.example.sherpalink.ui.theme
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -12,189 +15,171 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import com.example.sherpalink.R
+import androidx.navigation.NavHostController
+import coil3.compose.rememberAsyncImagePainter
 import com.example.sherpalink.UserModel
-import com.example.sherpalink.repository.UserRepoImplementation
 import com.example.sherpalink.viewmodel.UserViewModel
 
 @Composable
 fun ProfileScreen(
-    navController: NavController,
-    viewModel: UserViewModel = viewModel(
-        factory = UserViewModel.UserViewModelFactory(UserRepoImplementation())
-    )
+    user: UserModel?,
+    userViewModel: UserViewModel,
+    navController: NavHostController
 ) {
-    val user = viewModel.user
-    val loading = viewModel.loading
     val context = LocalContext.current
     var showEditDialog by remember { mutableStateOf(false) }
-    var showDeleteConfirm by remember { mutableStateOf(false) }
-    var showResetDialog by remember { mutableStateOf(false) }
-    var resetMessage by remember { mutableStateOf("") }
+    var showPasswordDialog by remember { mutableStateOf(false) }
+    var password by remember { mutableStateOf("") }
 
-    LaunchedEffect(viewModel.user) {
-        val uid = viewModel.getCurrentUser()?.uid
-        if (uid != null && viewModel.user == null) {
-            viewModel.getUserById(uid)
+    // Safety fetch if user is null
+    LaunchedEffect(Unit) {
+        if (user == null) {
+            userViewModel.getCurrentUser()?.uid
+                ?.let { userViewModel.getUserById(it) }
         }
     }
 
-    if (loading) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    // Loading spinner
+    if (user == null || userViewModel.loading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
             CircularProgressIndicator()
         }
         return
     }
 
-    if (user == null) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("User data not found")
-        }
-        return
-    }
-
-    ProfileScreenContent(
-        user = user,
-        viewModel = viewModel,
-        onEditClick = { showEditDialog = true },
-        onDeleteClick = { showDeleteConfirm = true },
-        showEditDialog = showEditDialog,
-        onDismissEdit = { showEditDialog = false },
-        onSaveEdit = { updatedUser ->
-            viewModel.updateProfile(updatedUser.userId, updatedUser) { _, _ -> }
-        },
-        onResetPassword = { email ->
-            viewModel.forgetPassword(email) { success, message ->
-                resetMessage = message
-                showResetDialog = true
+    // Image picker
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            userViewModel.uploadProfileImage(it) { _, msg ->
+                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
             }
         }
-    )
+    }
 
-    // ------------------ Delete Confirmation Dialog ------------------
-    if (showDeleteConfirm) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Profile Image
+        if (user.profileImageUrl.isNotEmpty()) {
+            Image(
+                painter = rememberAsyncImagePainter(user.profileImageUrl),
+                contentDescription = "Profile Image",
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .clickable { launcher.launch("image/*") }
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .background(Color.Gray)
+                    .clickable { launcher.launch("image/*") },
+                contentAlignment = Alignment.Center
+            ) {
+                Text("No Image", color = Color.White)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("${user.firstName} ${user.lastName}", style = MaterialTheme.typography.titleMedium)
+        Text(user.email, style = MaterialTheme.typography.bodyMedium)
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Edit Profile Button
+        Button(onClick = { showEditDialog = true }, modifier = Modifier.fillMaxWidth()) {
+            Text("Edit Profile")
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Reset Password Button
+        Button(
+            onClick = {
+                userViewModel.getCurrentUser()?.email?.let {
+                    userViewModel.repoForgetPassword(it) { _, msg ->
+                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Reset Password")
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Delete Account Button
+        Button(
+            onClick = { showPasswordDialog = true },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+        ) {
+            Text("Delete Account")
+        }
+    }
+
+    // Edit Profile Dialog
+    if (showEditDialog) {
+        EditProfileDialog(
+            user = user,
+            onDismiss = { showEditDialog = false },
+            onSave = { updatedUser ->
+                userViewModel.updateUser(updatedUser) { success, msg ->
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                    if (success) showEditDialog = false
+                }
+            }
+        )
+    }
+
+    // Password Confirmation Dialog for Delete
+    if (showPasswordDialog) {
         AlertDialog(
-            onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete Account") },
-            text = { Text("Are you sure you want to delete your account? This action cannot be undone.") },
+            onDismissRequest = { showPasswordDialog = false },
+            title = { Text("Confirm Account Deletion") },
+            text = {
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Enter your password") },
+                    singleLine = true
+                )
+            },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.deleteAccount(user.userId) { success, message ->
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    userViewModel.deleteAccount(password) { success, msg ->
+                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                         if (success) {
-                            navController.navigate("login_screen") {
-                                popUpTo("home") { inclusive = true }
+                            navController.navigate("sign_in") {
+                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
                             }
                         }
                     }
-                    showDeleteConfirm = false
+                    showPasswordDialog = false
                 }) {
-                    Text("Delete", color = Color.Red)
+                    Text("Delete")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) {
+                TextButton(onClick = { showPasswordDialog = false }) {
                     Text("Cancel")
                 }
             }
         )
     }
-
-    // ------------------ Reset Password Dialog ------------------
-    if (showResetDialog) {
-        AlertDialog(
-            onDismissRequest = { showResetDialog = false },
-            title = { Text("Reset Password") },
-            text = { Text(resetMessage) },
-            confirmButton = {
-                TextButton(onClick = { showResetDialog = false }) {
-                    Text("OK")
-                }
-            }
-        )
-    }
 }
 
-@Composable
-fun ProfileScreenContent(
-    user: UserModel,
-    viewModel: UserViewModel,
-    onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit,
-    showEditDialog: Boolean,
-    onDismissEdit: () -> Unit,
-    onSaveEdit: (UserModel) -> Unit,
-    onResetPassword: (String) -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(user.role.uppercase(), fontSize = 18.sp, fontWeight = FontWeight.Medium)
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
-            contentDescription = "Profile Image",
-            modifier = Modifier
-                .size(150.dp)
-                .clip(CircleShape)
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text("${user.firstName} ${user.lastName}", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(user.email)
-        Spacer(modifier = Modifier.height(28.dp))
-
-        Button(
-            onClick = onEditClick,
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier.fillMaxWidth(0.85f).height(52.dp)
-        ) { Text("Details", color = Color.White) }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Button(
-            onClick = onDeleteClick,
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD9362B)),
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier.fillMaxWidth(0.85f).height(52.dp)
-        ) { Text("Delete Account", color = Color.White) }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // -------- Reset Password Button --------
-        Button(
-            onClick = { onResetPassword(user.email) },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D1B2A)),
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier.fillMaxWidth(0.85f).height(52.dp)
-        ) { Text("Reset Password", color = Color.White) }
-
-        // ------------------ Edit Dialog ------------------
-        if (showEditDialog) {
-            EditProfileDialog(
-                user = user,
-                onDismiss = onDismissEdit,
-                onSave = onSaveEdit
-            )
-        }
-    }
-}
-
-// ------------------------------ Edit Dialog ------------------------------
 @Composable
 fun EditProfileDialog(
     user: UserModel,
@@ -228,38 +213,12 @@ fun EditProfileDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                onSave(user.copy(firstName = firstName, lastName = lastName, email = email))
-                onDismiss()
-            }) { Text("Save") }
+            TextButton(
+                onClick = { onSave(user.copy(firstName = firstName, lastName = lastName, email = email)) }
+            ) { Text("Save") }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("Cancel") }
         }
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ProfileScreenPreview() {
-    val mockUser = UserModel(
-        userId = "1",
-        firstName = "Saksham",
-        lastName = "Ban",
-        email = "saksham@example.com",
-        dob = "2000-01-01",
-        gender = "Male",
-        role = "user"
-    )
-
-    ProfileScreenContent(
-        user = mockUser,
-        viewModel = UserViewModel(UserRepoImplementation()),
-        onEditClick = {},
-        onDeleteClick = {},
-        showEditDialog = false,
-        onDismissEdit = {},
-        onSaveEdit = {},
-        onResetPassword = {}
     )
 }

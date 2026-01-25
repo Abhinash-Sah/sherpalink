@@ -15,7 +15,7 @@ import com.example.sherpalink.viewmodel.UserViewModel
 class SignInActivity : ComponentActivity() {
 
     private val userViewModel: UserViewModel by viewModels {
-        UserViewModel.UserViewModelFactory(UserRepoImplementation())
+        UserViewModel.UserViewModelFactory(UserRepoImplementation(this))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,6 +35,7 @@ class SignInActivity : ComponentActivity() {
                     }
                 },
                 onSignUpClick = {
+                    // Navigate to SignUpActivity
                     startActivity(Intent(this, SignUpActivity::class.java))
                 }
             )

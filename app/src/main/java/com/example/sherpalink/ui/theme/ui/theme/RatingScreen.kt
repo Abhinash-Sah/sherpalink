@@ -1,8 +1,12 @@
+package com.example.sherpalink.ui.theme
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,7 +27,7 @@ data class Review(
     val body: String,
     val reviewerName: String,
     val date: String,
-    val avatarRes: Int // drawable resource ID
+    val avatarRes: Int // drawable resource
 )
 
 @Composable
@@ -35,7 +39,7 @@ fun RatingsScreen() {
             body = "The guide was very knowledgeable and helpful throughout the trip.",
             reviewerName = "Alice",
             date = "Jan 1, 2026",
-            avatarRes = com.example.sherpalink.R.drawable.outline_rate_review_24
+            avatarRes = R.drawable.outline_article_person_24 // use a valid drawable
         ),
         Review(
             rating = 4,
@@ -43,33 +47,34 @@ fun RatingsScreen() {
             body = "Smooth booking and very friendly guide.",
             reviewerName = "Bob",
             date = "Dec 28, 2025",
-            avatarRes = R.drawable.outline_rate_review_24
+            avatarRes = R.drawable.outline_article_person_24
         )
     )
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            text = "Rating & Review",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        item {
+            Text(
+                text = "Rating & Review",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
 
-        reviews.forEach { review ->
+        items(reviews) { review ->
             Card(
                 shape = RoundedCornerShape(8.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
 
-                    // Star rating row
+                    // Star rating
                     Row {
                         repeat(5) { index ->
                             val color = if (index < review.rating) Color.Yellow else Color.Gray
@@ -79,21 +84,11 @@ fun RatingsScreen() {
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Title & body
-                    Text(
-                        text = review.title,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                    Text(
-                        text = review.body,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
+                    Text(review.title, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text(review.body, fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp))
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Reviewer info
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Image(
                             painter = painterResource(id = review.avatarRes),

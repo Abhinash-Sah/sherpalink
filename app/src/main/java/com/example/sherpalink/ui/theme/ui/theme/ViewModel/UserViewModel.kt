@@ -1,13 +1,15 @@
 package com.example.sherpalink.viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import android.net.Uri
+import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.sherpalink.UserModel
 import com.example.sherpalink.repository.UserRepo
+import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.FirebaseDatabase
 
 class UserViewModel(private val repo: UserRepo) : ViewModel() {
 
@@ -20,17 +22,16 @@ class UserViewModel(private val repo: UserRepo) : ViewModel() {
     var loading by mutableStateOf(false)
         private set
 
+    // ------------------- AUTH -------------------
+
     fun login(email: String, password: String, callback: (Boolean, String) -> Unit) {
         loading = true
         repo.login(email, password) { success, message ->
             if (success) {
                 val uid = repo.getCurrentUser()?.uid
                 if (uid != null) {
-                    repo.getUserById(uid) { successUser, _, data ->
-                        loading = false
-                        user = if (successUser) data else null
-                        callback(successUser, if (successUser) "Login successful" else "User data not found")
-                    }
+                    getUserById(uid)
+                    callback(true, "Login successful")
                 } else {
                     loading = false
                     callback(false, "Failed to get current user")
@@ -42,58 +43,27 @@ class UserViewModel(private val repo: UserRepo) : ViewModel() {
         }
     }
 
-
-    fun register(email: String, password: String, callback: (Boolean, String, String) -> Unit) {
+    fun register(email: String, password: String, callback: (Boolean, String, String) -> Unit) =
         repo.register(email, password, callback)
-    }
 
-    fun addUserToDatabase(userId: String, model: UserModel, callback: (Boolean, String) -> Unit) {
+    fun logOut(callback: (Boolean, String) -> Unit) = repo.logOut(callback)
+
+    fun getCurrentUser() = repo.getCurrentUser()
+
+    // ------------------- DATABASE -------------------
+
+    fun addUserToDatabase(userId: String, model: UserModel, callback: (Boolean, String) -> Unit) =
         repo.addUserToDatabase(userId, model, callback)
-    }
-
-    fun updateProfile(userId: String, model: UserModel, callback: (Boolean, String) -> Unit) {
-        repo.updateProfile(userId, model, callback)
-    }
-
-    fun deleteAccount(userId: String, onComplete: (Boolean, String) -> Unit) {
-        loading = true
-        // First delete user data from Realtime Database
-        repo.deleteAccount(userId) { success, message ->
-            if (success) {
-                // Also delete FirebaseAuth user
-                val currentUser = repo.getCurrentUser()
-                if (currentUser != null) {
-                    currentUser.delete()
-                        .addOnSuccessListener {
-                            loading = false
-                            user = null
-                            onComplete(true, "Account deleted successfully")
-                        }
-                        .addOnFailureListener { e ->
-                            loading = false
-                            onComplete(false, "Data deleted but failed to delete auth: ${e.message}")
-                        }
-                } else {
-                    loading = false
-                    onComplete(true, "Account deleted successfully")
-                }
-            } else {
-                loading = false
-                onComplete(false, "Failed to delete account: $message")
-            }
-        }
-    }
-
 
     fun getUserById(userId: String) {
         loading = true
         repo.getUserById(userId) { success, _, data ->
             loading = false
-            user = if (success) data else null
+            user = if (success && data != null) data else null
         }
     }
 
-    fun getAllUser() {
+    fun getAllUsers() {
         loading = true
         repo.getAllUser { success, _, data ->
             loading = false
@@ -101,17 +71,75 @@ class UserViewModel(private val repo: UserRepo) : ViewModel() {
         }
     }
 
+    fun uploadProfileImage(imageUri: Uri, callback: (Boolean, String) -> Unit) {
+        val uid = repo.getCurrentUser()?.uid
+        if (uid == null) {
+            callback(false, "User not logged in")
+            return
+        }
 
-    fun getCurrentUser(): FirebaseUser? = repo.getCurrentUser()
+        loading = true
+        repo.uploadProfileImage(uid, imageUri) { success, message ->
+            if (success) getUserById(uid)
+            loading = false
+            callback(success, message)
+        }
+    }
+    fun repoForgetPassword(email: String, callback: (Boolean, String) -> Unit) {
+        repo.forgetPassword(email, callback)
+    }
 
-    fun logOut(callback: (Boolean, String) -> Unit) = repo.logOut(callback)
+    fun deleteAccount(password: String, callback: (Boolean, String) -> Unit) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            callback(false, "User not logged in")
+            return
+        }
 
-    fun forgetPassword(email: String, callback: (Boolean, String) -> Unit) = repo.forgetPassword(email, callback)
+        // 1️⃣ Reauthenticate
+        val credential = EmailAuthProvider.getCredential(user.email!!, password)
+        user.reauthenticate(credential)
+            .addOnSuccessListener {
+                // 2️⃣ Delete from Firebase Auth
+                user.delete()
+                    .addOnSuccessListener {
+                        // 3️⃣ Delete from Realtime Database
+                        FirebaseDatabase.getInstance().getReference("users")
+                            .child(user.uid)
+                            .removeValue()
+                            .addOnSuccessListener {
+                                callback(true, "Account deleted successfully")
+                            }
+                            .addOnFailureListener { e ->
+                                callback(false, e.message ?: "Failed to delete user data")
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        callback(false, e.message ?: "Failed to delete Auth account")
+                    }
+            }
+            .addOnFailureListener { e ->
+                callback(false, e.message ?: "Reauthentication required")
+            }
+    }
 
-    class UserViewModelFactory(
-        private val repo: UserRepo
-    ) : ViewModelProvider.Factory {
+    fun updateUser(updatedUser: UserModel, callback: (Boolean, String) -> Unit) {
+        val uid = repo.getCurrentUser()?.uid
+        if (uid == null) {
+            callback(false, "User not logged in")
+            return
+        }
 
+        loading = true
+        repo.updateProfile(uid, updatedUser) { success, message ->
+            if (success) {
+                // Update the local state so the UI refreshes
+                user = updatedUser
+            }
+            loading = false
+            callback(success, message)
+        }
+    }    class UserViewModelFactory(private val repo: UserRepo) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")

@@ -16,7 +16,7 @@ import com.example.sherpalink.viewmodel.UserViewModel
 class SignUpActivity : ComponentActivity() {
 
     private val userViewModel: UserViewModel by viewModels {
-        UserViewModel.UserViewModelFactory(UserRepoImplementation())
+        UserViewModel.UserViewModelFactory(UserRepoImplementation(this))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -15,7 +15,6 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:fullBackupContent">
 
-        <!-- Launch with Auth Check -->
         <activity
             android:name=".auth.AuthCheckActivity"
             android:exported="true"

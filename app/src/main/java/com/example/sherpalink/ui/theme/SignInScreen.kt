@@ -15,14 +15,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sherpalink.R
 
 @Composable
 fun SignInScreen(
-    onSignInClick: (String, String) -> Unit,
+    onSignInClick: (email: String, password: String) -> Unit,
     onSignUpClick: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
@@ -123,9 +122,7 @@ fun SignInScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF0D1B2A)
-                ),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D1B2A)),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Sign In", fontSize = 16.sp)

@@ -8,9 +8,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.example.sherpalink.ProductModel
-import com.example.sherpalink.viewmodel.ProductViewModel
 
 @Composable
 fun AdminEditTourScreen(navController: androidx.navigation.NavHostController, productViewModel: com.example.sherpalink.viewmodel.ProductViewModel, productId: String) {

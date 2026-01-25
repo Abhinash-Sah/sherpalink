@@ -7,41 +7,37 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sherpalink.repository.ProductRepoImplementation
+import com.example.sherpalink.repository.UserRepoImplementation
 import com.example.sherpalink.ui.auth.SignInScreen
 import com.example.sherpalink.ui.auth.SignUpScreen
 import com.example.sherpalink.viewmodel.ProductViewModel
+import com.example.sherpalink.viewmodel.UserViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
 
-    // ✅ ViewModel created OUTSIDE compose
-    private val productViewModel by lazy {
-        ProductViewModel(ProductRepoImplementation())
-    }
+    private val productViewModel by lazy { ProductViewModel(ProductRepoImplementation()) }
+    private val userViewModel by lazy { UserViewModel(UserRepoImplementation(this)) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             val navController = rememberNavController()
-
-            // ✅ Firebase login state
             val currentUser = FirebaseAuth.getInstance().currentUser
-            val startDestination =
-                if (currentUser != null) "dashboard" else "sign_in"
+            val startDestination = if (currentUser != null) "dashboard" else "sign_in"
 
-            NavHost(
-                navController = navController,
-                startDestination = startDestination
-            ) {
+            NavHost(navController = navController, startDestination = startDestination) {
 
-                // -------- SIGN IN --------
                 composable("sign_in") {
                     SignInScreen(
                         onSignInClick = { email, password ->
-                            // TODO: Firebase sign-in logic
-                            navController.navigate("dashboard") {
-                                popUpTo("sign_in") { inclusive = true }
+                            userViewModel.login(email, password) { success, _ ->
+                                if (success) {
+                                    navController.navigate("dashboard") {
+                                        popUpTo("sign_in") { inclusive = true }
+                                    }
+                                }
                             }
                         },
                         onSignUpClick = {
@@ -50,13 +46,19 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                // -------- SIGN UP --------
                 composable("signup") {
                     SignUpScreen(
                         onSignUpClick = { email, password, user ->
-                            // TODO: Firebase sign-up logic
-                            navController.navigate("dashboard") {
-                                popUpTo("signup") { inclusive = true }
+                            userViewModel.register(email, password) { success, _, uid ->
+                                if (success && uid != null) {
+                                    userViewModel.addUserToDatabase(uid, user) { dbSuccess, _ ->
+                                        if (dbSuccess) {
+                                            navController.navigate("dashboard") {
+                                                popUpTo("signup") { inclusive = true }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         },
                         onSignInClick = {
@@ -67,10 +69,10 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                // -------- DASHBOARD --------
                 composable("dashboard") {
                     DashboardRoot(
                         productViewModel = productViewModel,
+                        userViewModel = userViewModel,
                         navController = navController
                     )
                 }
