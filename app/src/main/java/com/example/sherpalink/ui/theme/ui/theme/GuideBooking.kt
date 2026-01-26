@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 
 /* ---------------- MOCK GUIDE DATA ---------------- */
@@ -39,7 +40,7 @@ val sampleGuides = listOf(
 
 /* ---------------- MAIN UI ---------------- */
 @Composable
-fun GuideBookingSimpleUI() {
+fun GuideBookingSimplePreview(navController: NavHostController) {
     var selectedGuide by remember { mutableStateOf<Guide?>(null) }
 
     if (selectedGuide == null) {
@@ -159,5 +160,5 @@ fun RatingStars(rating: Float, size: Int = 16) {
 @Preview(showBackground = true)
 @Composable
 fun GuideBookingSimplePreview() {
-    GuideBookingSimpleUI()
+    GuideBookingSimplePreview()
 }

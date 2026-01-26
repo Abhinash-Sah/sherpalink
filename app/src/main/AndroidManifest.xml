@@ -1,17 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <meta-data
-        android:name="com.google.android.geo.API_KEY"
-        android:value="YOUR_API_KEY" />
-
-    <!-- Location Permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission-sdk-23 android:name="android.permission.CAMERA" />
-
 
     <application
         android:allowBackup="true"
@@ -24,42 +19,27 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:fullBackupContent">
 
-        <activity
-            android:name=".auth.AuthCheckActivity"
-            android:exported="true"
-            android:label="@string/title_activity_sign_in_activity.kt"
-            android:theme="@style/Theme.Sherpalink">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".MainActivity" android:exported="true"/>
-        <activity android:name=".DashboardActivity" android:exported="true"/>
-        <activity android:name=".auth.SignInActivity" android:exported="true"/>
-        <activity android:name=".auth.SignUpActivity" android:exported="true"/>
-        <activity android:name=".admin.AdminLauncherActivity" android:exported="true"/>
-
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_ACTUAL_API_KEY"/>
-        <!-- GOOGLE MAPS API KEY (MUST be inside application) -->
+        <!-- Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDb0Z8lGtIrp4pPGTPH1-iPF--6ss2-Ej0"/>
 
-        <!-- Launcher activity -->
+        <!-- Launcher Activity -->
         <activity
             android:name=".DashboardActivity"
             android:exported="true">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
+
+        <!-- Other activities -->
+        <activity android:name=".auth.AuthCheckActivity" android:exported="true" android:theme="@style/Theme.Sherpalink"/>
+        <activity android:name=".MainActivity" android:exported="true"/>
+        <activity android:name=".auth.SignInActivity" android:exported="true"/>
+        <activity android:name=".auth.SignUpActivity" android:exported="true"/>
+        <activity android:name=".admin.AdminLauncherActivity" android:exported="true"/>
 
     </application>
 </manifest>

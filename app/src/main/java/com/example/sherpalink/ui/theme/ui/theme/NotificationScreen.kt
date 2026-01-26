@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 
 class NotificationScreenActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,7 +29,7 @@ class NotificationScreenActivity : ComponentActivity() {
 }
 
 @Composable
-fun NotificationScreen() {
+fun NotificationScreen(navController: NavController? = null) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -36,7 +37,6 @@ fun NotificationScreen() {
             .padding(16.dp)
     ) {
 
-        // Title
         Text(
             text = "Activity",
             fontSize = 24.sp,
@@ -112,7 +112,7 @@ fun NotificationItem(
 
         if (showButton) {
             Button(
-                onClick = {},
+                onClick = { /* Can use navController?.navigate("some_route") */ },
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Black
@@ -142,5 +142,5 @@ fun NotificationItem(
 @Preview(showBackground = true)
 @Composable
 fun NotificationScreenPreview() {
-    NotificationScreen()
+    NotificationScreen() // ✅ Works now because navController is optional
 }
