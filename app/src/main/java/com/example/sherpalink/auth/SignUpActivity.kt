@@ -8,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import com.example.sherpalink.DashboardActivity
-import com.example.sherpalink.UserModel
 import com.example.sherpalink.repository.UserRepoImplementation
 import com.example.sherpalink.ui.auth.SignUpScreen
 import com.example.sherpalink.viewmodel.UserViewModel

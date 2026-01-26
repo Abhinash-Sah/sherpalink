@@ -22,6 +22,8 @@ import com.example.sherpalink.screens.*
 import com.example.sherpalink.ui.theme.ProfileScreen
 import com.example.sherpalink.ui.theme.RatingsScreen
 import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
+import RatingsScreen
+import com.example.sherpalink.ui.guide.GuideBookingSimplePreview
 import com.example.sherpalink.ui.theme.ui.theme.TrendingTripsScreen
 import com.example.sherpalink.viewmodel.ProductViewModel
 import com.example.sherpalink.viewmodel.UserViewModel
@@ -71,6 +73,7 @@ fun DashboardRoot(
         "list" to 3,
         "profile" to 4
     )
+
     val selectedTab = routeToIndex[currentRoute] ?: 0
 
     Scaffold(
@@ -114,6 +117,10 @@ fun DashboardRoot(
 
                 composable("about") { AboutScreen() }
                 composable("ratings") { RatingsScreen() }
+                composable("tour_package") { TourPackageScreen(navController) }
+                composable("registration_form") { NotificationScreen() }
+                composable("guide_booking") { GuideBookingSimplePreview() }
+                composable("notifications") { NotificationScreen() }
 
                 composable(
                     "tour_details/{productId}",
@@ -128,6 +135,23 @@ fun DashboardRoot(
                 composable("guide_booking") { GuideBookingScreen(navController) }
                 composable("notifications") { NotificationScreen(navController) }
                 composable("trending_trips_screen") { TrendingTripsScreen(navController) }
+                composable(
+                    "full_image/{index}",
+                    arguments = listOf(navArgument("index") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val index = backStackEntry.arguments?.getInt("index") ?: 0
+                    val images = listOf(
+                        R.drawable.image1,
+                        R.drawable.image2,
+                        R.drawable.image3
+                    )
+                    val safeIndex = index.coerceIn(images.indices)
+
+                    FullScreenImage(
+                        imageRes = images[safeIndex],
+                        onBack = { navController.popBackStack() }
+                    )
+                }
             }
         }
     }
@@ -155,4 +179,10 @@ fun BottomMenuBar(
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DashboardPreview() {
+    DashboardRoot()
 }
