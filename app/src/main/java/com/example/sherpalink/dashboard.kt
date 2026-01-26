@@ -75,9 +75,9 @@ fun DashboardRoot() {
                 composable("about") { AboutScreen() }
                 composable("ratings") { RatingsScreen() }
                 composable("tour_package") { TourPackageScreen(navController) }
-                composable("registration_form") { RegistrationScreen(navController) }
+                composable("registration_form") { NotificationScreen() }
                 composable("guide_booking") { GuideBookingSimplePreview() }
-                composable("notifications") { NotificationScreen(navController) }
+                composable("notifications") { NotificationScreen() }
                 composable("trending_trips_screen") { TrendingTripsScreen(navController) }
                 composable(
                     "full_image/{index}",

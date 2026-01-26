@@ -77,5 +77,12 @@ dependencies {
 
     // ML Kit (FREE mountain detection)
     implementation("com.google.mlkit:image-labeling:17.0.7")
+    // CameraX
+    implementation("androidx.camera:camera-camera2:1.3.1")
+    implementation("androidx.camera:camera-lifecycle:1.3.1")
+    implementation("androidx.camera:camera-view:1.3.1")
+
+    // ML Kit Image Labeling
+    implementation("com.google.mlkit:image-labeling:17.0.8")
 }
 
