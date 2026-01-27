@@ -5,21 +5,28 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.sherpalink.admin.AdminGuideUploadScreen
 import com.example.sherpalink.screens.admin.*
+import com.example.sherpalink.viewmodel.GuideViewModel
+import com.example.sherpalink.viewmodel.ProductViewModel
+
 @Composable
-fun AdminNavGraph(navController: androidx.navigation.NavHostController, productViewModel: com.example.sherpalink.viewmodel.ProductViewModel) {
+fun AdminNavGraph(
+    navController: androidx.navigation.NavHostController,
+    productViewModel: ProductViewModel,
+    guideViewModel: GuideViewModel// Add this
+) {
     NavHost(navController = navController, startDestination = "admin_dashboard") {
+        composable("admin_dashboard") { AdminDashboardScreen(navController) }
+        composable("admin_upload") { AdminTourUploadScreen(navController, productViewModel) }
+        composable("admin_list") { AdminTourListScreen(navController, productViewModel) }
 
-        composable("admin_dashboard") {
-            AdminDashboardScreen(navController)
+        // --- Guide Management Routes ---
+        composable("admin_guide_upload") {
+            AdminGuideUploadScreen(navController, guideViewModel)
         }
-
-        composable("admin_upload") {
-            AdminTourUploadScreen(navController, productViewModel)
-        }
-
-        composable("admin_list") {
-            AdminTourListScreen(navController, productViewModel)
+        composable("admin_guide_list") {
+            AdminGuideListScreen(navController, guideViewModel)
         }
 
         composable(

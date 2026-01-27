@@ -1,14 +1,13 @@
 package com.example.sherpalink.model
 
-
 data class GuideModel(
-    val guideId: String = "",
-    val name: String = "",
-    val experienceYears: Int = 0,
-    val specialty: String = "",
-    val location: String = "",
-    val pricePerDay: Double = 0.0,
-    val phone: String = "",
-    val imageUrl: String = "",
-    val rating: Float = 0f
+    var guideId: String = "",
+    var name: String = "",
+    var specialty: String = "",
+    var location: String = "",
+    var pricePerDay: Double = 0.0,
+    var experienceYears: Int = 0,
+    var phone: String = "",
+    var imageUrl: String = "",
+    var rating: Double = 5.0
 )

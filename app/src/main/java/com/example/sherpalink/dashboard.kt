@@ -1,6 +1,8 @@
 package com.example.sherpalink
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -20,6 +23,7 @@ import androidx.navigation.navArgument
 import com.cloudinary.android.MediaManager
 import com.example.sherpalink.repository.*
 import com.example.sherpalink.screens.*
+import com.example.sherpalink.ui.auth.SignInScreen
 import com.example.sherpalink.ui.guide.GuideBookingScreen
 import com.example.sherpalink.ui.theme.*
 import com.example.sherpalink.viewmodel.*
@@ -136,7 +140,39 @@ fun DashboardRoot(
                 composable("notifications") {
                     NotificationScreen(navController, currentUserId)
                 }
+                composable("sign_in") {
+                    val context = LocalContext.current
 
+                    SignInScreen (
+                        onSignInClick = { email, password ->
+                            userViewModel.login(email, password) { success, message ->
+                                if (success) {
+                                    if (email == "admin@gmail.com" && password == "admin123") {
+                                        val intent = Intent(context, com.example.sherpalink.admin.AdminLauncherActivity::class.java)
+                                        context.startActivity(intent)
+                                        (context as? android.app.Activity)?.finish()
+                                    } else {
+                                        navController.navigate("home") {
+                                            popUpTo("sign_in") { inclusive = true }
+                                        }
+                                    }
+                                } else {
+                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        },
+                        onSignUpClick = { navController.navigate("sign_up") },
+                        onForgotPasswordClick = { email ->
+                            if (email.isBlank()) {
+                                Toast.makeText(context, "Please enter your email first", Toast.LENGTH_SHORT).show()
+                            } else {
+                                userViewModel.repoForgetPassword(email) { success, message ->
+                                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                                }
+                            }
+                        }
+                    )
+                }
                 composable("guide_booking") {
                     GuideBookingScreen(navController, guideViewModel)
                 }

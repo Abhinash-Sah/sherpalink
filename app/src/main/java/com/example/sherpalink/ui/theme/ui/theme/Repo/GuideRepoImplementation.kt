@@ -2,108 +2,81 @@ package com.example.sherpalink.repository
 
 import android.content.Context
 import android.net.Uri
-import com.cloudinary.Cloudinary
-import com.cloudinary.utils.ObjectUtils
+import android.util.Log
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.example.sherpalink.model.GuideModel
-import com.google.firebase.database.*
-import java.util.concurrent.Executors
+import com.google.firebase.database.FirebaseDatabase
 
-class GuideRepoImplementation(
-    private val context: Context
-) : GuideRepo {
+class GuideRepoImplementation(val context: Context) : GuideRepo {
 
-    private val database: DatabaseReference =
-        FirebaseDatabase.getInstance().getReference("guides")
+    private val database = FirebaseDatabase.getInstance().getReference("guides")
 
-    // Cloudinary config
-    private val cloudinary = Cloudinary(
-        mapOf(
-            "cloud_name" to "YOUR_CLOUD_NAME",
-            "api_key" to "YOUR_API_KEY",
-            "api_secret" to "YOUR_API_SECRET"
-        )
-    )
-
-    private val executor = Executors.newSingleThreadExecutor()
-
-    override fun addGuide(
-        guide: GuideModel,
-        imageUri: Uri?,
-        callback: (Boolean, String) -> Unit
-    ) {
-        val guideId = database.push().key
-        if (guideId == null) {
-            callback(false, "Failed to generate guide ID")
+    override fun addGuide(guide: GuideModel, imageUri: Uri?, callback: (Boolean, String) -> Unit) {
+        if (imageUri == null) {
+            callback(false, "Image is required")
             return
         }
 
-        if (imageUri != null) {
-            executor.execute {
-                try {
-                    val inputStream =
-                        context.contentResolver.openInputStream(imageUri)
-                            ?: throw Exception("Cannot open image")
+        // 1. Upload to Cloudinary First
+        val requestId = MediaManager.get().upload(imageUri)
+            .option("folder", "guides")
+            .callback(object : UploadCallback {
+                override fun onStart(requestId: String?) {
+                    Log.d("Upload", "Cloudinary upload started...")
+                }
 
-                    val result = cloudinary.uploader().upload(
-                        inputStream,
-                        ObjectUtils.asMap("folder", "guides")
-                    )
+                override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
 
-                    val imageUrl = result["secure_url"] as String
+                override fun onSuccess(requestId: String?, resultData: Map<*, *>) {
+                    val imageUrl = resultData["secure_url"] as String
+                    Log.d("Upload", "Cloudinary Success: $imageUrl")
 
-                    val updatedGuide = guide.copy(
-                        guideId = guideId,
-                        imageUrl = imageUrl
-                    )
+                    // 2. Once image is uploaded, save to Firebase
+                    val guideId = database.push().key ?: ""
+                    val finalGuide = guide.copy(guideId = guideId, imageUrl = imageUrl)
 
-                    database.child(guideId).setValue(updatedGuide)
+                    database.child(guideId).setValue(finalGuide)
                         .addOnSuccessListener {
-                            callback(true, "Guide added successfully")
+                            Log.d("Upload", "Firebase Success")
+                            callback(true, "Guide added successfully!")
                         }
                         .addOnFailureListener {
-                            callback(false, it.message ?: "Database error")
+                            Log.e("Upload", "Firebase Failed: ${it.message}")
+                            callback(false, "Firebase Error: ${it.message}")
                         }
+                }
 
-                } catch (e: Exception) {
-                    callback(false, e.message ?: "Image upload failed")
+                override fun onError(requestId: String?, error: ErrorInfo?) {
+                    Log.e("Upload", "Cloudinary Error: ${error?.description}")
+                    callback(false, "Image upload failed: ${error?.description}")
                 }
-            }
-        } else {
-            val updatedGuide = guide.copy(guideId = guideId)
-            database.child(guideId).setValue(updatedGuide)
-                .addOnSuccessListener {
-                    callback(true, "Guide added successfully")
-                }
-                .addOnFailureListener {
-                    callback(false, it.message ?: "Database error")
-                }
-        }
+
+                override fun onReschedule(requestId: String?, error: ErrorInfo?) {}
+            }).dispatch()
     }
 
     override fun getAllGuides(callback: (List<GuideModel>) -> Unit) {
-        database.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
+        database.addValueEventListener(object : com.google.firebase.database.ValueEventListener {
+            override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
                 val list = mutableListOf<GuideModel>()
-                for (data in snapshot.children) {
-                    val guide = data.getValue(GuideModel::class.java)
-                    if (guide != null) list.add(guide)
+                snapshot.children.forEach {
+                    val guide = it.getValue(GuideModel::class.java)
+                    guide?.let { list.add(it) }
                 }
                 callback(list)
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                callback(emptyList())
+            override fun onCancelled(error: com.google.firebase.database.DatabaseError) {
+                Log.e("Firebase", "Load failed: ${error.message}")
             }
         })
     }
 
     override fun deleteGuide(guideId: String, callback: (Boolean, String) -> Unit) {
-        database.child(guideId).removeValue()
-            .addOnSuccessListener {
-                callback(true, "Guide deleted")
-            }
-            .addOnFailureListener {
-                callback(false, it.message ?: "Delete failed")
-            }
+        database.child(guideId).removeValue().addOnCompleteListener {
+            if (it.isSuccessful) callback(true, "Guide deleted")
+            else callback(false, "Delete failed")
+        }
     }
 }

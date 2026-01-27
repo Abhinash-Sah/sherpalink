@@ -2,6 +2,7 @@ package com.example.sherpalink.ui.auth
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -15,21 +16,22 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sherpalink.R
 
 @Composable
 fun SignInScreen(
-    onSignInClick: (email: String, password: String) -> Unit,
-    onSignUpClick: () -> Unit
+    onSignInClick: (String, String) -> Unit,
+    onSignUpClick: () -> Unit,
+    onForgotPasswordClick: (String) -> Unit // New parameter
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-
         Image(
             painter = painterResource(id = R.drawable.loginimage),
             contentDescription = null,
@@ -42,10 +44,7 @@ fun SignInScreen(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        listOf(
-                            Color.Black.copy(alpha = 0.4f),
-                            Color.Black.copy(alpha = 0.8f)
-                        )
+                        listOf(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.8f))
                     )
                 )
         )
@@ -57,28 +56,11 @@ fun SignInScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-
-            Text(
-                text = "SherpaLink",
-                fontSize = 40.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
+            Text(text = "SherpaLink", fontSize = 40.sp, fontWeight = FontWeight.Bold, color = Color.White)
 
             Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "Welcome back",
-                color = Color.White,
-                fontSize = 18.sp
-            )
-
-            Text(
-                text = "Sign in to continue",
-                color = Color.White.copy(alpha = 0.8f),
-                fontSize = 14.sp,
-                textAlign = TextAlign.Center
-            )
+            Text(text = "Welcome back", color = Color.White, fontSize = 18.sp)
+            Text(text = "Sign in to continue", color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp)
 
             Spacer(modifier = Modifier.height(28.dp))
 
@@ -90,7 +72,9 @@ fun SignInScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White
+                    focusedContainerColor = Color.White,
+                    unfocusedTextColor = Color.Black,
+                    focusedTextColor = Color.Black
                 )
             )
 
@@ -105,37 +89,46 @@ fun SignInScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White
+                    focusedContainerColor = Color.White,
+                    unfocusedTextColor = Color.Black,
+                    focusedTextColor = Color.Black
                 )
             )
+
+            // Forgot Password Link
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                Text(
+                    text = "Forgot Password?",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .clickable { onForgotPasswordClick(email) },
+                    textDecoration = TextDecoration.Underline
+                )
+            }
 
             Spacer(modifier = Modifier.height(22.dp))
 
             Button(
                 onClick = {
-                    if (email.isBlank() || password.isBlank()) {
-                        showErrorDialog = true
-                    } else {
-                        onSignInClick(email, password)
-                    }
+                    if (email.isBlank() || password.isBlank()) showErrorDialog = true
+                    else onSignInClick(email, password)
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
+                modifier = Modifier.fillMaxWidth().height(52.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D1B2A)),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Sign In", fontSize = 16.sp)
+                Text("Sign In", fontSize = 16.sp, color = Color.White)
             }
 
             Spacer(modifier = Modifier.height(14.dp))
 
             OutlinedButton(
                 onClick = onSignUpClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(12.dp)
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
             ) {
                 Text("Sign Up", fontSize = 16.sp)
             }
@@ -145,13 +138,9 @@ fun SignInScreen(
     if (showErrorDialog) {
         AlertDialog(
             onDismissRequest = { showErrorDialog = false },
-            confirmButton = {
-                TextButton(onClick = { showErrorDialog = false }) {
-                    Text("OK")
-                }
-            },
-            title = { Text("Error") },
-            text = { Text("Please enter email and password") }
+            confirmButton = { TextButton(onClick = { showErrorDialog = false }) { Text("OK") } },
+            title = { Text("Missing Info") },
+            text = { Text("Please enter both email and password to continue.") }
         )
     }
 }
