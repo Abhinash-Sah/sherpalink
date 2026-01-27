@@ -9,6 +9,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import java.io.File
+import android.os.Handler
+import android.os.Looper
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 
 class UserRepoImplementation(private val context: Context) : UserRepo {
 
@@ -121,23 +126,39 @@ class UserRepoImplementation(private val context: Context) : UserRepo {
     }
 
     override fun uploadProfileImage(userId: String, imageUri: Uri, callback: (Boolean, String) -> Unit) {
-        try {
-            val file = FileUtils.getFileFromUri(context, imageUri)
-            Thread {
-                try {
-                    val uploadResult = cloudinary.uploader().upload(file, ObjectUtils.emptyMap())
-                    val imageUrl = uploadResult["secure_url"] as String
-
-                    userRef.child(userId).updateChildren(mapOf("profileImageUrl" to imageUrl))
-                        .addOnSuccessListener { callback(true, "Profile image updated successfully") }
-                        .addOnFailureListener { e -> callback(false, e.message ?: "Failed to update profile image") }
-
-                } catch (e: Exception) {
-                    callback(false, e.message ?: "Cloudinary upload failed")
+        // We use MediaManager.get() because it's already initialized in DashboardActivity
+        MediaManager.get().upload(imageUri)
+            .unsigned("ml_default") // <--- YOU MUST CREATE THIS IN CLOUDINARY SETTINGS
+            .callback(object : UploadCallback {
+                override fun onStart(requestId: String) {
+                    // Upload started
                 }
-            }.start()
-        } catch (e: Exception) {
-            callback(false, e.message ?: "Failed to upload profile image")
-        }
+
+                override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {
+                    // Progress tracking
+                }
+
+                override fun onSuccess(requestId: String, resultData: Map<*, *>) {
+                    val imageUrl = resultData["secure_url"] as String
+
+                    // Update Firebase with the new URL
+                    userRef.child(userId).child("profileImageUrl").setValue(imageUrl)
+                        .addOnSuccessListener {
+                            callback(true, "Profile updated successfully!")
+                        }
+                        .addOnFailureListener {
+                            callback(false, "Firebase Error: ${it.message}")
+                        }
+                }
+
+                override fun onError(requestId: String, error: ErrorInfo) {
+                    callback(false, "Cloudinary Error: ${error.description}")
+                }
+
+                override fun onReschedule(requestId: String, error: ErrorInfo) {
+                    // Handle reschedule
+                }
+            })
+            .dispatch()
     }
 }

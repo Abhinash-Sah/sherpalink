@@ -9,9 +9,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
-
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,30 +21,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.example.sherpalink.model.GuideModel
+import com.example.sherpalink.viewmodel.GuideViewModel
 
-/* ---------------- MOCK GUIDE DATA ---------------- */
-data class Guide(
-    val name: String,
-    val imageUrl: String,
-    val rating: Float,
-    val experience: String,
-    val location: String
-)
-
-val sampleGuides = listOf(
-    Guide("Anmol KC", "https://i.pravatar.cc/300?img=12", 4.5f, "8+ years trekking guide", "Everest"),
-    Guide("Sita Lama", "https://i.pravatar.cc/300?img=32", 4.0f, "5 years mountain guide", "Langtang"),
-    Guide("Ram Thapa", "https://i.pravatar.cc/300?img=45", 3.5f, "3 years hiking guide", "Annapurna"),
-    Guide("Hari Rai", "https://i.pravatar.cc/300?img=66", 5.0f, "10 years trekking guide", "Manaslu")
-)
-
-/* ---------------- MAIN UI ---------------- */
+/* ---------------- GUIDE BOOKING SCREEN ---------------- */
 @Composable
-fun GuideBookingSimplePreview(navController: NavHostController) {
-    var selectedGuide by remember { mutableStateOf<Guide?>(null) }
+fun GuideBookingScreen(
+    navController: NavHostController,
+    guideViewModel: GuideViewModel
+) {
+    val guides by guideViewModel.guides.observeAsState(emptyList())
+    var selectedGuide by remember { mutableStateOf<GuideModel?>(null) }
+
+    // Load guides from Firebase once
+    LaunchedEffect(Unit) {
+        guideViewModel.loadGuides()
+    }
 
     if (selectedGuide == null) {
-        GuideGridUI(sampleGuides) { guide -> selectedGuide = guide }
+        GuideGridUI(guides) { guide -> selectedGuide = guide }
     } else {
         GuidePreviewUI(selectedGuide!!) { selectedGuide = null }
     }
@@ -52,13 +47,12 @@ fun GuideBookingSimplePreview(navController: NavHostController) {
 
 /* ---------------- GRID OF GUIDES ---------------- */
 @Composable
-fun GuideGridUI(guides: List<Guide>, onClick: (Guide) -> Unit) {
+fun GuideGridUI(guides: List<GuideModel>, onClick: (GuideModel) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-
         Text("Available Guides", fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -82,7 +76,7 @@ fun GuideGridUI(guides: List<Guide>, onClick: (Guide) -> Unit) {
                             .clip(CircleShape)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    RatingStars(guide.rating)
+                    RatingStars(guide.rating.toFloat())
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(guide.name, fontWeight = FontWeight.Medium, fontSize = 14.sp)
                 }
@@ -91,9 +85,9 @@ fun GuideGridUI(guides: List<Guide>, onClick: (Guide) -> Unit) {
     }
 }
 
-
+/* ---------------- GUIDE DETAILS PREVIEW ---------------- */
 @Composable
-fun GuidePreviewUI(guide: Guide, onBack: () -> Unit) {
+fun GuidePreviewUI(guide: GuideModel, onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -115,7 +109,6 @@ fun GuidePreviewUI(guide: Guide, onBack: () -> Unit) {
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-
         Text(
             guide.name,
             fontSize = 22.sp,
@@ -124,16 +117,17 @@ fun GuidePreviewUI(guide: Guide, onBack: () -> Unit) {
         )
 
         Spacer(modifier = Modifier.height(8.dp))
-        RatingStars(guide.rating, size = 20)
+        RatingStars(guide.rating.toFloat(), size = 20)
 
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Experience: ${guide.experience}", fontWeight = FontWeight.SemiBold)
+        Text("Experience: ${guide.experienceYears} years", fontWeight = FontWeight.SemiBold)
+        Text("Specialty: ${guide.specialty}", fontWeight = FontWeight.SemiBold)
         Text("Location: ${guide.location}", fontWeight = FontWeight.SemiBold)
+        Text("Price per Day: \$${guide.pricePerDay}", fontWeight = FontWeight.SemiBold)
 
         Spacer(modifier = Modifier.height(24.dp))
-
         Button(
-            onClick = { /* Do nothing for now */ },
+            onClick = { /* TODO: Book guide logic */ },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Book Guide")
@@ -147,9 +141,9 @@ fun RatingStars(rating: Float, size: Int = 16) {
     Row {
         repeat(5) { i ->
             Icon(
-                imageVector = if (i < rating.toInt()) Icons.Filled.Star else Icons.Filled.Star,
+                imageVector = Icons.Filled.Star,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = if (i < rating.toInt()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                 modifier = Modifier.size(size.dp)
             )
         }
@@ -159,6 +153,24 @@ fun RatingStars(rating: Float, size: Int = 16) {
 /* ---------------- PREVIEW ---------------- */
 @Preview(showBackground = true)
 @Composable
-fun GuideBookingSimplePreview() {
-    GuideBookingSimplePreview()
+fun GuideBookingScreenPreview() {
+    // Use a fake ViewModel for preview
+    val fakeGuides = listOf(
+        GuideModel(
+            guideId = "1",
+            name = "Test Guide",
+            experienceYears = 5,
+            specialty = "Mountain Trekking",
+            location = "Everest",
+            pricePerDay = 100.0,
+            phone = "1234567890",
+            imageUrl = "https://i.pravatar.cc/300?img=12",
+        )
+    )
+    var selectedGuide by remember { mutableStateOf<GuideModel?>(null) }
+    if (selectedGuide == null) {
+        GuideGridUI(fakeGuides) { selectedGuide = it }
+    } else {
+        GuidePreviewUI(selectedGuide!!) { selectedGuide = null }
+    }
 }

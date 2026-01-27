@@ -72,19 +72,20 @@ class UserViewModel(private val repo: UserRepo) : ViewModel() {
     }
 
     fun uploadProfileImage(imageUri: Uri, callback: (Boolean, String) -> Unit) {
-        val uid = repo.getCurrentUser()?.uid
-        if (uid == null) {
-            callback(false, "User not logged in")
-            return
-        }
+        val uid = repo.getCurrentUser()?.uid ?: return callback(false, "User not logged in")
 
         loading = true
         repo.uploadProfileImage(uid, imageUri) { success, message ->
-            if (success) getUserById(uid)
+            if (success) {
+                // Re-fetch user data to get the new image URL from Firebase
+                getUserById(uid)
+            }
             loading = false
             callback(success, message)
         }
     }
+
+
     fun repoForgetPassword(email: String, callback: (Boolean, String) -> Unit) {
         repo.forgetPassword(email, callback)
     }

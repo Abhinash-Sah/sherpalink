@@ -9,5 +9,6 @@ data class GuideModel(
     val location: String = "",
     val pricePerDay: Double = 0.0,
     val phone: String = "",
-    val imageUrl: String = ""
+    val imageUrl: String = "",
+    val rating: Float = 0f
 )

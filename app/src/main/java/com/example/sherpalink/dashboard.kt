@@ -7,9 +7,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -17,24 +17,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
-import com.example.sherpalink.repository.ProductRepoImplementation
-import com.example.sherpalink.repository.UserRepoImplementation
-import com.example.sherpalink.screens.AddScreen
-import com.example.sherpalink.screens.FullScreenImage
-import com.example.sherpalink.screens.HomeScreen
-import com.example.sherpalink.screens.LocationScreen
-import com.example.sherpalink.screens.MessageScreen
-import com.example.sherpalink.screens.RegistrationScreen
-import com.example.sherpalink.screens.TourDetailsScreen
-import com.example.sherpalink.screens.TourPackageScreen
-import com.example.sherpalink.ui.guide.GuideBookingSimplePreview
+import com.cloudinary.android.MediaManager
+import com.example.sherpalink.repository.*
+import com.example.sherpalink.screens.*
+import com.example.sherpalink.ui.guide.GuideBookingScreen
+import com.example.sherpalink.ui.theme.*
+import com.example.sherpalink.viewmodel.*
+import com.google.firebase.auth.FirebaseAuth
 import com.example.sherpalink.ui.notifications.NotificationScreen
-import com.example.sherpalink.ui.theme.ProfileScreen
-import com.example.sherpalink.ui.theme.RatingsScreen
 import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
 import com.example.sherpalink.ui.theme.ui.theme.TrendingTripsScreen
-import com.example.sherpalink.viewmodel.ProductViewModel
-import com.example.sherpalink.viewmodel.UserViewModel
 
 class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,19 +37,35 @@ class DashboardActivity : ComponentActivity() {
             val navController = rememberNavController()
 
             val userViewModel: UserViewModel = viewModel(
-                factory = UserViewModel.UserViewModelFactory(
-                    UserRepoImplementation(this)
-                )
+                factory = UserViewModel.UserViewModelFactory(UserRepoImplementation(this))
+            )
+            val productViewModel: ProductViewModel = viewModel { ProductViewModel(ProductRepoImplementation()) }
+            val guideViewModel: GuideViewModel = viewModel(
+                factory = GuideViewModelFactory(GuideRepoImplementation(this))
+            )
+            val bookingViewModel: BookingViewModel = viewModel(
+                factory = BookingViewModelFactory(BookingRepoImplementation())
             )
 
-            val productViewModel: ProductViewModel = viewModel {
-                ProductViewModel(ProductRepoImplementation())
+
+            val cloudinaryConfig = mapOf(
+                "cloud_name" to "dnenna9ii",
+                "api_key" to "245798297858912",
+                "api_secret" to "Pjo0x-H-jC-XirHA6uwrWTLFDwg"
+            )
+
+            try {
+                MediaManager.init(this, cloudinaryConfig)
+            } catch (e: Exception) {
+                android.util.Log.d("Cloudinary", "MediaManager already initialized")
             }
 
             DashboardRoot(
-                productViewModel = productViewModel,
-                userViewModel = userViewModel,
-                navController = navController
+                productViewModel,
+                userViewModel,
+                guideViewModel,
+                bookingViewModel,
+                navController
             )
         }
     }
@@ -66,11 +74,19 @@ class DashboardActivity : ComponentActivity() {
 fun DashboardRoot(
     productViewModel: ProductViewModel,
     userViewModel: UserViewModel,
+    guideViewModel: GuideViewModel,
+    bookingViewModel: BookingViewModel,
     navController: NavHostController
 ) {
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBottomBar = currentRoute !in listOf("sign_in", "signup")
+
+    // Initialize NotificationViewModel
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+    val notificationViewModel: NotificationViewModel = viewModel(
+        factory = NotificationViewModelFactory(NotificationRepoImplementation(currentUserId))
+    )
 
     val routeToIndex = mapOf(
         "home" to 0,
@@ -79,16 +95,14 @@ fun DashboardRoot(
         "list" to 3,
         "profile" to 4
     )
-
     val selectedTab = routeToIndex[currentRoute] ?: 0
-
-    val bottomRoutes = listOf("home", "location", "add", "list", "profile")
 
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
                 BottomMenuBar(selectedTab) { index ->
-                    navController.navigate(bottomRoutes[index]) {
+                    val routes = listOf("home", "location", "add", "list", "profile")
+                    navController.navigate(routes[index]) {
                         launchSingleTop = true
                         restoreState = true
                         popUpTo(navController.graph.startDestinationId) { saveState = true }
@@ -100,71 +114,79 @@ fun DashboardRoot(
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             NavHost(navController, startDestination = "home") {
 
-                // Bottom Tabs
+                // --- Basic Tabs ---
                 composable("home") { HomeScreen(navController) }
                 composable("location") { LocationScreen() }
                 composable("add") { AddScreen() }
                 composable("list") { MessageScreen() }
                 composable("profile") {
-                    LaunchedEffect(Unit) {
-                        if (userViewModel.user == null) {
-                            userViewModel.getCurrentUser()?.uid?.let { userViewModel.getUserById(it) }
-                        }
-                    }
-                    ProfileScreen(
-                        user = userViewModel.user,
-                        userViewModel = userViewModel,
-                        navController = navController
-                    )
+                    ProfileScreen(userViewModel.user, userViewModel, navController)
                 }
 
-                // Other Screens
-                composable("about") { AboutScreen() }
-                composable("ratings") { RatingsScreen() }
-                composable("trending_trips_screen") { TrendingTripsScreen(navController) }
+                // --- Feature Screens (Fixed ViewModels) ---
+                composable("tour_package") {
+                    // CRASH FIX: Pass productViewModel here
+                    TourPackageScreen(navController, productViewModel)
+                }
 
-                composable("tour_package") { TourPackageScreen(navController, productViewModel) }
-                composable("registration_form") { RegistrationScreen(navController) }
-                composable("guide_booking") { GuideBookingSimplePreview(navController) }
-                composable("notifications") { NotificationScreen(navController) }
+                composable("myBookings") {
+                    MyBookingsScreen(navController, bookingViewModel, notificationViewModel)
+                }
 
-                // Tour Details with argument
+                composable("notifications") {
+                    NotificationScreen(navController, currentUserId)
+                }
+
+                composable("guide_booking") {
+                    GuideBookingScreen(navController, guideViewModel)
+                }
+
+                // --- Dynamic Registration Form (Fixed arguments) ---
                 composable(
-                    "tour_details/{productId}",
+                    "registration_form/{tourId}/{tourName}",
+                    arguments = listOf(
+                        navArgument("tourId") { type = NavType.StringType },
+                        navArgument("tourName") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val tourId = backStackEntry.arguments?.getString("tourId") ?: ""
+                    val tourName = backStackEntry.arguments?.getString("tourName") ?: ""
+                    RegistrationScreen(
+                        navController, tourId, tourName, bookingViewModel, notificationViewModel
+                    )
+                }
+                composable(
+                    route = "tour_details/{productId}",
                     arguments = listOf(navArgument("productId") { type = NavType.StringType })
                 ) { backStackEntry ->
                     val productId = backStackEntry.arguments?.getString("productId") ?: ""
-                    TourDetailsScreen(navController, productViewModel, productId)
+                    // This screen shows the specific tour info before the user clicks "Book Now"
+                    TourDetailsScreenSafe(navController, productViewModel, productId)
                 }
-
-                // Full Screen Image with argument
+                // --- Full Image Viewer (Missing from code 1) ---
                 composable(
                     "full_image/{index}",
                     arguments = listOf(navArgument("index") { type = NavType.IntType })
                 ) { backStackEntry ->
                     val index = backStackEntry.arguments?.getInt("index") ?: 0
                     val images = listOf(R.drawable.image1, R.drawable.image2, R.drawable.image3)
-                    val safeIndex = index.coerceIn(images.indices)
                     FullScreenImage(
-                        imageRes = images[safeIndex],
+                        imageRes = images[index.coerceIn(images.indices)],
                         onBack = { navController.popBackStack() }
                     )
                 }
+
+                // --- Extra Info ---
+                composable("about") { AboutScreen() }
+                composable("ratings") { RatingsScreen() }
+                composable("trending_trips_screen") { TrendingTripsScreen(navController) }
             }
         }
     }
 }
-
 @Composable
 fun BottomMenuBar(selectedIndex: Int, onTabSelected: (Int) -> Unit) {
-    val icons = listOf(
-        Icons.Default.Home,
-        Icons.Default.LocationOn,
-        Icons.Default.CameraAlt,
-        Icons.Default.Chat, // Fixed deprecated icon
-        Icons.Default.Person
-    )
-
+    val icons = listOf(Icons.Default.Home, Icons.Default.LocationOn, Icons.Default.CameraAlt, Icons.Default.Chat, Icons.Default.Person)
     NavigationBar(containerColor = Color.White) {
         icons.forEachIndexed { index, icon ->
             NavigationBarItem(

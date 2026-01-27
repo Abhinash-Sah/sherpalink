@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -79,15 +80,43 @@ fun ProfileScreen(
                     .clickable { launcher.launch("image/*") }
             )
         } else {
+            // ... inside your Column in ProfileScreen
             Box(
                 modifier = Modifier
-                    .size(120.dp)
+                    .size(130.dp) // Slightly larger container
                     .clip(CircleShape)
-                    .background(Color.Gray)
+                    .background(Color.LightGray)
                     .clickable { launcher.launch("image/*") },
                 contentAlignment = Alignment.Center
             ) {
-                Text("No Image", color = Color.White)
+                if (user.profileImageUrl.isNotEmpty()) {
+                    Image(
+                        painter = rememberAsyncImagePainter(user.profileImageUrl),
+                        contentDescription = "Profile Image",
+                        modifier = Modifier.fillMaxSize(),
+                        // CRUCIAL: This makes the image fill the circle without stretching
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = androidx.compose.material.icons.Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.size(60.dp),
+                        tint = Color.White
+                    )
+                }
+
+                // Show a small loader on top of the image during upload
+                if (userViewModel.loading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.4f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp)
+                    }
+                }
             }
         }
 

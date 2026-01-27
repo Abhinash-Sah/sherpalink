@@ -1,46 +1,59 @@
 package com.example.sherpalink.screens
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.sherpalink.R
+import com.example.sherpalink.model.*
+import com.example.sherpalink.viewmodel.*
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun RegistrationScreen(navController: NavHostController) {
+fun RegistrationScreen(
+    navController: NavHostController,
+    tourId: String,
+    tourName: String,
+    bookingViewModel: BookingViewModel,
+    notificationViewModel: NotificationViewModel
+) {
+    val context = LocalContext.current
+    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
+    // --- Form States ---
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var departureDate by remember { mutableStateOf("") }
-    var departureTime by remember { mutableStateOf("") }
-    var returnDate by remember { mutableStateOf("") }
-    var returnTime by remember { mutableStateOf("") }
     var travellers by remember { mutableStateOf("") }
-    var guideName by remember { mutableStateOf("") }
+
+    // --- Simulation States (No Cloudinary Needed) ---
+    var idSelected by remember { mutableStateOf(false) }
+    var paymentSelected by remember { mutableStateOf(false) }
+    var isSaving by remember { mutableStateOf(false) }
+
+    // --- Launchers (Just checking if user picked something) ---
+    val idLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        idSelected = (uri != null)
+    }
+    val payLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        paymentSelected = (uri != null)
+    }
 
     Column(
         modifier = Modifier
@@ -48,108 +61,122 @@ fun RegistrationScreen(navController: NavHostController) {
             .verticalScroll(rememberScrollState())
             .padding(20.dp)
     ) {
+        Text("Booking for: $tourName", color = Color.Gray, fontSize = 14.sp)
+        Text("Registration Form", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
-        Text(
-            text = "Booking Form",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Spacer(Modifier.height(20.dp))
 
-        Spacer(modifier = Modifier.height(20.dp))
+        // Input Fields
+        InputField("First Name", firstName) { firstName = it }
+        InputField("Last Name", lastName) { lastName = it }
+        InputField("Email", email) { email = it }
+        InputField("Phone", phone) { phone = it }
+        InputField("Departure Date", departureDate) { departureDate = it }
+        InputField("Number of Travellers", travellers) { travellers = it }
 
-        Row(modifier = Modifier.fillMaxWidth()) {
-            InputField("First Name", firstName, { firstName = it }, Modifier.weight(1f))
-            Spacer(modifier = Modifier.width(8.dp))
-            InputField("Last Name", lastName, { lastName = it }, Modifier.weight(1f))
-        }
+        Spacer(Modifier.height(20.dp))
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(modifier = Modifier.fillMaxWidth()) {
-            InputField("Email", email, { email = it }, Modifier.weight(1f))
-            Spacer(modifier = Modifier.width(8.dp))
-            InputField("Phone no.", phone, { phone = it }, Modifier.weight(1f))
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(modifier = Modifier.fillMaxWidth()) {
-            InputField("Departure Date", departureDate, { departureDate = it }, Modifier.weight(1f))
-            Spacer(modifier = Modifier.width(8.dp))
-            InputField("Departure Time", departureTime, { departureTime = it }, Modifier.weight(1f))
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(modifier = Modifier.fillMaxWidth()) {
-            InputField("Return Date", returnDate, { returnDate = it }, Modifier.weight(1f))
-            Spacer(modifier = Modifier.width(8.dp))
-            InputField("Return Time", returnTime, { returnTime = it }, Modifier.weight(1f))
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(modifier = Modifier.fillMaxWidth()) {
-            InputField("No of Travellers", travellers, { travellers = it }, Modifier.weight(1f))
-            Spacer(modifier = Modifier.width(8.dp))
-            InputField("Guide Name", guideName, { guideName = it }, Modifier.weight(1f))
-        }
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        Text(
-            text = "Valid Document",
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Button(
-            onClick = { /* Add image logic */ },
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .height(48.dp)
-                .width(140.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F6ED5))
+        // --- Simulated Payment Section ---
+        Text("Step 1: Payment QR", fontWeight = FontWeight.Bold)
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F8F8))
         ) {
-            Text("Add Image", color = Color.White)
+            Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                // R.drawable.qr must exist in your drawable folder
+                Image(
+                    painter = painterResource(id = R.drawable.qr),
+                    contentDescription = "QR Code",
+                    modifier = Modifier.size(150.dp)
+                )
+                Spacer(Modifier.height(8.dp))
+                Button(
+                    onClick = { payLauncher.launch("image/*") },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (paymentSelected) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text(if (!paymentSelected) "Attach Payment Screenshot" else "Screenshot Attached ✅")
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(30.dp))
+        // --- Simulated ID Section ---
+        Text("Step 2: Identification", fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+        Button(
+            onClick = { idLauncher.launch("image/*") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (idSelected) Color(0xFF4CAF50) else Color(0xFF3F51B5)
+            )
+        ) {
+            Text(if (!idSelected) "Attach ID Proof" else "ID Attached ✅")
+        }
 
+        Spacer(Modifier.height(30.dp))
+
+        // --- Final Submit Button ---
         Button(
             onClick = {
-                // Submit logic, can navigate using navController
-                // Example: navController.navigate("home")
+                if (firstName.isEmpty() || !idSelected || !paymentSelected) {
+                    Toast.makeText(context, "Please fill all fields and attach proofs", Toast.LENGTH_SHORT).show()
+                } else {
+                    isSaving = true
+
+
+                    val booking = BookingModel(
+                        userId = userId,
+                        tourId = tourId,
+                        tourName = tourName,
+                        fullName = "$firstName $lastName",
+                        email = email,
+                        phone = phone,
+                        departureDate = departureDate,
+                        returnDate = "",
+                        travellers = travellers,
+                        imageUrl = "simulated_local_upload"
+                    )
+
+                    bookingViewModel.confirmBooking(booking) { success, _ ->
+                        if (success) {
+                            notificationViewModel.addNotification(
+                                NotificationModel(
+                                    title = "Booking Request Sent",
+                                    message = "Your registration for $tourName is pending review."
+                                )
+                            )
+                            navController.navigate("home") {
+                                popUpTo("home") { inclusive = true }
+                            }
+                        } else {
+                            Toast.makeText(context, "Submission failed. Check connection.", Toast.LENGTH_SHORT).show()
+                            isSaving = false
+                        }
+                    }
+                }
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD8342A))
+            enabled = !isSaving,
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
         ) {
-            Text("Submit", color = Color.White)
+            if (isSaving) {
+                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+            } else {
+                Text("Confirm & Submit Booking", color = Color.White, fontWeight = FontWeight.Bold)
+            }
         }
+        Spacer(Modifier.height(24.dp))
     }
 }
 
 @Composable
-fun InputField(
-    hint: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    TextField(
+fun InputField(label: String, value: String, onValueChange: (String) -> Unit) {
+    OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = { Text(text = hint) },
-        modifier = modifier.height(55.dp),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color(0xFFE0E0E0),
-            unfocusedContainerColor = Color(0xFFE0E0E0),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
-        )
+        label = { Text(label) },
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        singleLine = true
     )
 }
-

@@ -1,5 +1,6 @@
 package com.example.sherpalink.screens
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -16,12 +17,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.example.sherpalink.viewmodel.ProductViewModel
 
+
 @Composable
-fun TourDetailsScreen(
-    navController: NavController,
+fun TourDetailsScreenSafe(
+    navController: NavHostController,
     viewModel: ProductViewModel,
     productId: String
 ) {
@@ -33,14 +36,14 @@ fun TourDetailsScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // Main content
         product?.let { tour ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
+                    .padding(bottom = 80.dp)
             ) {
-                AsyncImage(
+                coil.compose.AsyncImage(
                     model = tour.image.takeIf { it.isNotEmpty() },
                     contentDescription = tour.name,
                     modifier = Modifier
@@ -63,6 +66,23 @@ fun TourDetailsScreen(
                     Text(tour.description, style = MaterialTheme.typography.bodyLarge)
                 }
             }
+
+            Button(
+                onClick = {
+                    val safeId = Uri.encode(tour.productId)
+                    val safeName = Uri.encode(tour.name)
+                    navController.navigate("registration_form/$safeId/$safeName")
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F6ED5))
+            ) {
+                Text("Book Now", color = Color.White)
+            }
+
         } ?: Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -70,7 +90,6 @@ fun TourDetailsScreen(
             CircularProgressIndicator()
         }
 
-        // Floating back button
         IconButton(
             onClick = { navController.popBackStack() },
             modifier = Modifier
@@ -79,11 +98,7 @@ fun TourDetailsScreen(
                 .align(Alignment.TopStart)
                 .background(Color.White.copy(alpha = 0.7f), shape = MaterialTheme.shapes.small)
         ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBackIosNew,
-                contentDescription = "Back",
-                tint = Color.Black
-            )
+            Icon(Icons.Default.ArrowBackIosNew, contentDescription = "Back", tint = Color.Black)
         }
     }
 }

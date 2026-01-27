@@ -6,18 +6,18 @@ import androidx.activity.compose.setContent
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.sherpalink.repository.ProductRepoImplementation
-import com.example.sherpalink.repository.UserRepoImplementation
+import com.example.sherpalink.repository.*
 import com.example.sherpalink.ui.auth.SignInScreen
 import com.example.sherpalink.ui.auth.SignUpScreen
-import com.example.sherpalink.viewmodel.ProductViewModel
-import com.example.sherpalink.viewmodel.UserViewModel
+import com.example.sherpalink.viewmodel.*
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
 
     private val productViewModel by lazy { ProductViewModel(ProductRepoImplementation()) }
     private val userViewModel by lazy { UserViewModel(UserRepoImplementation(this)) }
+    private val guideViewModel by lazy { GuideViewModel(GuideRepoImplementation(this)) }
+    private val bookingViewModel by lazy { BookingViewModel(BookingRepoImplementation()) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,10 +25,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val currentUser = FirebaseAuth.getInstance().currentUser
+
+            // If user is logged in, go straight to Dashboard
             val startDestination = if (currentUser != null) "dashboard" else "sign_in"
 
             NavHost(navController = navController, startDestination = startDestination) {
 
+                // Sign In Screen
                 composable("sign_in") {
                     SignInScreen(
                         onSignInClick = { email, password ->
@@ -46,6 +49,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                // Sign Up Screen
                 composable("signup") {
                     SignUpScreen(
                         onSignUpClick = { email, password, user ->
@@ -69,11 +73,14 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                // Dashboard
                 composable("dashboard") {
                     DashboardRoot(
-                        productViewModel = productViewModel,
-                        userViewModel = userViewModel,
-                        navController = navController
+                        productViewModel,
+                        userViewModel,
+                        guideViewModel,
+                        bookingViewModel,
+                        navController
                     )
                 }
             }

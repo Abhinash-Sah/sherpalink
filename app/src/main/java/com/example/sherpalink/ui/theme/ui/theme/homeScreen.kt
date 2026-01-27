@@ -85,6 +85,7 @@ fun HomeScreen(navController: NavController) {
             onProfileClick = { navController.navigate("profile") },
             onAboutClick = { navController.navigate("about") },
             onRatingsClick = { navController.navigate("ratings") },
+            onMyBookingsClick = { navController.navigate("myBookings") },
             onLogout = {
                 FirebaseAuth.getInstance().signOut()
                 context.startActivity(Intent(context, SignInActivity::class.java))
@@ -104,6 +105,7 @@ fun AppHeader(
     onProfileClick: () -> Unit = {},
     onAboutClick: () -> Unit = {},
     onRatingsClick: () -> Unit = {},
+    onMyBookingsClick: () -> Unit = {},
     onLogout: () -> Unit
 ) {
     Box(modifier.fillMaxWidth()) {
@@ -173,7 +175,19 @@ fun AppHeader(
                         }
                         .padding(vertical = 8.dp)
                 )
+                Text(
+                    text = "My Bookings",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onMenuToggle()
+                            onMyBookingsClick()
+                        }
+                        .padding(vertical = 8.dp)
+                )
+
                 Divider(color = Color.Gray, thickness = 1.dp)
+
                 Text(
                     text = "Logout",
                     color = Color.Red,
@@ -232,19 +246,18 @@ fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
             contentScale = ContentScale.Fit
         )
     }
-}
-
-@Composable
+}@Composable
 fun CategoryRow(navController: NavController) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween // Original Arrangement
     ) {
         CategoryItem(R.drawable.tour_package, "Tour\nPackage") {
             navController.navigate("tour_package")
         }
         CategoryItem(R.drawable.registration, "Registration\nForm") {
-            navController.navigate("registration_form")
+            // CRASH FIX: Added default arguments so the NavHost finds the route
+            navController.navigate("registration_form/general/General_Booking")
         }
         CategoryItem(R.drawable.guide, "Guide\nBooking") {
             navController.navigate("guide_booking")
@@ -262,15 +275,14 @@ fun CategoryItem(image: Int, title: String, onClick: () -> Unit) {
             painter = painterResource(image),
             contentDescription = null,
             modifier = Modifier
-                .size(100.dp)
-                .clip(RoundedCornerShape(18.dp)),
-            contentScale = ContentScale.Crop
+                .size(100.dp) // Original size
+                .clip(RoundedCornerShape(18.dp)), // Original clip
+            contentScale = ContentScale.Crop // Original scale
         )
         Spacer(modifier = Modifier.height(6.dp))
-        Text(title, fontSize = 14.sp)
+        Text(title, fontSize = 14.sp) // Original font size
     }
 }
-
 @Composable
 fun TrendingTrips(navController: NavController) {
     Column(
