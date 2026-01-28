@@ -10,4 +10,5 @@
     <string name="title_activity_admin_launcher">AdminLauncherActivity</string>
     <string name="title_activity_retrofit_client">RetrofitClient</string>
     <string name="title_activity_weather_api_service.kt">WeatherApiService.kt</string>
+    <string name="title_activity_weather_api_service">WeatherApiService</string>
 </resources>
