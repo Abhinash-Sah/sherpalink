@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Main app theme -->
+    <style name="Theme.SherpaLink" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- App-level theme customizations -->
+    </style>
+
+    <!-- Splash screen theme -->
+    <style name="Theme.SherpaLink.Splash" parent="Theme.SplashScreen">
+
+        <!-- Splash background -->
+        <item name="windowSplashScreenBackground">#FFFFFF</item>
+
+        <!-- Splash icon -->
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+
+        <!-- Theme after splash -->
+        <item name="postSplashScreenTheme">@style/Theme.SherpaLink</item>
+
+    </style>
+
     <style name="Theme.Sherpalink" parent="android:Theme.Material.Light.NoActionBar" />
+
 </resources>
