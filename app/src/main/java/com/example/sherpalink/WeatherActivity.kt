@@ -71,6 +71,7 @@ suspend fun fetchWeather(onResult: (String, String) -> Unit) {
                 .getJSONObject(0)
                 .getString("description")
 
+
             onResult(temp, desc)
 
         } catch (e: Exception) {

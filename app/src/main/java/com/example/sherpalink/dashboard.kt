@@ -20,8 +20,11 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.sherpalink.screens.*
+import com.example.sherpalink.R
+import com.example.sherpalink.ui.notifications.NotificationScreen
+import com.example.sherpalink.ui.theme.ProfileScreen
+import com.example.sherpalink.ui.theme.RatingsScreen
 import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
-import RatingsScreen
 import com.example.sherpalink.ui.theme.ui.theme.TrendingTripsScreen
 
 class DashboardActivity : ComponentActivity() {

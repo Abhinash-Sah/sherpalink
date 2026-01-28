@@ -8,7 +8,8 @@ package com.example.sherpalink
         val password: String = "",
         val dob: String = "",
         val gender: String = "",
-        val role: String = ""
+        val role: String = "",
+        val profileImageUrl: String = ""
     ) {
 
         fun toMap(): Map<String, Any?> {
@@ -19,7 +20,8 @@ package com.example.sherpalink
                 "email" to email,
                 "dob" to dob,
                 "gender" to gender,
-                "role" to role
+                "role" to role,
+                "profileImageUrl" to profileImageUrl
             )
         }
     }
