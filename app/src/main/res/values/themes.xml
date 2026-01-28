@@ -19,6 +19,7 @@
         <item name="postSplashScreenTheme">@style/Theme.SherpaLink</item>
 
     </style>
+
     <style name="Theme.Sherpalink" parent="android:Theme.Material.Light.NoActionBar" />
 
 </resources>

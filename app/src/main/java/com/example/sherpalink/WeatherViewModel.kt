@@ -2,7 +2,6 @@ package com.example.sherpalink.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.sherpalink.network.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -15,7 +14,7 @@ class WeatherViewModel : ViewModel() {
     fun loadWeather(city: String, apiKey: String) {
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.api.getWeather(city, apiKey)
+                val response = `RetrofitClient.kt`.api.getWeather(city, apiKey)
                 _weatherState.value =
                     "${response.name}\n" +
                             "${response.main.temp}°C\n" +
