@@ -6,20 +6,14 @@ import retrofit2.http.Query
 data class WeatherResponse(
     val name: String,
     val main: Main,
-    val weather: List<Weather>
+    val weather: List<WeatherInfo>
 )
 
-data class Main(
-    val temp: Double,
-    val humidity: Int
-)
+data class Main(val temp: Double, val humidity: Int)
 
-data class Weather(
-    val description: String
-)
+data class WeatherInfo(val description: String)
 
 interface WeatherApiService {
-
     @GET("weather")
     suspend fun getWeather(
         @Query("q") city: String,

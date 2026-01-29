@@ -3,8 +3,7 @@ package com.example.sherpalink.network
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object `RetrofitClient.kt` {
-
+object RetrofitClient {
     private const val BASE_URL = "https://api.openweathermap.org/data/2.5/"
 
     val api: WeatherApiService by lazy {

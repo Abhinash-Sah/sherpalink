@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.sherpalink">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -10,34 +9,34 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
-
+    <uses-feature android:name="android.hardware.camera.any" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Sherpalink"
         android:usesCleartextTraffic="true"
-        tools:replace="android:fullBackupContent">
+        android:theme="@style/Theme.SherpaLink">
 
         <!-- Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDb0Z8lGtIrp4pPGTPH1-iPF--6ss2-Ej0" />
+            android:value="YOUR_API_KEY_HERE" />
 
-        <!-- Launcher Activity -->
+        <!-- Splash / Launcher -->
         <activity
             android:name=".auth.AuthCheckActivity"
             android:exported="true"
-            android:theme="@style/Theme.Sherpalink">
+            android:theme="@style/Theme.SherpaLink.Splash">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
 
-        <!-- Auth Screens -->
         <activity
             android:name=".auth.SignInActivity"
             android:exported="false" />
@@ -46,7 +45,6 @@
             android:name=".auth.SignUpActivity"
             android:exported="false" />
 
-        <!-- Main App Screens -->
         <activity
             android:name=".DashboardActivity"
             android:exported="false" />

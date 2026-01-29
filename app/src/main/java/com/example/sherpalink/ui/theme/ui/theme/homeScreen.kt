@@ -8,12 +8,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
@@ -22,64 +18,95 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.*
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.sherpalink.R
-import com.example.sherpalink.auth.SignInActivity
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
-import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun HomeScreen(navController: NavController) {
-
     var search by remember { mutableStateOf("") }
     var menuOpen by remember { mutableStateOf(false) }
-
-    val images = listOf(
-        R.drawable.image1,
-        R.drawable.image2,
-        R.drawable.image3
-    )
-
     val context = LocalContext.current
+    val images = listOf(R.drawable.image1, R.drawable.image2, R.drawable.image3)
 
     Box(Modifier.fillMaxSize()) {
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(top = 60.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(top = 70.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
+            // 1. Search Bar
             item {
                 OutlinedTextField(
                     value = search,
                     onValueChange = { search = it },
-                    placeholder = { Text("Search...") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = null)
-                    },
+                    placeholder = { Text("Search mountains...") },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp)
+                        .padding(top = 8.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF4CAF50),
+                        unfocusedBorderColor = Color.LightGray
+                    )
                 )
             }
 
+            // 2. Auto Slider
             item { AutoImageSlider(navController, images) }
+
+            // 3. Categories (Weather Edit Here)
             item { CategoryRow(navController) }
-            item { TrendingTrips(navController) }
+
+            // 4. Trending Trips Section
+            item {
+                SectionHeader("Trending Trips") {
+                    navController.navigate("trending_trips_screen")
+                }
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    item { TrendingItem(R.drawable.trip1, "Trekking", "Everest Summit") }
+                    item { TrendingItem(R.drawable.trip2, "Hunting", "Dhorpatan Hunting") }
+                    item { TrendingItem(R.drawable.trip3, "Camping", "Jungle Camping") }
+                    item { TrendingItem(R.drawable.trip4, "Rafting", "Trishuli River") }
+                }
+            }
+
+            // 5. Most Visited Section
+            item {
+                SectionHeader("Most Visited") {}
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    item { TrendingItem(R.drawable.image1, "Nature", "Annapurna Base") }
+                    item { TrendingItem(R.drawable.image2, "Adventure", "Manaslu Circuit") }
+                }
+            }
+
+            // 6. Latest Trips
+            item {
+                SectionHeader("Latest Trips") {}
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LatestTripItem(R.drawable.trip1, "Langtang Valley", "3 Days Ago")
+                    LatestTripItem(R.drawable.trip2, "Gosaikunda Lake", "5 Days Ago")
+                }
+            }
         }
 
+        // Floating Header
         AppHeader(
             modifier = Modifier.zIndex(3f),
             onNotificationClick = { navController.navigate("notifications") },
-            onHomeClick = { navController.navigate("home") },
+            onHomeClick = {
+                navController.navigate("home") {
+                    popUpTo("home") { inclusive = true }
+                }
+            },
             menuOpen = menuOpen,
             onMenuToggle = { menuOpen = !menuOpen },
             onProfileClick = { navController.navigate("profile") },
@@ -88,118 +115,109 @@ fun HomeScreen(navController: NavController) {
             onMyBookingsClick = { navController.navigate("myBookings") },
             onLogout = {
                 FirebaseAuth.getInstance().signOut()
-                context.startActivity(Intent(context, SignInActivity::class.java))
-                (context as Activity).finish()
+                navController.navigate("sign_in") {
+                    popUpTo(0) { inclusive = true }
+                }
             }
         )
     }
 }
 
 @Composable
-fun AppHeader(
-    modifier: Modifier = Modifier,
-    onNotificationClick: () -> Unit,
-    onHomeClick: () -> Unit,
-    menuOpen: Boolean,
-    onMenuToggle: () -> Unit,
-    onProfileClick: () -> Unit = {},
-    onAboutClick: () -> Unit = {},
-    onRatingsClick: () -> Unit = {},
-    onMyBookingsClick: () -> Unit = {},
-    onLogout: () -> Unit
-) {
-    Box(modifier.fillMaxWidth()) {
+fun SectionHeader(title: String, onAction: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(title, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        IconButton(onClick = onAction) {
+            Icon(Icons.Default.KeyboardArrowRight, null, modifier = Modifier.size(28.dp))
+        }
+    }
+}
 
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Default.Notifications,
-                null,
-                modifier = Modifier.size(32.dp).clickable { onNotificationClick() }
-            )
-
-            Text(
-                "SherpaLink",
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { onHomeClick() }
-            )
-
-            Icon(
-                Icons.Default.Menu,
-                null,
-                modifier = Modifier.size(32.dp).clickable { onMenuToggle() }
-            )
+@Composable
+fun CategoryRow(navController: NavController) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        CategoryItem(R.drawable.tour_package, "Tour\nPackage") {
+            navController.navigate("tour_package")
         }
 
-        if (menuOpen) {
-            Column(
-                Modifier
-                    .padding(top = 60.dp)
-                    .background(Color.White)
-                    .width(200.dp)
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = "Profile",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            onMenuToggle()
-                            onProfileClick()
-                        }
-                        .padding(vertical = 8.dp)
-                )
-                Text(
-                    text = "About",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            onMenuToggle()
-                            onAboutClick()
-                        }
-                        .padding(vertical = 8.dp)
-                )
-                Text(
-                    text = "Ratings",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            onMenuToggle()
-                            onRatingsClick()
-                        }
-                        .padding(vertical = 8.dp)
-                )
-                Text(
-                    text = "My Bookings",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            onMenuToggle()
-                            onMyBookingsClick()
-                        }
-                        .padding(vertical = 8.dp)
-                )
+        // ONLY EDIT: Registration -> Weather
+        CategoryItem(R.drawable.registration, "Mountain\nWeather") {
+            navController.navigate("weather")
+        }
 
-                Divider(color = Color.Gray, thickness = 1.dp)
+        CategoryItem(R.drawable.guide, "Guide\nBooking") {
+            navController.navigate("guide_booking")
+        }
+    }
+}
 
-                Text(
-                    text = "Logout",
-                    color = Color.Red,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            onMenuToggle()
-                            onLogout()
-                        }
-                        .padding(vertical = 8.dp)
-                )
-            }
+@Composable
+fun CategoryItem(image: Int, title: String, onClick: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        Image(
+            painter = painterResource(image),
+            contentDescription = null,
+            modifier = Modifier
+                .size(80.dp)
+                .clip(RoundedCornerShape(18.dp)),
+            contentScale = ContentScale.Crop
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(title, fontSize = 13.sp, textAlign = TextAlign.Center, lineHeight = 16.sp)
+    }
+}
+
+@Composable
+fun TrendingItem(image: Int, category: String, title: String) {
+    Column(modifier = Modifier.width(160.dp)) {
+        Image(
+            painter = painterResource(image),
+            contentDescription = null,
+            modifier = Modifier
+                .size(160.dp)
+                .clip(RoundedCornerShape(18.dp)),
+            contentScale = ContentScale.Crop
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(category, fontSize = 11.sp, color = Color.Gray)
+        Text(title, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+fun LatestTripItem(image: Int, title: String, time: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color(0xFFF5F5F5))
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(image),
+            contentDescription = null,
+            modifier = Modifier
+                .size(60.dp)
+                .clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column {
+            Text(title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(time, fontSize = 12.sp, color = Color.Gray)
         }
     }
 }
@@ -207,14 +225,12 @@ fun AppHeader(
 @Composable
 fun AutoImageSlider(navController: NavController, images: List<Int>) {
     var currentIndex by remember { mutableStateOf(0) }
-
     LaunchedEffect(Unit) {
         while (true) {
             delay(3000)
             currentIndex = (currentIndex + 1) % images.size
         }
     }
-
     Image(
         painter = painterResource(images[currentIndex]),
         contentDescription = null,
@@ -222,13 +238,10 @@ fun AutoImageSlider(navController: NavController, images: List<Int>) {
             .fillMaxWidth()
             .height(180.dp)
             .clip(RoundedCornerShape(16.dp))
-            .clickable {
-                navController.navigate("full_image/$currentIndex") // ✅ FIXED
-            },
+            .clickable { navController.navigate("full_image/$currentIndex") },
         contentScale = ContentScale.Crop
     )
 }
-
 
 @Composable
 fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
@@ -246,109 +259,94 @@ fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
             contentScale = ContentScale.Fit
         )
     }
-}@Composable
-fun CategoryRow(navController: NavController) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween // Original Arrangement
-    ) {
-        CategoryItem(R.drawable.tour_package, "Tour\nPackage") {
-            navController.navigate("tour_package")
-        }
-        CategoryItem(R.drawable.registration, "Registration\nForm") {
-            // CRASH FIX: Added default arguments so the NavHost finds the route
-            navController.navigate("registration_form/general/General_Booking")
-        }
-        CategoryItem(R.drawable.guide, "Guide\nBooking") {
-            navController.navigate("guide_booking")
-        }
-    }
 }
 
 @Composable
-fun CategoryItem(image: Int, title: String, onClick: () -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.clickable { onClick() }
-    ) {
-        Image(
-            painter = painterResource(image),
-            contentDescription = null,
-            modifier = Modifier
-                .size(100.dp) // Original size
-                .clip(RoundedCornerShape(18.dp)), // Original clip
-            contentScale = ContentScale.Crop // Original scale
-        )
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(title, fontSize = 14.sp) // Original font size
-    }
-}
-@Composable
-fun TrendingTrips(navController: NavController) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        // Header row
+fun AppHeader(
+    modifier: Modifier = Modifier,
+    onNotificationClick: () -> Unit,
+    onHomeClick: () -> Unit,
+    menuOpen: Boolean,
+    onMenuToggle: () -> Unit,
+    onProfileClick: () -> Unit,
+    onAboutClick: () -> Unit,
+    onRatingsClick: () -> Unit,
+    onMyBookingsClick: () -> Unit,
+    onLogout: () -> Unit
+) {
+    Box(modifier.fillMaxWidth().background(Color.White).padding(bottom = 8.dp)) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            Icon(
+                Icons.Default.Notifications,
+                contentDescription = null,
+                modifier = Modifier.size(30.dp).clickable { onNotificationClick() }
+            )
+
             Text(
-                text = "Trending Trips",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+                "SherpaLink",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFF2E7D32),
+                modifier = Modifier.clickable { onHomeClick() }
             )
 
             Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
-                contentDescription = "Trips",
-                modifier = Modifier
-                    .size(32.dp)
-                    .clickable {
-                        navController.navigate("trending_trips_screen")
-                    }
+                Icons.Default.Menu,
+                contentDescription = null,
+                modifier = Modifier.size(30.dp).clickable { onMenuToggle() }
             )
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        if (menuOpen) {
+            Surface(
+                modifier = Modifier
+                    .padding(top = 60.dp, end = 16.dp)
+                    .align(Alignment.TopEnd),
+                shape = RoundedCornerShape(12.dp),
+                shadowElevation = 10.dp,
+                color = Color.White
+            ) {
+                Column(Modifier.width(200.dp).padding(8.dp)) {
+                    val items = listOf(
+                        Triple("Profile", Icons.Default.Person, onProfileClick),
+                        Triple("About", Icons.Default.Info, onAboutClick),
+                        Triple("Ratings", Icons.Default.Star, onRatingsClick),
+                        Triple("My Bookings", Icons.Default.List, onMyBookingsClick)
+                    )
 
-
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            item { TrendingItem(R.drawable.trip1, "Trekking", "Everest Summit") }
-            item { TrendingItem(R.drawable.trip2, "Hunting", "Dhorpatan Hunting") }
-            item { TrendingItem(R.drawable.trip3, "Camping", "Jungle Camping") }
-            item { TrendingItem(R.drawable.trip4, "Rafting", "Trishuli River") }
+                    items.forEach { (label, icon, action) ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable { onMenuToggle(); action() }
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(icon, null, modifier = Modifier.size(20.dp), tint = Color.Gray)
+                            Spacer(Modifier.width(12.dp))
+                            Text(label, fontSize = 16.sp)
+                        }
+                    }
+                    Divider(Modifier.padding(vertical = 4.dp))
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable { onMenuToggle(); onLogout() }
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.ExitToApp, null, modifier = Modifier.size(20.dp), tint = Color.Red)
+                        Spacer(Modifier.width(12.dp))
+                        Text("Logout", color = Color.Red, fontSize = 16.sp)
+                    }
+                }
+            }
         }
     }
-}
-
-
-
-@Composable
-fun TrendingItem(image: Int, category: String, title: String) {
-    Column(modifier = Modifier.padding(end = 18.dp)) {
-        Image(
-            painter = painterResource(image),
-            contentDescription = null,
-            modifier = Modifier
-                .size(180.dp)
-                .clip(RoundedCornerShape(18.dp)),
-            contentScale = ContentScale.Crop
-        )
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(category, fontSize = 12.sp, color = Color.Gray)
-        Text(title, fontSize = 16.sp)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    HomeScreen(navController = rememberNavController())
 }

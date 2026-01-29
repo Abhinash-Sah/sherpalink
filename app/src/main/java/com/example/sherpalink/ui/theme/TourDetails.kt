@@ -75,7 +75,7 @@ fun TourDetailsScreenSafe(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(80.dp)
                     .align(Alignment.BottomCenter)
                     .padding(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F6ED5))

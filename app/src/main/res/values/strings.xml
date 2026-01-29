@@ -1,14 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">sherpalink</string>
-    <string name="title_activity_dashboard">dashboard</string>
-    <string name="title_activity_">Activity</string>
-    <string name="title_activity_menu">menu</string>
-    <string name="title_activity_sign_in_activity.kt">SignInActivity.kt</string>
-    <string name="title_activity_sign_up_screen">SignUpScreen</string>
-    <string name="title_activity_sign_up">SignUpActivity</string>
-    <string name="title_activity_auth_check">AuthCheckActivity</string>
-    <string name="title_activity_admin_launcher">AdminLauncherActivity</string>
-    <string name="title_activity_retrofit_client">RetrofitClient</string>
-    <string name="title_activity_weather_api_service.kt">WeatherApiService.kt</string>
-    <string name="title_activity_weather_api_service">WeatherApiService</string>
+
+    <string name="app_name">SherpaLink</string>
+
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_menu">Menu</string>
+    <string name="title_sign_in">Sign In</string>
+    <string name="title_sign_up">Sign Up</string>
+    <string name="title_auth_check">Auth Check</string>
+    <string name="title_admin_launcher">Admin Launcher</string>
+    <string name="title_weather_api_service">Weather API Service</string>
+
 </resources>

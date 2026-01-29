@@ -1,25 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Main app theme -->
+    <!-- Main App Theme -->
     <style name="Theme.SherpaLink" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- App-level theme customizations -->
+        <!-- Customize colors if needed -->
     </style>
 
-    <!-- Splash screen theme -->
+    <!-- Splash Screen Theme (Android 12+) -->
     <style name="Theme.SherpaLink.Splash" parent="Theme.SplashScreen">
-
-        <!-- Splash background -->
-        <item name="windowSplashScreenBackground">#FFFFFF</item>
-
-        <!-- Splash icon -->
+        <item name="windowSplashScreenBackground">@color/white</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
-
-        <!-- Theme after splash -->
         <item name="postSplashScreenTheme">@style/Theme.SherpaLink</item>
-
     </style>
-
-    <style name="Theme.Sherpalink" parent="android:Theme.Material.Light.NoActionBar" />
 
 </resources>
