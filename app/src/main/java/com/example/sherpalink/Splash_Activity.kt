@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.sherpalink.auth.SignInActivity
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 
 class SplashActivity : ComponentActivity() {
@@ -23,7 +25,15 @@ class SplashActivity : ComponentActivity() {
 
         setContent {
             SplashScreen {
-                startActivity(Intent(this, MainActivity::class.java))
+                // Check if user is already logged in
+                val currentUser = FirebaseAuth.getInstance().currentUser
+                if (currentUser != null) {
+                    // User is logged in, skip login screen
+                    startActivity(Intent(this@SplashActivity, DashboardActivity::class.java))
+                } else {
+                    // No user found, go to SignIn
+                    startActivity(Intent(this@SplashActivity, SignInActivity::class.java))
+                }
                 finish()
             }
         }
@@ -32,9 +42,8 @@ class SplashActivity : ComponentActivity() {
 
 @Composable
 fun SplashScreen(onTimeout: () -> Unit) {
-
     LaunchedEffect(Unit) {
-        delay(2000) // 2 seconds
+        delay(2500) // Give them 2.5 seconds to see your logo
         onTimeout()
     }
 
@@ -46,8 +55,8 @@ fun SplashScreen(onTimeout: () -> Unit) {
     ) {
         Image(
             painter = painterResource(id = R.drawable.splash_logo),
-            contentDescription = "Splash Logo",
-            modifier = Modifier.size(200.dp)
+            contentDescription = "SherpaLink Logo",
+            modifier = Modifier.size(180.dp)
         )
     }
 }

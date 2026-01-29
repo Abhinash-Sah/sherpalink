@@ -54,10 +54,14 @@ class UserRepoImplementation(private val context: Context) : UserRepo {
         }
     }
 
-    override fun forgetPassword(email: String, callback: (Boolean, String) -> Unit) {
+    override fun forgetPassword(email: String, context: android.content.Context, callback: (Boolean, String) -> Unit) {
         auth.sendPasswordResetEmail(email)
-            .addOnSuccessListener { callback(true, "Password reset email sent") }
-            .addOnFailureListener { e -> callback(false, e.message ?: "Failed to send reset email") }
+            .addOnSuccessListener {
+                callback(true, "Password reset email sent")
+            }
+            .addOnFailureListener { e ->
+                callback(false, e.message ?: "Failed to send reset email")
+            }
     }
 
     override fun getCurrentUser(): FirebaseUser? = auth.currentUser

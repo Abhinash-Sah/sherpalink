@@ -1,40 +1,75 @@
 package com.example.sherpalink
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.compose.*
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.cloudinary.android.MediaManager
-import com.example.sherpalink.repository.*
-import com.example.sherpalink.screens.*
+import com.example.sherpalink.repository.BookingRepoImplementation
+import com.example.sherpalink.repository.GuideRepoImplementation
+import com.example.sherpalink.repository.NotificationRepoImplementation
+import com.example.sherpalink.repository.ProductRepoImplementation
+import com.example.sherpalink.repository.UserRepoImplementation
+import com.example.sherpalink.screens.AddScreen
+import com.example.sherpalink.screens.FullScreenImage
+import com.example.sherpalink.screens.HomeScreen
+import com.example.sherpalink.screens.LocationScreen
+import com.example.sherpalink.screens.MessageScreen
+import com.example.sherpalink.screens.MostVisitedScreen
+import com.example.sherpalink.screens.RegistrationScreen
+import com.example.sherpalink.screens.TourDetailsScreenSafe
+import com.example.sherpalink.screens.TourPackageScreen
+import com.example.sherpalink.screens.WeatherScreen
 import com.example.sherpalink.ui.auth.SignInScreen
 import com.example.sherpalink.ui.guide.GuideBookingScreen
-import com.example.sherpalink.viewmodel.*
-import com.google.firebase.auth.FirebaseAuth
 import com.example.sherpalink.ui.notifications.NotificationScreen
 import com.example.sherpalink.ui.theme.MyBookingsScreen
 import com.example.sherpalink.ui.theme.ProfileScreen
 import com.example.sherpalink.ui.theme.RatingsScreen
 import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
+import com.example.sherpalink.ui.theme.ui.theme.Repo.ReviewRepoImplementation
 import com.example.sherpalink.ui.theme.ui.theme.TrendingTripsScreen
-import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.example.sherpalink.ui.theme.ui.theme.ViewModel.ReviewViewModel
+import com.example.sherpalink.ui.theme.ui.theme.ViewModel.ReviewViewModelFactory
+import com.example.sherpalink.viewmodel.BookingViewModel
+import com.example.sherpalink.viewmodel.BookingViewModelFactory
+import com.example.sherpalink.viewmodel.GuideViewModel
+import com.example.sherpalink.viewmodel.GuideViewModelFactory
+import com.example.sherpalink.viewmodel.NotificationViewModel
+import com.example.sherpalink.viewmodel.NotificationViewModelFactory
+import com.example.sherpalink.viewmodel.ProductViewModel
+import com.example.sherpalink.viewmodel.UserViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,15 +89,26 @@ class DashboardActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
+            val context = LocalContext.current
+
             val userViewModel: UserViewModel = viewModel(factory = UserViewModel.UserViewModelFactory(UserRepoImplementation(this)))
             val productViewModel: ProductViewModel = viewModel { ProductViewModel(ProductRepoImplementation()) }
             val guideViewModel: GuideViewModel = viewModel(factory = GuideViewModelFactory(GuideRepoImplementation(this)))
             val bookingViewModel: BookingViewModel = viewModel(factory = BookingViewModelFactory(BookingRepoImplementation()))
 
-            DashboardRoot(productViewModel, userViewModel, guideViewModel, bookingViewModel, navController)
-        }
-    }
-}
+            val reviewViewModel: ReviewViewModel = viewModel(
+                factory = ReviewViewModelFactory(ReviewRepoImplementation())
+            )
+
+            DashboardRoot(
+                productViewModel = productViewModel,
+                userViewModel = userViewModel,
+                guideViewModel = guideViewModel,
+                bookingViewModel = bookingViewModel,
+                reviewViewModel = reviewViewModel, // FIXED: Pass the variable
+                navController = navController
+            )
+        }}}
 
 @Composable
 fun DashboardRoot(
@@ -70,7 +116,8 @@ fun DashboardRoot(
     userViewModel: UserViewModel,
     guideViewModel: GuideViewModel,
     bookingViewModel: BookingViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    reviewViewModel: ReviewViewModel,
 ) {
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
@@ -128,7 +175,9 @@ fun DashboardRoot(
                 composable("notifications") { NotificationScreen(navController, currentUserId) }
                 composable("guide_booking") { GuideBookingScreen(navController, guideViewModel) }
                 composable("about") { AboutScreen() }
-                composable("ratings") { RatingsScreen() }
+                composable("ratings") {
+                    RatingsScreen(reviewViewModel, userViewModel)
+                }
                 composable(
                     "full_image/{index}",
                     arguments = listOf(navArgument("index") { type = NavType.IntType })

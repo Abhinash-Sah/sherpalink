@@ -1,11 +1,11 @@
 package com.example.sherpalink.screens
 
-import android.app.Activity
-import android.content.Intent
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -13,9 +13,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.*
 import androidx.compose.ui.text.style.TextAlign
@@ -31,47 +32,66 @@ import kotlinx.coroutines.delay
 fun HomeScreen(navController: NavController) {
     var search by remember { mutableStateOf("") }
     var menuOpen by remember { mutableStateOf(false) }
-    val context = LocalContext.current
     val images = listOf(R.drawable.image1, R.drawable.image2, R.drawable.image3)
 
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
+        // --- 1. Main Scrollable Content ---
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(top = 70.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(top = 90.dp, bottom = 24.dp), // Increased top padding for header
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // 1. Search Bar
+            // Search Bar Section
             item {
-                OutlinedTextField(
-                    value = search,
-                    onValueChange = { search = it },
-                    placeholder = { Text("Search mountains...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFF4CAF50),
-                        unfocusedBorderColor = Color.LightGray
+                PaddingWrapper {
+                    OutlinedTextField(
+                        value = search,
+                        onValueChange = { search = it },
+                        placeholder = { Text("Search mountains, guides...", color = Color.Gray) },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFF2E7D32)) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(2.dp, RoundedCornerShape(16.dp)),
+                        shape = RoundedCornerShape(16.dp),
+                        singleLine = true,
+                        // FIXED: Using valid M3 color parameters
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF2E7D32),
+                            unfocusedBorderColor = Color.Transparent,
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White
+                        )
                     )
-                )
+                }
             }
 
-            // 2. Auto Slider
-            item { AutoImageSlider(navController, images) }
-
-            // 3. Categories
-            item { CategoryRow(navController) }
-
-            // 4. Trending Trips Section
+            // Slider Section
             item {
-                SectionHeader("Trending Trips") {
-                    navController.navigate("trending_trips_screen")
+                PaddingWrapper {
+                    AutoImageSlider(navController, images)
                 }
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            }
+
+            // Categories Section
+            item {
+                PaddingWrapper {
+                    Text("Services", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1A1A1A))
+                    Spacer(Modifier.height(12.dp))
+                    CategoryRow(navController)
+                }
+            }
+
+            // Trending Trips
+            item {
+                PaddingWrapper {
+                    SectionHeader("Trending Trips") {
+                        navController.navigate("trending_trips_screen")
+                    }
+                }
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
                     item { TrendingItem(R.drawable.trip1, "Trekking", "Everest Summit") }
                     item { TrendingItem(R.drawable.trip2, "Hunting", "Dhorpatan Hunting") }
                     item { TrendingItem(R.drawable.trip3, "Camping", "Jungle Camping") }
@@ -79,21 +99,26 @@ fun HomeScreen(navController: NavController) {
                 }
             }
 
-            // 5. Most Visited Section (Navigation Enabled)
+            // Most Visited
             item {
-                SectionHeader("Most Visited") {
-                    navController.navigate("most_visited_screen") // Navigates to the screen we created
+                PaddingWrapper {
+                    SectionHeader("Most Visited") {
+                        navController.navigate("most_visited_screen")
+                    }
                 }
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
                     item { TrendingItem(R.drawable.image1, "Nature", "Annapurna Base") }
                     item { TrendingItem(R.drawable.image2, "Adventure", "Manaslu Circuit") }
                 }
             }
         }
 
-        // Floating Header
+        // --- 2. Elegant App Header (Fixed at Top) ---
         AppHeader(
-            modifier = Modifier.zIndex(3f),
+            modifier = Modifier.align(Alignment.TopCenter).zIndex(5f),
             onNotificationClick = { navController.navigate("notifications") },
             onHomeClick = {
                 navController.navigate("home") {
@@ -116,6 +141,15 @@ fun HomeScreen(navController: NavController) {
     }
 }
 
+// --- Helper UI Components ---
+
+@Composable
+fun PaddingWrapper(content: @Composable () -> Unit) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        content()
+    }
+}
+
 @Composable
 fun SectionHeader(title: String, onAction: () -> Unit) {
     Row(
@@ -123,66 +157,122 @@ fun SectionHeader(title: String, onAction: () -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(title, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-        IconButton(onClick = onAction) {
-            Icon(Icons.Default.KeyboardArrowRight, null, modifier = Modifier.size(28.dp))
-        }
+        Text(title, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1B263B))
+        Text(
+            "See All",
+            fontSize = 14.sp,
+            color = Color(0xFF2E7D32),
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.clickable { onAction() }
+        )
     }
-}
-
-@Composable
+}@Composable
 fun CategoryRow(navController: NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        CategoryItem(R.drawable.tour_package, "Tour\nPackage") {
-            navController.navigate("tour_package")
-        }
-        CategoryItem(R.drawable.registration, "Mountain\nWeather") {
-            navController.navigate("weather")
-        }
-        CategoryItem(R.drawable.guide, "Guide\nBooking") {
-            navController.navigate("guide_booking")
+        val categories = listOf(
+            Triple(R.drawable.tour_package, "Tour\nPackage", "tour_package"),
+            Triple(R.drawable.registration, "Weather", "weather"),
+            Triple(R.drawable.guide, "Guides", "guide_booking")
+        )
+
+        categories.forEach { (image, title, route) ->
+            CategoryItem(
+                image = image,
+                title = title,
+                modifier = Modifier.weight(1f)
+            ) {
+                navController.navigate(route)
+            }
         }
     }
 }
 
 @Composable
-fun CategoryItem(image: Int, title: String, onClick: () -> Unit) {
+fun CategoryItem(image: Int, title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.clickable { onClick() }
+        modifier = modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null
+        ) { onClick() }
     ) {
-        Image(
-            painter = painterResource(image),
-            contentDescription = null,
+        // The Button Container
+        Surface(
             modifier = Modifier
-                .size(80.dp)
-                .clip(RoundedCornerShape(18.dp)),
-            contentScale = ContentScale.Crop
-        )
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(title, fontSize = 13.sp, textAlign = TextAlign.Center, lineHeight = 16.sp)
+                .aspectRatio(1f) // Makes it a perfect square
+                .fillMaxWidth()
+                .shadow(8.dp, RoundedCornerShape(20.dp)),
+            shape = RoundedCornerShape(20.dp),
+            color = Color.LightGray // Placeholder color while loading
+        ) {
+            Box {
+                // The Image now fills the entire button
+                Image(
+                    painter = painterResource(image),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop // This makes the image cover the full button
+                )
+
+                // Elegant Gradient Overlay for text readability
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f)),
+                                startY = 100f
+                            )
+                        )
+                )
+
+                // Text placed INSIDE the image at the bottom
+                Text(
+                    text = title,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 14.sp,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 8.dp)
+                )
+            }
+        }
     }
 }
-
 @Composable
 fun TrendingItem(image: Int, category: String, title: String) {
-    Column(modifier = Modifier.width(160.dp)) {
-        Image(
-            painter = painterResource(image),
-            contentDescription = null,
-            modifier = Modifier
-                .size(160.dp)
-                .clip(RoundedCornerShape(18.dp)),
-            contentScale = ContentScale.Crop
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(category, fontSize = 11.sp, color = Color.Gray)
-        Text(title, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+    Card(
+        modifier = Modifier.width(180.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column {
+            Image(
+                painter = painterResource(image),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(110.dp),
+                contentScale = ContentScale.Crop
+            )
+            Column(Modifier.padding(12.dp)) {
+                Text(category.uppercase(), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
+                Text(title, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1B263B), maxLines = 1)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.LocationOn, null, modifier = Modifier.size(12.dp), tint = Color.Gray)
+                    Text(" Nepal", fontSize = 11.sp, color = Color.Gray)
+                }
+            }
+        }
     }
 }
 
@@ -191,36 +281,62 @@ fun AutoImageSlider(navController: NavController, images: List<Int>) {
     var currentIndex by remember { mutableStateOf(0) }
     LaunchedEffect(Unit) {
         while (true) {
-            delay(3000)
+            delay(4000)
             currentIndex = (currentIndex + 1) % images.size
         }
     }
-    Image(
-        painter = painterResource(images[currentIndex]),
-        contentDescription = null,
-        modifier = Modifier
+    Box(
+        Modifier
             .fillMaxWidth()
-            .height(180.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { navController.navigate("full_image/$currentIndex") },
-        contentScale = ContentScale.Crop
-    )
+            .height(190.dp)
+            .shadow(4.dp, RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(24.dp))
+            .clickable { navController.navigate("full_image/$currentIndex") }
+    ) {
+        Image(
+            painter = painterResource(images[currentIndex]),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(0.5f))))
+        )
+        Text(
+            "Explore Nepal with SherpaLink",
+            modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            fontSize = 17.sp
+        )
+    }
 }
 @Composable
 fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(androidx.compose.ui.graphics.Color.Black)
+            .background(Color.Black)
+            // Using a specific clickable to prevent accidental clicks
             .clickable { onBack() },
-        contentAlignment = androidx.compose.ui.Alignment.Center
+        contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = androidx.compose.ui.res.painterResource(id = imageRes),
-            contentDescription = null,
+            painter = painterResource(id = imageRes),
+            contentDescription = "Full Screen View",
             modifier = Modifier.fillMaxSize(),
-            contentScale = androidx.compose.ui.layout.ContentScale.Fit
+            contentScale = ContentScale.Fit
         )
+
+        // Small close button for better UX
+        IconButton(
+            onClick = onBack,
+            modifier = Modifier.align(Alignment.TopStart).padding(top = 40.dp, start = 16.dp)
+        ) {
+            Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+        }
     }
 }
 @Composable
@@ -236,76 +352,72 @@ fun AppHeader(
     onMyBookingsClick: () -> Unit,
     onLogout: () -> Unit
 ) {
-    Box(modifier.fillMaxWidth().background(Color.White).padding(bottom = 8.dp)) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Default.Notifications,
-                contentDescription = null,
-                modifier = Modifier.size(30.dp).clickable { onNotificationClick() }
-            )
-
-            Text(
-                "SherpaLink",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFF2E7D32),
-                modifier = Modifier.clickable { onHomeClick() }
-            )
-
-            Icon(
-                Icons.Default.Menu,
-                contentDescription = null,
-                modifier = Modifier.size(30.dp).clickable { onMenuToggle() }
-            )
-        }
-
-        if (menuOpen) {
-            Surface(
-                modifier = Modifier
-                    .padding(top = 60.dp, end = 16.dp)
-                    .align(Alignment.TopEnd),
-                shape = RoundedCornerShape(12.dp),
-                shadowElevation = 10.dp,
-                color = Color.White
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = Color.White.copy(alpha = 0.98f),
+        shadowElevation = 4.dp
+    ) {
+        Box(Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(Modifier.width(200.dp).padding(8.dp)) {
-                    val items = listOf(
-                        Triple("Profile", Icons.Default.Person, onProfileClick),
-                        Triple("About", Icons.Default.Info, onAboutClick),
-                        Triple("Ratings", Icons.Default.Star, onRatingsClick),
-                        Triple("My Bookings", Icons.Default.List, onMyBookingsClick)
-                    )
+                IconButton(onClick = onNotificationClick) {
+                    Icon(Icons.Default.Notifications, null, modifier = Modifier.size(26.dp), tint = Color(0xFF1B263B))
+                }
 
-                    items.forEach { (label, icon, action) ->
+                Text(
+                    "SherpaLink",
+                    fontSize = 22.sp,
+                    fontFamily = FontFamily.Serif,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF2E7D32),
+                    modifier = Modifier.clickable { onHomeClick() }
+                )
+
+                IconButton(onClick = onMenuToggle) {
+                    Icon(if (menuOpen) Icons.Default.Close else Icons.Default.Menu, null, modifier = Modifier.size(26.dp))
+                }
+            }
+
+            // --- Menu Popup (Properly inside Header Box) ---
+            if (menuOpen) {
+                Card(
+                    modifier = Modifier
+                        .padding(top = 55.dp)
+                        .align(Alignment.TopEnd),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(8.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
+                    Column(Modifier.width(180.dp).padding(8.dp)) {
+                        val menuItems = listOf(
+                            Triple("Profile", Icons.Default.Person, onProfileClick),
+                            Triple("About Us", Icons.Default.Info, onAboutClick),
+                            Triple("Ratings", Icons.Default.Star, onRatingsClick),
+                            Triple("My Bookings", Icons.Default.List, onMyBookingsClick)
+                        )
+
+                        menuItems.forEach { (label, icon, action) ->
+                            Row(
+                                Modifier.fillMaxWidth().clickable { onMenuToggle(); action() }.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(icon, null, modifier = Modifier.size(18.dp), tint = Color(0xFF2E7D32))
+                                Spacer(Modifier.width(12.dp))
+                                Text(label, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                            }
+                        }
+                        HorizontalDivider(Modifier.padding(vertical = 4.dp), color = Color.LightGray.copy(0.4f))
                         Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .clickable { onMenuToggle(); action() }
-                                .padding(12.dp),
+                            Modifier.fillMaxWidth().clickable { onMenuToggle(); onLogout() }.padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(icon, null, modifier = Modifier.size(20.dp), tint = Color.Gray)
+                            Icon(Icons.Default.ExitToApp, null, modifier = Modifier.size(18.dp), tint = Color.Red)
                             Spacer(Modifier.width(12.dp))
-                            Text(label, fontSize = 16.sp)
+                            Text("Logout", color = Color.Red, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                         }
-                    }
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable { onMenuToggle(); onLogout() }
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Default.ExitToApp, null, modifier = Modifier.size(20.dp), tint = Color.Red)
-                        Spacer(Modifier.width(12.dp))
-                        Text("Logout", color = Color.Red, fontSize = 16.sp)
                     }
                 }
             }

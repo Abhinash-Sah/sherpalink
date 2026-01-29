@@ -1,5 +1,6 @@
 package com.example.sherpalink.viewmodel
 
+import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
@@ -86,8 +87,13 @@ class UserViewModel(private val repo: UserRepo) : ViewModel() {
     }
 
 
-    fun repoForgetPassword(email: String, callback: (Boolean, String) -> Unit) {
-        repo.forgetPassword(email, callback)
+    // In UserViewModel.kt
+    fun repoForgetPassword(email: String, context: Context, callback: (Boolean, String) -> Unit) {
+        loading = true // Start loading
+        repo.forgetPassword(email, context) { success, message ->
+            loading = false // Stop loading
+            callback(success, message)
+        }
     }
 
     fun deleteAccount(password: String, callback: (Boolean, String) -> Unit) {

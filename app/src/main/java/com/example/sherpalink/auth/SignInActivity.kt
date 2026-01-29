@@ -27,7 +27,6 @@ class SignInActivity : ComponentActivity() {
         setContent {
             SignInScreen(
                 onSignInClick = { email, password ->
-                    // .trim() is crucial to remove accidental spaces at the end of email
                     val cleanEmail = email.trim()
                     val cleanPassword = password.trim()
 
@@ -35,19 +34,16 @@ class SignInActivity : ComponentActivity() {
                         if (success) {
                             Log.d("LoginSuccess", "User authenticated: $cleanEmail")
 
-                            // 1. Check for Admin Credentials (MUST MATCH FIREBASE EXACTLY)
+                            // 1. Check for Admin Credentials
                             if (cleanEmail == "admin@gmail.com" && cleanPassword == "admin123") {
                                 Toast.makeText(this, "Welcome Admin", Toast.LENGTH_SHORT).show()
-                                val intent = Intent(this, AdminLauncherActivity::class.java)
-                                startActivity(intent)
+                                startActivity(Intent(this, AdminLauncherActivity::class.java))
                             } else {
                                 // 2. Regular User Login
                                 startActivity(Intent(this, DashboardActivity::class.java))
                             }
                             finish()
                         } else {
-                            // This message comes from Firebase.
-                            // If it says "invalid-credential", the email/pass isn't in Firebase Authentication.
                             Log.e("LoginError", "Error: $message")
                             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
                         }
@@ -58,9 +54,10 @@ class SignInActivity : ComponentActivity() {
                 },
                 onForgotPasswordClick = { email ->
                     if (email.isBlank()) {
-                        Toast.makeText(this, "Please enter your email address", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Please enter your email address in the field above", Toast.LENGTH_SHORT).show()
                     } else {
-                        userViewModel.repoForgetPassword(email.trim()) { success, msg ->
+                        // FIX: Pass 'this' as the context parameter required by repoForgetPassword
+                        userViewModel.repoForgetPassword(email.trim(), this) { success, msg ->
                             Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
                         }
                     }

@@ -13,16 +13,21 @@ import androidx.navigation.compose.rememberNavController
 import com.example.sherpalink.repository.*
 import com.example.sherpalink.ui.auth.SignInScreen
 import com.example.sherpalink.ui.auth.SignUpScreen
+import com.example.sherpalink.ui.theme.ui.theme.Repo.ReviewRepoImplementation
+import com.example.sherpalink.ui.theme.ui.theme.ViewModel.ReviewViewModel
 import com.example.sherpalink.viewmodel.*
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
 
+    // Using 'this' as context for the repositories that require it
     private val productViewModel by lazy { ProductViewModel(ProductRepoImplementation()) }
     private val userViewModel by lazy { UserViewModel(UserRepoImplementation(this)) }
     private val guideViewModel by lazy { GuideViewModel(GuideRepoImplementation(this)) }
     private val bookingViewModel by lazy { BookingViewModel(BookingRepoImplementation()) }
-
+    // Top of MainActivity
+    private val reviewRepo by lazy { ReviewRepoImplementation() }
+    private val reviewViewModel by lazy { ReviewViewModel(reviewRepo) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -38,7 +43,7 @@ class MainActivity : ComponentActivity() {
 
             NavHost(navController = navController, startDestination = startDestination) {
 
-                // Admin Gate (Handles jumping to the Admin Activity if session is active)
+                // Admin Gate
                 composable("admin_gate") {
                     LaunchedEffect (Unit) {
                         val intent = Intent(context, com.example.sherpalink.admin.AdminLauncherActivity::class.java)
@@ -53,7 +58,6 @@ class MainActivity : ComponentActivity() {
                         onSignInClick = { email, password ->
                             userViewModel.login(email, password) { success, message ->
                                 if (success) {
-                                    // CHECK FOR ADMIN CREDENTIALS
                                     if (email == "admin@gmail.com" && password == "admin123") {
                                         val intent = Intent(context, com.example.sherpalink.admin.AdminLauncherActivity::class.java)
                                         context.startActivity(intent)
@@ -75,7 +79,8 @@ class MainActivity : ComponentActivity() {
                             if (email.isBlank()) {
                                 Toast.makeText(context, "Please enter your email first", Toast.LENGTH_SHORT).show()
                             } else {
-                                userViewModel.repoForgetPassword(email) { success, msg ->
+                                // FIXED: Added 'context' parameter to match the new ViewModel signature
+                                userViewModel.repoForgetPassword(email.trim(), context) { success, msg ->
                                     Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
                                 }
                             }
@@ -118,7 +123,8 @@ class MainActivity : ComponentActivity() {
                         userViewModel,
                         guideViewModel,
                         bookingViewModel,
-                        navController
+                        navController,
+                        reviewViewModel = reviewViewModel,
                     )
                 }
             }

@@ -15,6 +15,6 @@ interface UserRepo {
     fun getAllUser(callback: (Boolean, String, List<UserModel>?) -> Unit)
     fun getCurrentUser(): FirebaseUser?
     fun logOut(callback: (Boolean, String) -> Unit)
-    fun forgetPassword(email: String, callback: (Boolean, String) -> Unit)
+    fun forgetPassword(email: String, context: android.content.Context, callback: (Boolean, String) -> Unit)
     fun uploadProfileImage(userId: String, imageUri: Uri, callback: (Boolean, String) -> Unit)
 }
