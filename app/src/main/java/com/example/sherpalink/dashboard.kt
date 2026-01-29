@@ -104,7 +104,20 @@ fun DashboardRoot(
                 composable("add") { AddScreen() }
                 composable("list") { MessageScreen() }
                 composable("profile") { ProfileScreen(userViewModel.user, userViewModel, navController) }
+                composable(
+                    "registration_form/{tourId}/{tourName}/{bookingType}",
+                    arguments = listOf(
+                        navArgument("tourId") { type = NavType.StringType },
+                        navArgument("tourName") { type = NavType.StringType },
+                        navArgument("bookingType") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val tourId = backStackEntry.arguments?.getString("tourId") ?: ""
+                    val tourName = backStackEntry.arguments?.getString("tourName") ?: ""
+                    val bookingType = backStackEntry.arguments?.getString("bookingType") ?: "Tour"
 
+                    RegistrationScreen(navController, tourId, tourName, bookingType, bookingViewModel, notificationViewModel)
+                }
                 // --- Feature Screens ---
                 composable("weather") { WeatherScreen(navController) }
                 composable("trending_trips_screen") { TrendingTripsScreen(navController) }

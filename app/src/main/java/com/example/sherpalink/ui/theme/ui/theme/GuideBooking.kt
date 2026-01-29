@@ -33,7 +33,7 @@ fun GuideBookingScreen(
     val guides by guideViewModel.guides.observeAsState(emptyList())
     var selectedGuide by remember { mutableStateOf<GuideModel?>(null) }
 
-    // Load guides from Firebase once
+    // Load guides from Firebase once (Kept exactly as before)
     LaunchedEffect(Unit) {
         guideViewModel.loadGuides()
     }
@@ -41,7 +41,8 @@ fun GuideBookingScreen(
     if (selectedGuide == null) {
         GuideGridUI(guides) { guide -> selectedGuide = guide }
     } else {
-        GuidePreviewUI(selectedGuide!!) { selectedGuide = null }
+        // Updated to pass navController
+        GuidePreviewUI(selectedGuide!!, navController) { selectedGuide = null }
     }
 }
 
@@ -87,7 +88,11 @@ fun GuideGridUI(guides: List<GuideModel>, onClick: (GuideModel) -> Unit) {
 
 /* ---------------- GUIDE DETAILS PREVIEW ---------------- */
 @Composable
-fun GuidePreviewUI(guide: GuideModel, onBack: () -> Unit) {
+fun GuidePreviewUI(
+    guide: GuideModel,
+    navController: NavHostController, // Added navController here
+    onBack: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -126,8 +131,12 @@ fun GuidePreviewUI(guide: GuideModel, onBack: () -> Unit) {
         Text("Price per Day: \$${guide.pricePerDay}", fontWeight = FontWeight.SemiBold)
 
         Spacer(modifier = Modifier.height(24.dp))
+
+        // Navigation logic added to the existing button
         Button(
-            onClick = { /* TODO: Book guide logic */ },
+            onClick = {
+                navController.navigate("registration_form/${guide.guideId}/${guide.name}/Guide")
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Book Guide")
@@ -150,11 +159,10 @@ fun RatingStars(rating: Float, size: Int = 16) {
     }
 }
 
-/* ---------------- PREVIEW ---------------- */
+/* ---------------- PREVIEW (Kept exactly as before) ---------------- */
 @Preview(showBackground = true)
 @Composable
 fun GuideBookingScreenPreview() {
-    // Use a fake ViewModel for preview
     val fakeGuides = listOf(
         GuideModel(
             guideId = "1",
@@ -168,9 +176,16 @@ fun GuideBookingScreenPreview() {
         )
     )
     var selectedGuide by remember { mutableStateOf<GuideModel?>(null) }
+
+    // Note: Since NavController isn't easily mockable in previews,
+    // the preview won't actually navigate, but the UI remains accurate.
     if (selectedGuide == null) {
         GuideGridUI(fakeGuides) { selectedGuide = it }
     } else {
-        GuidePreviewUI(selectedGuide!!) { selectedGuide = null }
+        // Temporary placeholder for preview purposes
+        Column(Modifier.padding(16.dp)) {
+            Text("Preview of Detail View for ${selectedGuide!!.name}")
+            Button(onClick = { selectedGuide = null }) { Text("Back") }
+        }
     }
 }

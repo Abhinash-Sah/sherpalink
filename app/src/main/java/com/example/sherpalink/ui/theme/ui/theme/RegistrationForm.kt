@@ -28,6 +28,7 @@ fun RegistrationScreen(
     navController: NavHostController,
     tourId: String,
     tourName: String,
+    bookingType: String = "Tour",
     bookingViewModel: BookingViewModel,
     notificationViewModel: NotificationViewModel
 ) {
@@ -42,12 +43,12 @@ fun RegistrationScreen(
     var departureDate by remember { mutableStateOf("") }
     var travellers by remember { mutableStateOf("") }
 
-    // --- Simulation States (No Cloudinary Needed) ---
+    // --- Simulation States ---
     var idSelected by remember { mutableStateOf(false) }
     var paymentSelected by remember { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
 
-    // --- Launchers (Just checking if user picked something) ---
+    // --- Launchers ---
     val idLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         idSelected = (uri != null)
     }
@@ -61,17 +62,18 @@ fun RegistrationScreen(
             .verticalScroll(rememberScrollState())
             .padding(20.dp)
     ) {
-        Text("Booking for: $tourName", color = Color.Gray, fontSize = 14.sp)
-        Text("Registration Form", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        // Updated label to show what is being booked
+        Text("Booking for: $tourName", color = Color(0xFF2E7D32), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        Text("Registration Form", fontSize = 28.sp, fontWeight = FontWeight.Bold)
 
         Spacer(Modifier.height(20.dp))
 
-        // Input Fields
+        // Input Fields (Preserved from your code)
         InputField("First Name", firstName) { firstName = it }
         InputField("Last Name", lastName) { lastName = it }
         InputField("Email", email) { email = it }
         InputField("Phone", phone) { phone = it }
-        InputField("Departure Date", departureDate) { departureDate = it }
+        InputField("Date of Trip / Start Date", departureDate) { departureDate = it }
         InputField("Number of Travellers", travellers) { travellers = it }
 
         Spacer(Modifier.height(20.dp))
@@ -80,7 +82,8 @@ fun RegistrationScreen(
         Text("Step 1: Payment QR", fontWeight = FontWeight.Bold)
         Card(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F8F8))
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F8F8)),
+            border = BorderStroke(1.dp, Color.LightGray)
         ) {
             Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 // R.drawable.qr must exist in your drawable folder
@@ -93,7 +96,7 @@ fun RegistrationScreen(
                 Button(
                     onClick = { payLauncher.launch("image/*") },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (paymentSelected) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
+                        containerColor = if (paymentSelected) Color(0xFF4CAF50) else Color(0xFF2E7D32)
                     )
                 ) {
                     Text(if (!paymentSelected) "Attach Payment Screenshot" else "Screenshot Attached ✅")
@@ -111,7 +114,7 @@ fun RegistrationScreen(
                 containerColor = if (idSelected) Color(0xFF4CAF50) else Color(0xFF3F51B5)
             )
         ) {
-            Text(if (!idSelected) "Attach ID Proof" else "ID Attached ✅")
+            Text(if (!idSelected) "Attach ID Proof (Passport/Citizenship)" else "ID Attached ✅")
         }
 
         Spacer(Modifier.height(30.dp))
@@ -119,16 +122,16 @@ fun RegistrationScreen(
         // --- Final Submit Button ---
         Button(
             onClick = {
-                if (firstName.isEmpty() || !idSelected || !paymentSelected) {
+                if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || !idSelected || !paymentSelected) {
                     Toast.makeText(context, "Please fill all fields and attach proofs", Toast.LENGTH_SHORT).show()
                 } else {
                     isSaving = true
-
 
                     val booking = BookingModel(
                         userId = userId,
                         tourId = tourId,
                         tourName = tourName,
+                        bookingType = bookingType,
                         fullName = "$firstName $lastName",
                         email = email,
                         phone = phone,
@@ -143,9 +146,10 @@ fun RegistrationScreen(
                             notificationViewModel.addNotification(
                                 NotificationModel(
                                     title = "Booking Request Sent",
-                                    message = "Your registration for $tourName is pending review."
+                                    message = "Your request for $tourName is pending review."
                                 )
                             )
+                            Toast.makeText(context, "Booking Successful!", Toast.LENGTH_LONG).show()
                             navController.navigate("home") {
                                 popUpTo("home") { inclusive = true }
                             }
@@ -177,6 +181,10 @@ fun InputField(label: String, value: String, onValueChange: (String) -> Unit) {
         onValueChange = onValueChange,
         label = { Text(label) },
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        singleLine = true
+        singleLine = true,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Color(0xFF2E7D32),
+            focusedLabelColor = Color(0xFF2E7D32)
+        )
     )
 }
