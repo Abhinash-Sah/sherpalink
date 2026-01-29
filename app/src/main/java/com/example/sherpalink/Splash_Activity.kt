@@ -8,31 +8,35 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.sherpalink.auth.SignInActivity
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class SplashActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // 1. MUST BE CALLED BEFORE super.onCreate()
+        val splashScreen = installSplashScreen()
+
         super.onCreate(savedInstanceState)
 
+        // 2. Perform your logic and then navigate
         setContent {
-            SplashScreen {
-                // Check if user is already logged in
+            SplashScreenContent {
                 val currentUser = FirebaseAuth.getInstance().currentUser
                 if (currentUser != null) {
-                    // User is logged in, skip login screen
-                    startActivity(Intent(this@SplashActivity, DashboardActivity::class.java))
+                    startActivity(Intent(this, DashboardActivity::class.java))
                 } else {
-                    // No user found, go to SignIn
-                    startActivity(Intent(this@SplashActivity, SignInActivity::class.java))
+                    startActivity(Intent(this, SignInActivity::class.java))
                 }
                 finish()
             }
@@ -41,9 +45,10 @@ class SplashActivity : ComponentActivity() {
 }
 
 @Composable
-fun SplashScreen(onTimeout: () -> Unit) {
-    LaunchedEffect(Unit) {
-        delay(2500) // Give them 2.5 seconds to see your logo
+fun SplashScreenContent(onTimeout: () -> Unit) {
+    // This handles the transition delay in Compose
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        delay(2000)
         onTimeout()
     }
 

@@ -110,6 +110,7 @@ class DashboardActivity : ComponentActivity() {
                 navController = navController
             )
         }}}
+// ... (Keep your imports)
 
 @Composable
 fun DashboardRoot(
@@ -152,6 +153,8 @@ fun DashboardRoot(
                 composable("add") { AddScreen() }
                 composable("list") { MessageScreen() }
                 composable("profile") { ProfileScreen(userViewModel.user, userViewModel, navController) }
+
+                // --- Registration Form ---
                 composable(
                     "registration_form/{tourId}/{tourName}/{bookingType}",
                     arguments = listOf(
@@ -163,35 +166,21 @@ fun DashboardRoot(
                     val tourId = backStackEntry.arguments?.getString("tourId") ?: ""
                     val tourName = backStackEntry.arguments?.getString("tourName") ?: ""
                     val bookingType = backStackEntry.arguments?.getString("bookingType") ?: "Tour"
-
                     RegistrationScreen(navController, tourId, tourName, bookingType, bookingViewModel, notificationViewModel)
                 }
+
                 // --- Feature Screens ---
                 composable("weather") { WeatherScreen(navController) }
                 composable("trending_trips_screen") { TrendingTripsScreen(navController) }
-                composable("most_visited_screen") { MostVisitedScreen(navController) } // Added this!
-
+                composable("most_visited_screen") { MostVisitedScreen(navController) }
                 composable("tour_package") { TourPackageScreen(navController, productViewModel) }
                 composable("myBookings") { MyBookingsScreen(navController, bookingViewModel, notificationViewModel) }
                 composable("notifications") { NotificationScreen(navController, currentUserId) }
                 composable("guide_booking") { GuideBookingScreen(navController, guideViewModel) }
                 composable("about") { AboutScreen() }
-                composable("ratings") {
-                    RatingsScreen(reviewViewModel, userViewModel)
-                }
-                composable(
-                    "full_image/{index}",
-                    arguments = listOf(navArgument("index") { type = NavType.IntType })
-                ) { backStackEntry ->
-                    val index = backStackEntry.arguments?.getInt("index") ?: 0
-                    val images = listOf(R.drawable.image1, R.drawable.image2, R.drawable.image3)
+                composable("ratings") { RatingsScreen(reviewViewModel, userViewModel) }
 
-                    // This displays the full screen image view
-                    FullScreenImage(
-                        imageRes = images[index.coerceIn(images.indices)],
-                        onBack = { navController.popBackStack() }
-                    )
-                }
+                // --- Search Details (FIXED NAVIGATION) ---
                 composable(
                     route = "search_detail/{title}/{category}/{image}",
                     arguments = listOf(
@@ -210,21 +199,15 @@ fun DashboardRoot(
                         imageRes = image,
                         onBack = { navController.popBackStack() },
                         onBookClick = {
-                            // FIX: We pass the data to fulfill "registration_form/{tourId}/{tourName}/{bookingType}"
-                            // We use the title (cleaned up) as the ID so it doesn't crash
-                            val tourId = title.replace(" ", "_")
-                            navController.navigate("registration_form/$tourId/$title/$category")
+                            // FIX: Clean the strings to prevent URL-breaking spaces
+                            val safeId = title.replace(" ", "_")
+                            val safeTitle = title.replace("/", "-")
+                            navController.navigate("registration_form/$safeId/$safeTitle/$category")
                         }
                     )
                 }
-                // --- Auth & Details ---
-                composable("sign_in") {
-                    SignInScreen(
-                        onSignInClick = { email, password -> /* Login Logic */ },
-                        onSignUpClick = { navController.navigate("sign_up") },
-                        onForgotPasswordClick = { /* Forgot Logic */ }
-                    )
-                }
+
+                // --- Details & Auth ---
                 composable("tour_details/{productId}") { backStackEntry ->
                     val productId = backStackEntry.arguments?.getString("productId") ?: ""
                     TourDetailsScreenSafe(navController, productViewModel, productId)

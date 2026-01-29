@@ -29,18 +29,7 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-
-    buildFeatures {
-        compose = true
-    }
+    // Cleaned up: Removed the duplicate Java 11/17 blocks and kept only Java 17
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -48,6 +37,10 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
+    }
+
+    buildFeatures {
+        compose = true
     }
 }
 
@@ -66,11 +59,12 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
 
-    // ML Kit - FIXED SYNTAX (Dots instead of hyphens)
+    // ML Kit
     implementation(libs.google.mlkit.image.labeling)
 
-    // Image Loading
-    implementation(libs.coil.compose)
+    // Image Loading (Kept Coil 3 as per your comment)
+    implementation("io.coil-kt.coil3:coil-compose:3.0.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.0")
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))
@@ -81,7 +75,7 @@ dependencies {
     implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.androidx.material.icons.extended)
 
-    // UI and Theme
+    // UI, Theme, and Splash Screen
     implementation(libs.google.material)
     implementation("androidx.core:core-splashscreen:1.0.1")
 
@@ -94,9 +88,6 @@ dependencies {
     implementation(libs.cloudinary.android)
     implementation("com.google.guava:guava:31.1-android")
 
-    // Ensure your Coil dependencies use the coil3 package
-    implementation("io.coil-kt.coil3:coil-compose:3.0.0")
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.0")
     // Google Maps & Location
     implementation("com.google.maps.android:maps-compose:4.3.0")
     implementation("com.google.android.gms:play-services-maps:18.2.0")
@@ -109,14 +100,12 @@ dependencies {
     // Room
     implementation(libs.androidx.room.ktx)
 
-    // Tests
+    // Tests & Debug
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-
-    // Debug
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

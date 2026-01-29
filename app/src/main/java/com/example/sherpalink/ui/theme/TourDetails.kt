@@ -43,7 +43,7 @@ fun TourDetailsScreenSafe(
                     .verticalScroll(rememberScrollState())
                     .padding(bottom = 80.dp)
             ) {
-                coil.compose.AsyncImage(
+                coil3.compose.AsyncImage(
                     model = tour.image.takeIf { it.isNotEmpty() },
                     contentDescription = tour.name,
                     modifier = Modifier
