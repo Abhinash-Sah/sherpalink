@@ -5,6 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -28,103 +29,131 @@ import com.example.sherpalink.R
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 
+data class TripItem(val id: Int, val category: String, val title: String, val image: Int)
+
 @Composable
 fun HomeScreen(navController: NavController) {
     var search by remember { mutableStateOf("") }
     var menuOpen by remember { mutableStateOf(false) }
     val images = listOf(R.drawable.image1, R.drawable.image2, R.drawable.image3)
 
+    val allTrips = listOf(
+        TripItem(1, "Trekking", "Everest Summit", R.drawable.trip1),
+        TripItem(2, "Hunting", "Dhorpatan Hunting", R.drawable.trip2),
+        TripItem(3, "Camping", "Jungle Camping", R.drawable.trip3),
+        TripItem(4, "Rafting", "Trishuli River", R.drawable.trip4),
+        TripItem(5, "Nature", "Annapurna Base", R.drawable.image1),
+        TripItem(6, "Adventure", "Manaslu Circuit", R.drawable.image2)
+    )
+
+    val filteredTrips = remember(search) {
+        if (search.isEmpty()) allTrips
+        else allTrips.filter {
+            it.title.contains(search, ignoreCase = true) ||
+                    it.category.contains(search, ignoreCase = true)
+        }
+    }
+
     Box(Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
-        // --- 1. Main Scrollable Content ---
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(top = 90.dp, bottom = 24.dp), // Increased top padding for header
+            contentPadding = PaddingValues(top = 90.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Search Bar Section
+            // --- SEARCH BAR ---
             item {
                 PaddingWrapper {
                     OutlinedTextField(
                         value = search,
                         onValueChange = { search = it },
-                        placeholder = { Text("Search mountains, guides...", color = Color.Gray) },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFF2E7D32)) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .shadow(2.dp, RoundedCornerShape(16.dp)),
+                        placeholder = { Text("Search mountains, guides...") },
+                        leadingIcon = { Icon(Icons.Default.Search, null, tint = Color(0xFF2E7D32)) },
+                        trailingIcon = {
+                            if (search.isNotEmpty()) {
+                                IconButton(onClick = { search = "" }) {
+                                    Icon(Icons.Default.Clear, null)
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth().shadow(4.dp, RoundedCornerShape(16.dp)),
                         shape = RoundedCornerShape(16.dp),
                         singleLine = true,
-                        // FIXED: Using valid M3 color parameters
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFF2E7D32),
-                            unfocusedBorderColor = Color.Transparent,
                             focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White
+                            unfocusedContainerColor = Color.White,
+                            focusedBorderColor = Color(0xFF2E7D32),
+                            unfocusedBorderColor = Color.Transparent
                         )
                     )
                 }
             }
 
-            // Slider Section
-            item {
-                PaddingWrapper {
-                    AutoImageSlider(navController, images)
-                }
-            }
-
-            // Categories Section
-            item {
-                PaddingWrapper {
-                    Text("Services", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1A1A1A))
-                    Spacer(Modifier.height(12.dp))
-                    CategoryRow(navController)
-                }
-            }
-
-            // Trending Trips
-            item {
-                PaddingWrapper {
-                    SectionHeader("Trending Trips") {
-                        navController.navigate("trending_trips_screen")
+            if (search.isNotEmpty()) {
+                // --- SEARCH RESULTS VIEW ---
+                item {
+                    PaddingWrapper {
+                        Text("Search Results (${filteredTrips.size})", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                     }
                 }
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    item { TrendingItem(R.drawable.trip1, "Trekking", "Everest Summit") }
-                    item { TrendingItem(R.drawable.trip2, "Hunting", "Dhorpatan Hunting") }
-                    item { TrendingItem(R.drawable.trip3, "Camping", "Jungle Camping") }
-                    item { TrendingItem(R.drawable.trip4, "Rafting", "Trishuli River") }
-                }
-            }
 
-            // Most Visited
-            item {
-                PaddingWrapper {
-                    SectionHeader("Most Visited") {
-                        navController.navigate("most_visited_screen")
+                items(filteredTrips) { trip ->
+                    PaddingWrapper {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .clickable {
+                                // REDIRECT: Navigates to the details page
+                                navController.navigate("search_detail/${trip.title}/${trip.category}/${trip.image}")
+                            }
+                        ) {
+                            SearchItemRow(trip)
+                        }
                     }
                 }
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    item { TrendingItem(R.drawable.image1, "Nature", "Annapurna Base") }
-                    item { TrendingItem(R.drawable.image2, "Adventure", "Manaslu Circuit") }
+
+                if (filteredTrips.isEmpty()) {
+                    item {
+                        Text("No adventures found matching \"$search\"",
+                            modifier = Modifier.fillMaxWidth().padding(top = 50.dp),
+                            textAlign = TextAlign.Center, color = Color.Gray)
+                    }
+
+                }
+            } else {
+                // --- REGULAR HOME VIEW ---
+                item { PaddingWrapper { AutoImageSlider(navController, images) } }
+
+                item {
+                    PaddingWrapper {
+                        Text("Explore Services", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+                        Spacer(Modifier.height(16.dp))
+                        CategoryRow(navController)
+                    }
+                }
+
+                item {
+                    PaddingWrapper { SectionHeader("Trending Trips") { navController.navigate("trending_trips_screen") } }
+                    LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        item {
+                            Box(Modifier.clickable { navController.navigate("tour_details/1") }) {
+                                TrendingItem(R.drawable.trip1, "Trekking", "Everest Summit")
+                            }
+                        }
+                        item {
+                            Box(Modifier.clickable { navController.navigate("tour_details/2") }) {
+                                TrendingItem(R.drawable.trip2, "Hunting", "Dhorpatan Hunting")
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        // --- 2. Elegant App Header (Fixed at Top) ---
+        // --- FIXED HEADER ---
         AppHeader(
             modifier = Modifier.align(Alignment.TopCenter).zIndex(5f),
             onNotificationClick = { navController.navigate("notifications") },
-            onHomeClick = {
-                navController.navigate("home") {
-                    popUpTo("home") { inclusive = true }
-                }
-            },
+            onHomeClick = { search = "" },
             menuOpen = menuOpen,
             onMenuToggle = { menuOpen = !menuOpen },
             onProfileClick = { navController.navigate("profile") },
@@ -133,23 +162,52 @@ fun HomeScreen(navController: NavController) {
             onMyBookingsClick = { navController.navigate("myBookings") },
             onLogout = {
                 FirebaseAuth.getInstance().signOut()
-                navController.navigate("sign_in") {
-                    popUpTo(0) { inclusive = true }
-                }
+                navController.navigate("sign_in") { popUpTo(0) }
             }
         )
     }
 }
-
-// --- Helper UI Components ---
-
 @Composable
 fun PaddingWrapper(content: @Composable () -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         content()
     }
 }
+@Composable
+fun SearchItemRow(trip: TripItem) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(2.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                painter = painterResource(trip.image),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop
+            )
 
+            Column(Modifier.padding(16.dp)) {
+                Text(trip.category, fontSize = 11.sp, color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
+                Text(trip.title, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
+                Text("Tap to explore details", fontSize = 12.sp, color = Color.Gray)
+            }
+
+            Spacer(Modifier.weight(1f))
+
+            Icon(
+                Icons.Default.KeyboardArrowRight,
+                contentDescription = null,
+                modifier = Modifier.padding(end = 8.dp),
+                tint = Color.LightGray
+            )
+        }
+    }
+}
 @Composable
 fun SectionHeader(title: String, onAction: () -> Unit) {
     Row(
@@ -176,7 +234,7 @@ fun CategoryRow(navController: NavController) {
     ) {
         val categories = listOf(
             Triple(R.drawable.tour_package, "Tour\nPackage", "tour_package"),
-            Triple(R.drawable.registration, "Weather", "weather"),
+            Triple(R.drawable.weather, "Weather", "weather"),
             Triple(R.drawable.guide, "Guides", "guide_booking")
         )
 

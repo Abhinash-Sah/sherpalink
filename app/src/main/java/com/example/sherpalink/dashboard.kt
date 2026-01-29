@@ -47,6 +47,7 @@ import com.example.sherpalink.screens.LocationScreen
 import com.example.sherpalink.screens.MessageScreen
 import com.example.sherpalink.screens.MostVisitedScreen
 import com.example.sherpalink.screens.RegistrationScreen
+import com.example.sherpalink.screens.SearchDetailsScreen
 import com.example.sherpalink.screens.TourDetailsScreenSafe
 import com.example.sherpalink.screens.TourPackageScreen
 import com.example.sherpalink.screens.WeatherScreen
@@ -189,6 +190,31 @@ fun DashboardRoot(
                     FullScreenImage(
                         imageRes = images[index.coerceIn(images.indices)],
                         onBack = { navController.popBackStack() }
+                    )
+                }
+                composable(
+                    route = "search_detail/{title}/{category}/{image}",
+                    arguments = listOf(
+                        navArgument("title") { type = NavType.StringType },
+                        navArgument("category") { type = NavType.StringType },
+                        navArgument("image") { type = NavType.IntType }
+                    )
+                ) { backStackEntry ->
+                    val title = backStackEntry.arguments?.getString("title") ?: "Unknown Trip"
+                    val category = backStackEntry.arguments?.getString("category") ?: "Adventure"
+                    val image = backStackEntry.arguments?.getInt("image") ?: R.drawable.trip1
+
+                    SearchDetailsScreen(
+                        title = title,
+                        category = category,
+                        imageRes = image,
+                        onBack = { navController.popBackStack() },
+                        onBookClick = {
+                            // FIX: We pass the data to fulfill "registration_form/{tourId}/{tourName}/{bookingType}"
+                            // We use the title (cleaned up) as the ID so it doesn't crash
+                            val tourId = title.replace(" ", "_")
+                            navController.navigate("registration_form/$tourId/$title/$category")
+                        }
                     )
                 }
                 // --- Auth & Details ---
