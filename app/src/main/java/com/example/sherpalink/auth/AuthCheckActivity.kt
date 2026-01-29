@@ -1,4 +1,3 @@
-
 package com.example.sherpalink.auth
 
 import android.content.Intent
@@ -14,14 +13,14 @@ class AuthCheckActivity : ComponentActivity() {
 
         val currentUser = FirebaseAuth.getInstance().currentUser
 
-        if (currentUser != null) {
-            // User already logged in
-            startActivity(Intent(this, DashboardActivity::class.java))
-        } else {
-            // User not logged in
+        if (currentUser == null) {
+            // ❌ No previous login → Sign In
             startActivity(Intent(this, SignInActivity::class.java))
+        } else {
+            // ✅ Previously logged in → Dashboard
+            startActivity(Intent(this, DashboardActivity::class.java))
         }
 
-        finish() // close this activity
+        finish()
     }
 }

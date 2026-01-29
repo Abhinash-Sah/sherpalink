@@ -49,6 +49,7 @@ import com.example.sherpalink.screens.SearchDetailsScreen
 import com.example.sherpalink.screens.TourDetailsScreenSafe
 import com.example.sherpalink.screens.TourPackageScreen
 import com.example.sherpalink.screens.WeatherScreen
+import com.example.sherpalink.ui.auth.SignInScreen
 import com.example.sherpalink.ui.guide.GuideBookingScreen
 import com.example.sherpalink.ui.notifications.NotificationScreen
 import com.example.sherpalink.ui.theme.MyBookingsScreen
@@ -179,7 +180,15 @@ fun DashboardRoot(
                 composable("guide_booking") { GuideBookingScreen(navController, guideViewModel) }
                 composable("about") { AboutScreen() }
                 composable("ratings") { RatingsScreen(reviewViewModel, userViewModel) }
-
+                composable("sign_in") {
+                    SignInScreen (
+                        onSignInClick = { email, password ->
+                            // Auth logic here
+                        },
+                        onSignUpClick = { navController.navigate("sign_up") },
+                        onForgotPasswordClick = { /* logic */ }
+                    )
+                }
                 // --- Search Details ---
                 composable(
                     route = "search_detail/{title}/{category}/{image}",
@@ -217,7 +226,6 @@ fun DashboardRoot(
 
 @Composable
 fun BottomMenuBar(selectedIndex: Int, onTabSelected: (Int) -> Unit) {
-    // REMOVED Icons.Default.Email (Inbox)
     val items = listOf(
         Icons.Default.Home to "Home",
         Icons.Default.LocationOn to "Map",

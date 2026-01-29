@@ -1,5 +1,6 @@
 package com.example.sherpalink.screens
 
+import android.content.Intent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -18,6 +19,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.*
 import androidx.compose.ui.text.style.TextAlign
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.sherpalink.R
+import com.example.sherpalink.auth.SignInActivity
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 
@@ -35,6 +38,7 @@ data class TripItem(val id: Int, val category: String, val title: String, val im
 fun HomeScreen(navController: NavController) {
     var search by remember { mutableStateOf("") }
     var menuOpen by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     val images = listOf(R.drawable.image1, R.drawable.image2, R.drawable.image3)
 
     val allTrips = listOf(
@@ -177,8 +181,11 @@ fun HomeScreen(navController: NavController) {
             onRatingsClick = { navController.navigate("ratings") },
             onMyBookingsClick = { navController.navigate("myBookings") },
             onLogout = {
+                menuOpen = false
                 FirebaseAuth.getInstance().signOut()
-                navController.navigate("sign_in") { popUpTo(0) }
+                val intent = Intent(context, com.example.sherpalink.auth.SignInActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                context.startActivity(intent)
             }
         )
     }
