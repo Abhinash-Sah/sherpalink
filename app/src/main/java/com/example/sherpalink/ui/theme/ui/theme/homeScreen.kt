@@ -63,7 +63,7 @@ fun HomeScreen(navController: NavController) {
             // 2. Auto Slider
             item { AutoImageSlider(navController, images) }
 
-            // 3. Categories (Weather Edit Here)
+            // 3. Categories
             item { CategoryRow(navController) }
 
             // 4. Trending Trips Section
@@ -79,21 +79,14 @@ fun HomeScreen(navController: NavController) {
                 }
             }
 
-            // 5. Most Visited Section
+            // 5. Most Visited Section (Navigation Enabled)
             item {
-                SectionHeader("Most Visited") {}
+                SectionHeader("Most Visited") {
+                    navController.navigate("most_visited_screen") // Navigates to the screen we created
+                }
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     item { TrendingItem(R.drawable.image1, "Nature", "Annapurna Base") }
                     item { TrendingItem(R.drawable.image2, "Adventure", "Manaslu Circuit") }
-                }
-            }
-
-            // 6. Latest Trips
-            item {
-                SectionHeader("Latest Trips") {}
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    LatestTripItem(R.drawable.trip1, "Langtang Valley", "3 Days Ago")
-                    LatestTripItem(R.drawable.trip2, "Gosaikunda Lake", "5 Days Ago")
                 }
             }
         }
@@ -148,12 +141,9 @@ fun CategoryRow(navController: NavController) {
         CategoryItem(R.drawable.tour_package, "Tour\nPackage") {
             navController.navigate("tour_package")
         }
-
-        // ONLY EDIT: Registration -> Weather
         CategoryItem(R.drawable.registration, "Mountain\nWeather") {
             navController.navigate("weather")
         }
-
         CategoryItem(R.drawable.guide, "Guide\nBooking") {
             navController.navigate("guide_booking")
         }
@@ -197,32 +187,6 @@ fun TrendingItem(image: Int, category: String, title: String) {
 }
 
 @Composable
-fun LatestTripItem(image: Int, title: String, time: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFFF5F5F5))
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Image(
-            painter = painterResource(image),
-            contentDescription = null,
-            modifier = Modifier
-                .size(60.dp)
-                .clip(RoundedCornerShape(8.dp)),
-            contentScale = ContentScale.Crop
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Column {
-            Text(title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            Text(time, fontSize = 12.sp, color = Color.Gray)
-        }
-    }
-}
-
-@Composable
 fun AutoImageSlider(navController: NavController, images: List<Int>) {
     var currentIndex by remember { mutableStateOf(0) }
     LaunchedEffect(Unit) {
@@ -242,25 +206,23 @@ fun AutoImageSlider(navController: NavController, images: List<Int>) {
         contentScale = ContentScale.Crop
     )
 }
-
 @Composable
 fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(androidx.compose.ui.graphics.Color.Black)
             .clickable { onBack() },
-        contentAlignment = Alignment.Center
+        contentAlignment = androidx.compose.ui.Alignment.Center
     ) {
         Image(
-            painter = painterResource(id = imageRes),
+            painter = androidx.compose.ui.res.painterResource(id = imageRes),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Fit
+            contentScale = androidx.compose.ui.layout.ContentScale.Fit
         )
     }
 }
-
 @Composable
 fun AppHeader(
     modifier: Modifier = Modifier,
@@ -333,7 +295,7 @@ fun AppHeader(
                             Text(label, fontSize = 16.sp)
                         }
                     }
-                    Divider(Modifier.padding(vertical = 4.dp))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                     Row(
                         Modifier
                             .fillMaxWidth()
