@@ -102,7 +102,6 @@ fun HomeScreen(navController: NavController) {
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
                             .clickable {
-                                // REDIRECT: Navigates to the details page
                                 navController.navigate("search_detail/${trip.title}/${trip.category}/${trip.image}")
                             }
                         ) {
@@ -117,7 +116,6 @@ fun HomeScreen(navController: NavController) {
                             modifier = Modifier.fillMaxWidth().padding(top = 50.dp),
                             textAlign = TextAlign.Center, color = Color.Gray)
                     }
-
                 }
             } else {
                 // --- REGULAR HOME VIEW ---
@@ -131,6 +129,7 @@ fun HomeScreen(navController: NavController) {
                     }
                 }
 
+                // --- TRENDING TRIPS SECTION ---
                 item {
                     PaddingWrapper { SectionHeader("Trending Trips") { navController.navigate("trending_trips_screen") } }
                     LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -142,6 +141,23 @@ fun HomeScreen(navController: NavController) {
                         item {
                             Box(Modifier.clickable { navController.navigate("tour_details/2") }) {
                                 TrendingItem(R.drawable.trip2, "Hunting", "Dhorpatan Hunting")
+                            }
+                        }
+                    }
+                }
+
+                // --- MOST VISITED SECTION (RESTORED) ---
+                item {
+                    PaddingWrapper { SectionHeader("Most Visited") { navController.navigate("most_visited_screen") } }
+                    LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        item {
+                            Box(Modifier.clickable { navController.navigate("tour_details/3") }) {
+                                TrendingItem(R.drawable.trip3, "Camping", "Jungle Camping")
+                            }
+                        }
+                        item {
+                            Box(Modifier.clickable { navController.navigate("tour_details/4") }) {
+                                TrendingItem(R.drawable.trip4, "Rafting", "Trishuli River")
                             }
                         }
                     }
@@ -167,12 +183,16 @@ fun HomeScreen(navController: NavController) {
         )
     }
 }
+
+// --- HELPER COMPONENTS ---
+
 @Composable
 fun PaddingWrapper(content: @Composable () -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         content()
     }
 }
+
 @Composable
 fun SearchItemRow(trip: TripItem) {
     Card(
@@ -208,6 +228,7 @@ fun SearchItemRow(trip: TripItem) {
         }
     }
 }
+
 @Composable
 fun SectionHeader(title: String, onAction: () -> Unit) {
     Row(
@@ -224,12 +245,12 @@ fun SectionHeader(title: String, onAction: () -> Unit) {
             modifier = Modifier.clickable { onAction() }
         )
     }
-}@Composable
+}
+
+@Composable
 fun CategoryRow(navController: NavController) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         val categories = listOf(
@@ -237,13 +258,8 @@ fun CategoryRow(navController: NavController) {
             Triple(R.drawable.weather, "Weather", "weather"),
             Triple(R.drawable.guide, "Guides", "guide_booking")
         )
-
         categories.forEach { (image, title, route) ->
-            CategoryItem(
-                image = image,
-                title = title,
-                modifier = Modifier.weight(1f)
-            ) {
+            CategoryItem(image = image, title = title, modifier = Modifier.weight(1f)) {
                 navController.navigate(route)
             }
         }
@@ -259,37 +275,26 @@ fun CategoryItem(image: Int, title: String, modifier: Modifier = Modifier, onCli
             indication = null
         ) { onClick() }
     ) {
-        // The Button Container
         Surface(
-            modifier = Modifier
-                .aspectRatio(1f) // Makes it a perfect square
-                .fillMaxWidth()
-                .shadow(8.dp, RoundedCornerShape(20.dp)),
+            modifier = Modifier.aspectRatio(1f).fillMaxWidth().shadow(8.dp, RoundedCornerShape(20.dp)),
             shape = RoundedCornerShape(20.dp),
-            color = Color.LightGray // Placeholder color while loading
+            color = Color.LightGray
         ) {
             Box {
-                // The Image now fills the entire button
                 Image(
                     painter = painterResource(image),
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop // This makes the image cover the full button
+                    contentScale = ContentScale.Crop
                 )
-
-                // Elegant Gradient Overlay for text readability
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f)),
-                                startY = 100f
-                            )
+                    modifier = Modifier.fillMaxSize().background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f)),
+                            startY = 100f
                         )
+                    )
                 )
-
-                // Text placed INSIDE the image at the bottom
                 Text(
                     text = title,
                     fontSize = 12.sp,
@@ -297,14 +302,13 @@ fun CategoryItem(image: Int, title: String, modifier: Modifier = Modifier, onCli
                     color = Color.White,
                     textAlign = TextAlign.Center,
                     lineHeight = 14.sp,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 8.dp)
+                    modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp)
                 )
             }
         }
     }
 }
+
 @Composable
 fun TrendingItem(image: Int, category: String, title: String) {
     Card(
@@ -317,9 +321,7 @@ fun TrendingItem(image: Int, category: String, title: String) {
             Image(
                 painter = painterResource(image),
                 contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(110.dp),
+                modifier = Modifier.fillMaxWidth().height(110.dp),
                 contentScale = ContentScale.Crop
             )
             Column(Modifier.padding(12.dp)) {
@@ -344,10 +346,7 @@ fun AutoImageSlider(navController: NavController, images: List<Int>) {
         }
     }
     Box(
-        Modifier
-            .fillMaxWidth()
-            .height(190.dp)
-            .shadow(4.dp, RoundedCornerShape(24.dp))
+        Modifier.fillMaxWidth().height(190.dp).shadow(4.dp, RoundedCornerShape(24.dp))
             .clip(RoundedCornerShape(24.dp))
             .clickable { navController.navigate("full_image/$currentIndex") }
     ) {
@@ -357,11 +356,7 @@ fun AutoImageSlider(navController: NavController, images: List<Int>) {
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(0.5f))))
-        )
+        Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(0.5f)))))
         Text(
             "Explore Nepal with SherpaLink",
             modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
@@ -371,14 +366,11 @@ fun AutoImageSlider(navController: NavController, images: List<Int>) {
         )
     }
 }
+
 @Composable
 fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            // Using a specific clickable to prevent accidental clicks
-            .clickable { onBack() },
+        modifier = Modifier.fillMaxSize().background(Color.Black).clickable { onBack() },
         contentAlignment = Alignment.Center
     ) {
         Image(
@@ -387,8 +379,6 @@ fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit
         )
-
-        // Small close button for better UX
         IconButton(
             onClick = onBack,
             modifier = Modifier.align(Alignment.TopStart).padding(top = 40.dp, start = 16.dp)
@@ -397,6 +387,7 @@ fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
         }
     }
 }
+
 @Composable
 fun AppHeader(
     modifier: Modifier = Modifier,
@@ -439,12 +430,9 @@ fun AppHeader(
                 }
             }
 
-            // --- Menu Popup (Properly inside Header Box) ---
             if (menuOpen) {
                 Card(
-                    modifier = Modifier
-                        .padding(top = 55.dp)
-                        .align(Alignment.TopEnd),
+                    modifier = Modifier.padding(top = 55.dp).align(Alignment.TopEnd),
                     shape = RoundedCornerShape(16.dp),
                     elevation = CardDefaults.cardElevation(8.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White)

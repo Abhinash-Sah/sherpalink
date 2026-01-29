@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
@@ -41,17 +41,14 @@ import com.example.sherpalink.repository.NotificationRepoImplementation
 import com.example.sherpalink.repository.ProductRepoImplementation
 import com.example.sherpalink.repository.UserRepoImplementation
 import com.example.sherpalink.screens.AddScreen
-import com.example.sherpalink.screens.FullScreenImage
 import com.example.sherpalink.screens.HomeScreen
 import com.example.sherpalink.screens.LocationScreen
-import com.example.sherpalink.screens.MessageScreen
 import com.example.sherpalink.screens.MostVisitedScreen
 import com.example.sherpalink.screens.RegistrationScreen
 import com.example.sherpalink.screens.SearchDetailsScreen
 import com.example.sherpalink.screens.TourDetailsScreenSafe
 import com.example.sherpalink.screens.TourPackageScreen
 import com.example.sherpalink.screens.WeatherScreen
-import com.example.sherpalink.ui.auth.SignInScreen
 import com.example.sherpalink.ui.guide.GuideBookingScreen
 import com.example.sherpalink.ui.notifications.NotificationScreen
 import com.example.sherpalink.ui.theme.MyBookingsScreen
@@ -110,7 +107,7 @@ class DashboardActivity : ComponentActivity() {
                 navController = navController
             )
         }}}
-// ... (Keep your imports)
+
 
 @Composable
 fun DashboardRoot(
@@ -128,14 +125,16 @@ fun DashboardRoot(
 
     val showBottomBar = currentRoute !in listOf("sign_in", "sign_up")
 
-    val routeToIndex = mapOf("home" to 0, "location" to 1, "add" to 2, "list" to 3, "profile" to 4)
+    // REMOVED "list" from mapping
+    val routeToIndex = mapOf("home" to 0, "location" to 1, "add" to 2, "profile" to 3)
     val selectedTab = routeToIndex[currentRoute] ?: 0
 
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
                 BottomMenuBar(selectedTab) { index ->
-                    val routes = listOf("home", "location", "add", "list", "profile")
+                    // REMOVED "list" from routes
+                    val routes = listOf("home", "location", "add", "profile")
                     navController.navigate(routes[index]) {
                         popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                         launchSingleTop = true
@@ -151,7 +150,8 @@ fun DashboardRoot(
                 composable("home") { HomeScreen(navController) }
                 composable("location") { LocationScreen() }
                 composable("add") { AddScreen() }
-                composable("list") { MessageScreen() }
+                // DELETED: composable("list") { MessageScreen() }
+
                 composable("profile") { ProfileScreen(userViewModel.user, userViewModel, navController) }
 
                 // --- Registration Form ---
@@ -180,7 +180,7 @@ fun DashboardRoot(
                 composable("about") { AboutScreen() }
                 composable("ratings") { RatingsScreen(reviewViewModel, userViewModel) }
 
-                // --- Search Details (FIXED NAVIGATION) ---
+                // --- Search Details ---
                 composable(
                     route = "search_detail/{title}/{category}/{image}",
                     arguments = listOf(
@@ -199,7 +199,6 @@ fun DashboardRoot(
                         imageRes = image,
                         onBack = { navController.popBackStack() },
                         onBookClick = {
-                            // FIX: Clean the strings to prevent URL-breaking spaces
                             val safeId = title.replace(" ", "_")
                             val safeTitle = title.replace("/", "-")
                             navController.navigate("registration_form/$safeId/$safeTitle/$category")
@@ -207,7 +206,6 @@ fun DashboardRoot(
                     )
                 }
 
-                // --- Details & Auth ---
                 composable("tour_details/{productId}") { backStackEntry ->
                     val productId = backStackEntry.arguments?.getString("productId") ?: ""
                     TourDetailsScreenSafe(navController, productViewModel, productId)
@@ -219,11 +217,11 @@ fun DashboardRoot(
 
 @Composable
 fun BottomMenuBar(selectedIndex: Int, onTabSelected: (Int) -> Unit) {
+    // REMOVED Icons.Default.Email (Inbox)
     val items = listOf(
         Icons.Default.Home to "Home",
         Icons.Default.LocationOn to "Map",
-        Icons.Default.AddCircle to "Scan",
-        Icons.Default.Email to "Inbox",
+        Icons.Default.Camera to "Scan",
         Icons.Default.Person to "Profile"
     )
 
