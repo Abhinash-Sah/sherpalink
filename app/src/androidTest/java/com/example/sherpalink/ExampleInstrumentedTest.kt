@@ -4,30 +4,19 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.sherpalink.auth.SignUpActivity
-import com.example.sherpalink.model.GuideModel
-import com.example.sherpalink.screens.HomeScreen
-import com.example.sherpalink.screens.TourPackageScreen
+import com.example.sherpalink.model.NotificationModel
+import com.example.sherpalink.screens.SearchDetailsScreen
 import com.example.sherpalink.screens.WeatherScreen
-import com.example.sherpalink.ui.guide.GuideBookingScreen
-import com.example.sherpalink.viewmodel.GuideViewModel
-import com.example.sherpalink.viewmodel.GuideViewModelFactory
-import com.example.sherpalink.viewmodel.ProductViewModel
+import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
+import com.example.sherpalink.viewmodel.NotificationViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import com.example.sherpalink.screens.TourPackageScreen
-import com.example.sherpalink.screens.SearchDetailsScreen
-import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
-
-
-
-
+import com.example.sherpalink.ui.notifications.NotificationScreen
+import com.example.sherpalink.ui.theme.ui.theme.TrendingTripsScreen
 
 @RunWith(AndroidJUnit4::class)
 class FullAppInstrumentedTest {
@@ -189,5 +178,45 @@ class AboutScreenTest {
                     "We help you find the best guides, explore new locations, and make your trips unforgettable. " +
                     "Our goal is to simplify travel planning and connect travelers with local experts."
         ).assertExists()
+    }
+}
+
+@RunWith(AndroidJUnit4::class)
+class NotificationScreenTest {
+
+    @get:Rule
+    val rule = createAndroidComposeRule<ComponentActivity>()
+@Test
+fun openNotificationScreen() {
+    rule.setContent {
+        val navController = rememberNavController()
+        val userId = "test_user"
+
+        // Just open the existing NotificationScreen
+        NotificationScreen(navController = navController, userId = userId)
+    }
+
+    rule.waitForIdle()
+
+    // Check that the Activity title is visible
+    rule.onNodeWithText("Activity").assertExists()
+}}
+
+class TrendingTripsScreenTest {
+
+    @get:Rule
+    val rule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun openTrendingTripsScreen() {
+        rule.setContent {
+            val navController = rememberNavController()
+            TrendingTripsScreen(navController = navController)
+        }
+
+        rule.waitForIdle()
+
+        // Simple check to make sure the screen opened
+        rule.onNodeWithText("All Trending Trips").assertExists()
     }
 }
