@@ -10,5 +10,7 @@
     <string name="title_auth_check">Auth Check</string>
     <string name="title_admin_launcher">Admin Launcher</string>
     <string name="title_weather_api_service">Weather API Service</string>
+    <string name="title_activity_main_dispatcher_rule">MainDispatcherRule</string>
+    <string name="title_activity_signup_view_model_test">SignupViewModelTest</string>
 
 </resources>
