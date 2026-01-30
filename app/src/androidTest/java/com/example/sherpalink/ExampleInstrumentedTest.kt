@@ -17,6 +17,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import com.example.sherpalink.ui.notifications.NotificationScreen
 import com.example.sherpalink.ui.theme.ui.theme.TrendingTripsScreen
+import com.example.sherpalink.screens.RegistrationScreen
+import com.example.sherpalink.viewmodel.BookingViewModel
+import com.example.sherpalink.viewmodel.BookingViewModelFactory
+
 
 @RunWith(AndroidJUnit4::class)
 class FullAppInstrumentedTest {
@@ -220,3 +224,103 @@ class TrendingTripsScreenTest {
         rule.onNodeWithText("All Trending Trips").assertExists()
     }
 }
+
+
+class RegistrationScreenTest {
+
+    @get:Rule
+    val rule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun openRegistrationScreen() {
+        rule.setContent {
+        }
+
+        rule.waitForIdle()
+    }
+}
+
+class AddScreenTest {
+
+    @get:Rule
+    val rule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun openAddScreen() {
+        rule.setContent {
+
+        }
+
+        rule.waitForIdle()
+    }
+}
+
+
+class RatingsScreenTest {
+
+    @get:Rule
+    val rule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun openRatingsScreen() {
+        rule.setContent {
+
+        }
+        rule.waitForIdle()
+    }
+}
+class WeatherScreenTest {
+
+    @get:Rule
+    val rule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun openWeatherScreen() {
+        rule.setContent {
+
+        }
+        rule.waitForIdle()
+    }
+}
+
+
+class LocationScreenTest {
+
+    @get:Rule
+    val rule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun openLocationScreen() {
+        rule.setContent {
+        }
+        rule.waitForIdle()
+    }
+}
+
+class SplashScreenTest {
+
+    @get:Rule
+    val rule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun openSplashScreen() {
+        rule.setContent {
+
+        }
+        rule.waitForIdle()
+    }
+}
+
+class AddScreenTest {
+
+    @get:Rule
+    val rule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun openAddScreen() {
+        rule.setContent {
+        }
+        rule.waitForIdle()
+    }
+}
+
