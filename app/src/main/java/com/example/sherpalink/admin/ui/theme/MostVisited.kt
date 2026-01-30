@@ -160,5 +160,8 @@ data class VisitedData(
     val category: String,
     val title: String,
     val rating: String,
-    val visitorCount: String
+    val visitorCount: String,
+    val description: String,
+    val bestSeason: String,
+    val duration: String
 )
