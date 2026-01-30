@@ -1,6 +1,7 @@
 package com.example.sherpalink.screens
 
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -355,7 +356,11 @@ fun AutoImageSlider(navController: NavController, images: List<Int>) {
     Box(
         Modifier.fillMaxWidth().height(190.dp).shadow(4.dp, RoundedCornerShape(24.dp))
             .clip(RoundedCornerShape(24.dp))
-            .clickable { navController.navigate("full_image/$currentIndex") }
+            .clickable {
+                val imageRes = images[currentIndex]
+                navController.navigate("full_image/$imageRes")
+            }
+
     ) {
         Image(
             painter = painterResource(images[currentIndex]),
@@ -372,28 +377,42 @@ fun AutoImageSlider(navController: NavController, images: List<Int>) {
             fontSize = 17.sp
         )
     }
-}
+}@Composable
+fun FullScreenImage(
+    imageRes: Int,
+    onBack: () -> Unit
+) {
+    BackHandler { onBack() }
 
-@Composable
-fun FullScreenImage(imageRes: Int, onBack: () -> Unit) {
     Box(
-        modifier = Modifier.fillMaxSize().background(Color.Black).clickable { onBack() },
-        contentAlignment = Alignment.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
     ) {
         Image(
             painter = painterResource(id = imageRes),
-            contentDescription = "Full Screen View",
+            contentDescription = "Full Screen Image",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit
         )
+
         IconButton(
             onClick = onBack,
-            modifier = Modifier.align(Alignment.TopStart).padding(top = 40.dp, start = 16.dp)
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(16.dp)
+                .align(Alignment.TopStart)
         ) {
-            Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Close",
+                tint = Color.White
+            )
         }
     }
 }
+
+
 
 @Composable
 fun AppHeader(
