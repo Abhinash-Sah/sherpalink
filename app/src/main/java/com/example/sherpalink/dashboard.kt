@@ -41,6 +41,7 @@ import com.example.sherpalink.repository.NotificationRepoImplementation
 import com.example.sherpalink.repository.ProductRepoImplementation
 import com.example.sherpalink.repository.UserRepoImplementation
 import com.example.sherpalink.screens.AddScreen
+import com.example.sherpalink.screens.FullScreenImage
 import com.example.sherpalink.screens.HomeScreen
 import com.example.sherpalink.screens.LocationScreen
 import com.example.sherpalink.screens.MostVisitedScreen
@@ -219,6 +220,24 @@ fun DashboardRoot(
                     val productId = backStackEntry.arguments?.getString("productId") ?: ""
                     TourDetailsScreenSafe(navController, productViewModel, productId)
                 }
+                composable(
+                    route = "full_image/{imageRes}",
+                    arguments = listOf(
+                        navArgument("imageRes") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val imageRes = backStackEntry.arguments
+                        ?.getString("imageRes")
+                        ?.toIntOrNull()
+                        ?: R.drawable.trip1
+
+                    FullScreenImage(
+                        imageRes = imageRes,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
+
             }
         }
     }
