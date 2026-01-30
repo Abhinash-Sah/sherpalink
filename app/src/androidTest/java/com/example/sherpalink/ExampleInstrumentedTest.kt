@@ -2,25 +2,23 @@ package com.example.sherpalink
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.sherpalink.auth.SignUpActivity
-import com.example.sherpalink.model.NotificationModel
 import com.example.sherpalink.screens.SearchDetailsScreen
 import com.example.sherpalink.screens.WeatherScreen
+import com.example.sherpalink.ui.notifications.NotificationScreen
 import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
-import com.example.sherpalink.viewmodel.NotificationViewModel
+import com.example.sherpalink.ui.theme.ui.theme.TrendingTripsScreen
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import com.example.sherpalink.ui.notifications.NotificationScreen
-import com.example.sherpalink.ui.theme.ui.theme.TrendingTripsScreen
-import com.example.sherpalink.screens.RegistrationScreen
-import com.example.sherpalink.viewmodel.BookingViewModel
-import com.example.sherpalink.viewmodel.BookingViewModelFactory
-
 
 @RunWith(AndroidJUnit4::class)
 class FullAppInstrumentedTest {
@@ -311,16 +309,15 @@ class SplashScreenTest {
     }
 }
 
-class AddScreenTest {
+class TourDetailsScreenTest {
 
     @get:Rule
-    val rule = createAndroidComposeRule<ComponentActivity>()
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun openAddScreen() {
-        rule.setContent {
+    fun openTourDetailsScreen() {
+        composeTestRule.setContent {
         }
-        rule.waitForIdle()
+        composeTestRule.waitForIdle()
     }
 }
-
