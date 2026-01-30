@@ -71,7 +71,11 @@ fun TourDetailsScreenSafe(
                 onClick = {
                     val safeId = Uri.encode(tour.productId)
                     val safeName = Uri.encode(tour.name)
-                    navController.navigate("registration_form/$safeId/$safeName")
+                    val bookingType = Uri.encode("Tour") // or "Guide", etc.
+
+                    navController.navigate(
+                        "registration_form/$safeId/$safeName/$bookingType"
+                    )
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -82,6 +86,7 @@ fun TourDetailsScreenSafe(
             ) {
                 Text("Book Now", color = Color.White)
             }
+
 
         } ?: Box(
             modifier = Modifier.fillMaxSize(),
