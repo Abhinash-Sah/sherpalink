@@ -108,4 +108,15 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    // 🔥 THIS IS THE MISSING ONE
+    androidTestImplementation("androidx.test.espresso:espresso-intents:3.5.1")
+
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.1")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.1")
 }
