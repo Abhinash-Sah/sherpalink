@@ -5,12 +5,12 @@
         <item name="colorPrimary">#2E7D32</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
+
     <style name="Theme.SherpaLink.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@android:color/white</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
         <item name="postSplashScreenTheme">@style/Theme.SherpaLink</item>
     </style>
-
 
 
 </resources>

@@ -1,16 +1,13 @@
 package com.example.sherpalink
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import org.junit.Test
 
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            DashboardRoot()
-        }
+// RENAME THIS CLASS to match the filename and avoid conflicts
+class MainActivityTest {
+
+    @Test
+    fun example_test() {
+        // Standard placeholder test
+        assert(true)
     }
 }
