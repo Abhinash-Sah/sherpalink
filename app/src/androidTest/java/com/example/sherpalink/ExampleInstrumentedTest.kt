@@ -4,18 +4,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.sherpalink.auth.SignUpActivity
 import com.example.sherpalink.model.GuideModel
 import com.example.sherpalink.screens.HomeScreen
+import com.example.sherpalink.screens.TourPackageScreen
 import com.example.sherpalink.screens.WeatherScreen
 import com.example.sherpalink.ui.guide.GuideBookingScreen
 import com.example.sherpalink.viewmodel.GuideViewModel
 import com.example.sherpalink.viewmodel.GuideViewModelFactory
+import com.example.sherpalink.viewmodel.ProductViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.example.sherpalink.screens.TourPackageScreen
+import com.example.sherpalink.screens.SearchDetailsScreen
+import com.example.sherpalink.ui.theme.ui.theme.AboutScreen
+
+
+
+
 
 @RunWith(AndroidJUnit4::class)
 class FullAppInstrumentedTest {
@@ -116,5 +128,66 @@ class GuideBookingScreenTest {
             .performClick()
 
         bookingRule.waitForIdle()
+    }
+}
+
+@RunWith(AndroidJUnit4::class)
+class SearchDetailsScreenTest {
+
+    @get:Rule
+    val rule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun openSearchDetailsScreen() {
+        // Sample test parameters
+        val sampleTitle = "Everest Base Camp Trek"
+        val sampleCategory = "Adventure"
+        val sampleImageRes = android.R.drawable.ic_menu_gallery // placeholder image
+
+        // Open the screen
+        rule.setContent {
+            SearchDetailsScreen(
+                title = sampleTitle,
+                category = sampleCategory,
+                imageRes = sampleImageRes,
+                onBack = {},      // no-op for test
+                onBookClick = {}  // no-op for test
+            )
+        }
+
+        // Wait for Compose to settle
+        rule.waitForIdle()
+
+        // Assertions (optional) to ensure key elements exist
+        rule.onNodeWithText(sampleTitle).assertExists()
+        rule.onNodeWithText(sampleCategory.uppercase()).assertExists()
+        rule.onNodeWithText("Book This Adventure").assertExists()
+    }
+}
+
+@RunWith(AndroidJUnit4::class)
+class AboutScreenTest {
+
+    @get:Rule
+    val rule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun openAboutScreen() {
+        // Open the AboutScreen
+        rule.setContent {
+            AboutScreen()
+        }
+
+        // Wait for Compose to settle
+        rule.waitForIdle()
+
+        // Assertions to check key elements exist
+        rule.onNodeWithText("About SherpaLink").assertExists()
+        rule.onNodeWithText("Version 1.0.0").assertExists()
+        rule.onNodeWithText(
+            "SherpaLink is your trusted travel companion. " +
+                    "We help you find the best guides, explore new locations, and make your trips unforgettable. " +
+                    "Our goal is to simplify travel planning and connect travelers with local experts."
+        ).assertExists()
     }
 }
